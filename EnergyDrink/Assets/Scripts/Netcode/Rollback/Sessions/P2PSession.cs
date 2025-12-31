@@ -4,6 +4,7 @@ using System.Linq;
 using Netcode.Rollback.Network;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Utils;
 
 namespace Netcode.Rollback.Sessions
 {

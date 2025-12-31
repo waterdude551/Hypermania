@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Netcode.Rollback.Network;
 using UnityEngine.Assertions;
+using Utils;
 
 namespace Netcode.Rollback.Sessions
 {

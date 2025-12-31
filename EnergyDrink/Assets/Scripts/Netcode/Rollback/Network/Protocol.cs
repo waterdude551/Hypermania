@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using MemoryPack;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Utils;
 
 namespace Netcode.Rollback.Network
 {
