@@ -1,9 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using Netcode.P2P;
 using Netcode.Rollback;
 using Netcode.Rollback.Sessions;
+using Steamworks;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -18,119 +19,100 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject _bob2;
     private GameState _curState;
-    private P2PSession<GameState, Input, EndPoint> _session;
-    private SynapseClient _synapse;
-
-    // matchmaking 
-    private int? _handle;
-    private int? _opponentHandle;
-    private ulong? _roomId;
+    private P2PSession<GameState, Input, CSteamID> _session;
 
     private bool _playing;
-
-    //rollback
     private uint _waitRemaining;
+    private SteamMatchmakingClient _client;
 
     void Awake()
     {
-        _synapse = new SynapseClient(ServerIp, HttpPort, RelayPort);
         _playing = false;
-        _handle = null;
-        _roomId = null;
-        _opponentHandle = null;
+        _client = new SteamMatchmakingClient();
     }
 
-    async void OnDestroy()
+    void OnDestroy()
     {
-        if (_synapse != null)
-        {
-            await _synapse.LeaveRoomAsync();
-            _synapse.Dispose();
-        }
-        _handle = null;
-        _opponentHandle = null;
-        _roomId = null;
-        _session = null;
         _playing = false;
+    }
+
+    public void CreateLobby() => StartCoroutine(CreateLobbyRoutine());
+    IEnumerator CreateLobbyRoutine()
+    {
+        var task = _client.Create();
+        while (!task.IsCompleted)
+            yield return null;
+        if (task.IsFaulted)
+        {
+            Debug.LogException(task.Exception);
+            yield break;
+        }
+        Debug.Log($"Created lobby {task.Result}");
+    }
+
+    public void JoinLobby(CSteamID lobbyId) => StartCoroutine(JoinLobbyRoutine(lobbyId));
+    IEnumerator JoinLobbyRoutine(CSteamID lobbyId)
+    {
+        var task = _client.Join(lobbyId);
+        while (!task.IsCompleted)
+            yield return null;
+        if (task.IsFaulted)
+        {
+            Debug.LogException(task.Exception);
+            yield break;
+        }
+        Debug.Log($"Joined lobby {lobbyId}");
+    }
+
+    public void LeaveLobby() => StartCoroutine(LeaveLobbyRoutine());
+    IEnumerator LeaveLobbyRoutine()
+    {
+        var task = _client.Leave();
+        while (!task.IsCompleted)
+            yield return null;
+        if (task.IsFaulted)
+        {
+            Debug.LogException(task.Exception);
+            yield break;
+        }
+        Debug.Log($"Left lobby");
+    }
+
+    public void StartGame() => StartCoroutine(StartGameRoutine());
+    IEnumerator StartGameRoutine()
+    {
+        Debug.Log($"{_client.Peer}, {_client.Me}, {_client.CurrentLobby}");
+        if (!_client.HasPeer) { yield break; }
+
+        var task = _client.StartGame();
+        while (!task.IsCompleted)
+            yield return null;
+        if (task.IsFaulted)
+        {
+            Debug.LogException(task.Exception);
+            yield break;
+        }
+        var handles = task.Result;
+
         _curState = GameState.New();
+        SessionBuilder<Input, CSteamID> builder = new SessionBuilder<Input, CSteamID>().WithNumPlayers(2).WithFps(64);
+        foreach ((CSteamID id, int handle) in handles)
+        {
+            builder.AddPlayer(new PlayerType<CSteamID> { Kind = _client.Me == id ? PlayerKind.Local : PlayerKind.Remote, Address = id }, new PlayerHandle(handle));
+        }
+        _session = builder.StartP2PSession<GameState>(_client);
+        _playing = true;
+
+        Debug.Log($"Started Game");
     }
 
     void FixedUpdate()
     {
-        NetworkingLoop();
         if (!_playing)
         {
             return;
         }
         GameLoop();
-    }
-
-    void NetworkingLoop()
-    {
-        List<InWsEvent> events = _synapse.PumpWebSocket();
-        foreach (InWsEvent ev in events)
-        {
-            switch (ev.Kind)
-            {
-                case InWsEventKind.JoinedRoom:
-                    _roomId = ev.RoomId;
-                    Debug.Log($"[Matchmaking] Joined room {ev.RoomId}");
-                    break;
-                case InWsEventKind.PeerLeft:
-                    _opponentHandle = null;
-                    Debug.Log($"[Matchmaking] Peer {ev.Handle} left");
-                    break;
-                case InWsEventKind.PeerJoined:
-                    _opponentHandle = (int)ev.Handle;
-                    Debug.Log($"[Matchmaking] Peer {ev.Handle} joined");
-                    break;
-                case InWsEventKind.YouAre:
-                    _handle = (int)ev.Handle;
-                    Debug.Log($"[Matchmaking] You are {ev.Handle}");
-                    break;
-                case InWsEventKind.StartedGame:
-
-                    Debug.Log($"[Matchmaking] Started game with handle: {_handle}, opponentHandle: {_opponentHandle}, roomId: {_roomId}");
-                    if (_handle == null || _opponentHandle == null || _roomId == null) return;
-
-                    Debug.Log($"[Matchmaking] Playing with peer {ep}");
-                    _curState = GameState.New();
-                    SessionBuilder<Input, EndPoint> builder = new SessionBuilder<Input, EndPoint>().WithNumPlayers(2).WithFps(50);
-                    builder.AddPlayer(new PlayerType<EndPoint> { Kind = PlayerKind.Local, Address = null }, new PlayerHandle(_handle.Value));
-                    builder.AddPlayer(new PlayerType<EndPoint> { Kind = PlayerKind.Remote, Address = ep }, new PlayerHandle(_opponentHandle.Value));
-                    _session = builder.StartP2PSession<GameState>(_synapse);
-                    _playing = true;
-                    break;
-            }
-        }
-    }
-
-    public async void CreateRoom()
-    {
-        Debug.Log("[Matchmaking] Creating room...");
-        await _synapse.CreateRoomAsync();
-    }
-
-    public async void JoinRoom(ulong roomId)
-    {
-        Debug.Log($"[Matchmaking] Joining room {roomId}...");
-        await _synapse.JoinRoomAsync(roomId);
-    }
-
-    public async void LeaveRoom()
-    {
-        Debug.Log($"[Matchmaking] Leaving room...");
-        await _synapse.LeaveRoomAsync();
-        _roomId = null;
-        _handle = null;
-        _opponentHandle = null;
-    }
-
-    public async void StartGame()
-    {
-        if (_handle == null || _opponentHandle == null || _roomId == null) return;
-        Debug.Log($"[Matchmaking] Starting game...");
-        await _synapse.StartGame();
     }
 
     void GameLoop()
@@ -141,8 +123,6 @@ public class GameManager : MonoBehaviour
             _waitRemaining--;
             return;
         }
-        InputFlags[] inputs = new InputFlags[2];
-
         InputFlags f1Input = InputFlags.None;
         if (UnityEngine.Input.GetKey(KeyCode.A))
             f1Input |= InputFlags.Left;
@@ -150,26 +130,16 @@ public class GameManager : MonoBehaviour
             f1Input |= InputFlags.Right;
         if (UnityEngine.Input.GetKey(KeyCode.W))
             f1Input |= InputFlags.Up;
-        inputs[0] = f1Input;
-
-        InputFlags f2Input = InputFlags.None;
-        if (UnityEngine.Input.GetKey(KeyCode.LeftArrow))
-            f2Input |= InputFlags.Left;
-        if (UnityEngine.Input.GetKey(KeyCode.RightArrow))
-            f2Input |= InputFlags.Right;
-        if (UnityEngine.Input.GetKey(KeyCode.UpArrow))
-            f2Input |= InputFlags.Up;
-        inputs[1] = f2Input;
 
         _session.PollRemoteClients();
 
-        foreach (RollbackEvent<Input, EndPoint> ev in _session.DrainEvents())
+        foreach (RollbackEvent<Input, CSteamID> ev in _session.DrainEvents())
         {
             Debug.Log($"[Game] Received {ev.Kind} event");
             switch (ev.Kind)
             {
                 case RollbackEventKind.WaitRecommendation:
-                    RollbackEvent<Input, EndPoint>.WaitRecommendation waitRec = ev.GetWaitRecommendation();
+                    RollbackEvent<Input, CSteamID>.WaitRecommendation waitRec = ev.GetWaitRecommendation();
                     _waitRemaining = waitRec.SkipFrames;
                     break;
             }
@@ -177,10 +147,7 @@ public class GameManager : MonoBehaviour
 
         if (_session.CurrentState == SessionState.Running)
         {
-            if (_handle == 0)
-                _session.AddLocalInput(new PlayerHandle(0), new Input(inputs[0]));
-            if (_handle == 1)
-                _session.AddLocalInput(new PlayerHandle(1), new Input(inputs[1]));
+            _session.AddLocalInput(new PlayerHandle(_client.MyHandle), new Input(f1Input));
 
             try
             {

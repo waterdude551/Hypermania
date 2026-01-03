@@ -1,4 +1,5 @@
 using UnityEditor;
+using Steamworks;
 using UnityEngine;
 
 [CustomEditor(typeof(GameManager))]
@@ -21,19 +22,19 @@ public sealed class GameManagerEditor : Editor
             _roomId = (ulong)EditorGUILayout.LongField("Room Id", (long)_roomId);
 
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Create Room"))
+            if (GUILayout.Button("Create Lobby"))
             {
-                gm.CreateRoom();
+                gm.CreateLobby();
             }
 
-            if (GUILayout.Button("Join Room"))
+            if (GUILayout.Button("Join Lobby"))
             {
-                gm.JoinRoom(_roomId);
+                gm.JoinLobby(new CSteamID(_roomId));
             }
 
-            if (GUILayout.Button("Leave Room"))
+            if (GUILayout.Button("Leave Lobby"))
             {
-                gm.LeaveRoom();
+                gm.LeaveLobby();
             }
             EditorGUILayout.EndHorizontal();
         }
