@@ -160,6 +160,7 @@ namespace Netcode.Rollback.Network
             TimeSpan disconnectNotifyStart,
             uint fps, DesyncDetection desyncDetection)
         {
+            _compression = new Compression();
             _random = new System.Random();
             ushort magic = 0;
             while (magic == 0)
