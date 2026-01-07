@@ -26,7 +26,10 @@ namespace Game
             _p2pClient = null;
             _players = new List<(PlayerHandle handle, PlayerKind playerKind, SteamNetworkingIdentity netId)>();
 
-            if (Runner == null) { Debug.LogError($"{nameof(GameManager)}: {Runner} reference is not assigned.", this); }
+            if (Runner == null)
+            {
+                Debug.LogError($"{nameof(GameManager)}: {Runner} reference is not assigned.", this);
+            }
         }
 
         void OnDisable()
@@ -39,6 +42,7 @@ namespace Game
         #region Controls
 
         public void CreateLobby() => StartCoroutine(CreateLobbyRoutine());
+
         IEnumerator CreateLobbyRoutine()
         {
             var task = _matchmakingClient.Create();
@@ -52,6 +56,7 @@ namespace Game
         }
 
         public void JoinLobby(CSteamID lobbyId) => StartCoroutine(JoinLobbyRoutine(lobbyId));
+
         IEnumerator JoinLobbyRoutine(CSteamID lobbyId)
         {
             var task = _matchmakingClient.Join(lobbyId);
@@ -65,6 +70,7 @@ namespace Game
         }
 
         public void LeaveLobby() => StartCoroutine(LeaveLobbyRoutine());
+
         IEnumerator LeaveLobbyRoutine()
         {
             var task = _matchmakingClient.Leave();
@@ -78,6 +84,7 @@ namespace Game
         }
 
         public void StartGame() => StartCoroutine(StartGameRoutine());
+
         IEnumerator StartGameRoutine()
         {
             var task = _matchmakingClient.StartGame();
@@ -94,7 +101,9 @@ namespace Game
         {
             if (_matchmakingClient.CurrentLobby.IsValid())
             {
-                throw new InvalidOperationException("cannot start local game while in valid lobby, leave the lobby first!");
+                throw new InvalidOperationException(
+                    "cannot start local game while in valid lobby, leave the lobby first!"
+                );
             }
             _players.Clear();
             _players.Add((new PlayerHandle(0), PlayerKind.Local, default));
@@ -117,7 +126,10 @@ namespace Game
                 bool isLocal = id == SteamUser.GetSteamID();
                 SteamNetworkingIdentity netId = new SteamNetworkingIdentity();
                 netId.SetSteamID(id);
-                if (!isLocal) { peerAddr.Add(netId); }
+                if (!isLocal)
+                {
+                    peerAddr.Add(netId);
+                }
             }
 
             _p2pClient = new P2PClient(peerAddr);

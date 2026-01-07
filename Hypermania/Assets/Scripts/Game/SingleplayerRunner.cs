@@ -12,11 +12,9 @@ namespace Game
 {
     public class SingleplayerRunner : GameRunner
     {
-        protected GameState _curState;
         protected SyncTestSession<GameState, GameInput, SteamNetworkingIdentity> _session;
         protected bool _initialized;
         protected float _time;
-        private CharacterConfig[] _characters;
         private InputBuffer _inputBuffer;
 
         protected void OnEnable()
@@ -39,21 +37,32 @@ namespace Game
             _inputBuffer = null;
         }
 
-        public override void Init(List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players, P2PClient client)
+        public override void Init(
+            List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players,
+            P2PClient client
+        )
         {
             // TODO: take in character selections from matchmaking/lobby
             CharacterConfig sampleConfig = _characterConfigs.Get(Character.SampleFighter);
             _characters = new CharacterConfig[2] { sampleConfig, sampleConfig };
 
             _curState = GameState.Create(_characters);
-            SessionBuilder<GameInput, SteamNetworkingIdentity> builder = new SessionBuilder<GameInput, SteamNetworkingIdentity>().WithNumPlayers(players.Count).WithFps(64);
+            SessionBuilder<GameInput, SteamNetworkingIdentity> builder = new SessionBuilder<
+                GameInput,
+                SteamNetworkingIdentity
+            >()
+                .WithNumPlayers(players.Count)
+                .WithFps(64);
             foreach ((PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address) in players)
             {
                 if (playerKind != PlayerKind.Local)
                 {
                     throw new InvalidOperationException("Cannot have remote/spectators in a local session");
                 }
-                builder.AddPlayer(new PlayerType<SteamNetworkingIdentity> { Kind = playerKind, Address = address }, playerHandle);
+                builder.AddPlayer(
+                    new PlayerType<SteamNetworkingIdentity> { Kind = playerKind, Address = address },
+                    playerHandle
+                );
             }
             _session = builder.StartSynctestSession<GameState>();
             _inputBuffer = new InputBuffer();
@@ -61,11 +70,17 @@ namespace Game
             _initialized = true;
         }
 
-        public override void Stop() { OnDisable(); }
+        public override void Stop()
+        {
+            OnDisable();
+        }
 
         public override void Poll(float deltaTime)
         {
-            if (!_initialized) { return; }
+            if (!_initialized)
+            {
+                return;
+            }
 
             _inputBuffer.Saturate();
 
@@ -81,7 +96,10 @@ namespace Game
 
         protected void GameLoop()
         {
-            if (_session == null) { return; }
+            if (_session == null)
+            {
+                return;
+            }
 
             _session.AddLocalInput(new PlayerHandle(0), _inputBuffer.Consume());
             try

@@ -1,7 +1,7 @@
 using System;
-using Utils;
 using System.Collections.Generic;
 using Netcode.Rollback.Network;
+using Utils;
 
 namespace Netcode.Rollback
 {
@@ -15,6 +15,7 @@ namespace Netcode.Rollback
         }
 
         public override string ToString() => Id.ToString();
+
         public string ToString(string format, IFormatProvider formatProvider) => Id.ToString(format, formatProvider);
     }
 
@@ -40,7 +41,7 @@ namespace Netcode.Rollback
     public enum SessionState
     {
         Synchronizing,
-        Running
+        Running,
     }
 
     public enum InputStatus
@@ -61,7 +62,8 @@ namespace Netcode.Rollback
         DesyncDetected,
     }
 
-    public struct RollbackEvent<TInput, TAddress> where TInput : IInput<TInput>
+    public struct RollbackEvent<TInput, TAddress>
+        where TInput : IInput<TInput>
     {
         public struct Synchronizing
         {
@@ -90,6 +92,7 @@ namespace Netcode.Rollback
         {
             public TAddress Addr;
         }
+
         public struct WaitRecommendation
         {
             public uint SkipFrames;
@@ -135,27 +138,40 @@ namespace Netcode.Rollback
             new() { Kind = RollbackEventKind.DesyncDetected, _desyncDetected = e };
 
         public Synchronizing GetSynchronizing() =>
-            Kind == RollbackEventKind.Synchronizing ? _synchronizing : throw new System.InvalidOperationException("event type mismatch");
+            Kind == RollbackEventKind.Synchronizing
+                ? _synchronizing
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public Synchronized GetSynchronized() =>
-            Kind == RollbackEventKind.Synchronized ? _synchronized : throw new System.InvalidOperationException("event type mismatch");
+            Kind == RollbackEventKind.Synchronized
+                ? _synchronized
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public Disconnected GetDisconnected() =>
-            Kind == RollbackEventKind.Disconnected ? _disconnected : throw new System.InvalidOperationException("event type mismatch");
+            Kind == RollbackEventKind.Disconnected
+                ? _disconnected
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public NetworkInterrupted GetNetworkInterrupted() =>
-            Kind == RollbackEventKind.NetworkInterrupted ? _networkInterrupted : throw new System.InvalidOperationException("event type mismatch");
+            Kind == RollbackEventKind.NetworkInterrupted
+                ? _networkInterrupted
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public NetworkResumed GetNetworkResumed() =>
-            Kind == RollbackEventKind.NetworkResumed ? _networkResumed : throw new System.InvalidOperationException("event type mismatch");
+            Kind == RollbackEventKind.NetworkResumed
+                ? _networkResumed
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public WaitRecommendation GetWaitRecommendation() =>
-            Kind == RollbackEventKind.WaitRecommendation ? _waitRecommendation : throw new System.InvalidOperationException("event type mismatch");
+            Kind == RollbackEventKind.WaitRecommendation
+                ? _waitRecommendation
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public DesyncDetected GetDesyncDetected() =>
-            Kind == RollbackEventKind.DesyncDetected ? _desyncDetected : throw new System.InvalidOperationException("event type mismatch");
+            Kind == RollbackEventKind.DesyncDetected
+                ? _desyncDetected
+                : throw new System.InvalidOperationException("event type mismatch");
     }
-
 
     public enum RollbackRequestKind
     {
@@ -200,17 +216,25 @@ namespace Netcode.Rollback
             new() { Kind = RollbackRequestKind.AdvanceFrameReq, _advanceFrameReq = body };
 
         public SaveGameState GetSaveGameStateReq() =>
-            Kind == RollbackRequestKind.SaveGameStateReq ? _saveStateReq : throw new InvalidOperationException("body type mismatch");
+            Kind == RollbackRequestKind.SaveGameStateReq
+                ? _saveStateReq
+                : throw new InvalidOperationException("body type mismatch");
 
         public LoadGameState GetLoadGameStateReq() =>
-            Kind == RollbackRequestKind.LoadGameStateReq ? _loadStateReq : throw new InvalidOperationException("body type mismatch");
+            Kind == RollbackRequestKind.LoadGameStateReq
+                ? _loadStateReq
+                : throw new InvalidOperationException("body type mismatch");
 
         public AdvanceFrame GetAdvanceFrameRequest() =>
-            Kind == RollbackRequestKind.AdvanceFrameReq ? _advanceFrameReq : throw new InvalidOperationException("body type mismatch");
+            Kind == RollbackRequestKind.AdvanceFrameReq
+                ? _advanceFrameReq
+                : throw new InvalidOperationException("body type mismatch");
     }
 
     public interface IInput<TSelf> : IEquatable<TSelf>, ISerializable { }
+
     public interface IState<TSelf> { }
+
     public interface IAddress<TSelf> : IEquatable<TSelf> { }
 
     public interface INonBlockingSocket<TAddress>

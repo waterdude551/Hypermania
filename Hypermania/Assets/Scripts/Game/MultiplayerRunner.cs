@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using Design;
@@ -13,14 +12,12 @@ namespace Game
 {
     public class MultiplayerRunner : GameRunner
     {
-        private GameState _curState;
         private P2PSession<GameState, GameInput, SteamNetworkingIdentity> _session;
 
         private bool _initialized;
         private uint _waitRemaining;
         private PlayerHandle _myHandle;
         private float _time;
-        private CharacterConfig[] _characters;
         private InputBuffer _inputBuffer;
 
         void OnEnable()
@@ -47,18 +44,32 @@ namespace Game
             _inputBuffer = null;
         }
 
-        public override void Init(List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players, P2PClient client)
+        public override void Init(
+            List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players,
+            P2PClient client
+        )
         {
             // TODO: take in character selections from matchmaking/lobby
             CharacterConfig sampleConfig = _characterConfigs.Get(Character.SampleFighter);
             _characters = new CharacterConfig[2] { sampleConfig, sampleConfig };
 
             _curState = GameState.Create(_characters);
-            SessionBuilder<GameInput, SteamNetworkingIdentity> builder = new SessionBuilder<GameInput, SteamNetworkingIdentity>().WithNumPlayers(players.Count).WithFps(64);
+            SessionBuilder<GameInput, SteamNetworkingIdentity> builder = new SessionBuilder<
+                GameInput,
+                SteamNetworkingIdentity
+            >()
+                .WithNumPlayers(players.Count)
+                .WithFps(64);
             foreach ((PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address) in players)
             {
-                if (playerKind == PlayerKind.Local) { _myHandle = playerHandle; }
-                builder.AddPlayer(new PlayerType<SteamNetworkingIdentity> { Kind = playerKind, Address = address }, playerHandle);
+                if (playerKind == PlayerKind.Local)
+                {
+                    _myHandle = playerHandle;
+                }
+                builder.AddPlayer(
+                    new PlayerType<SteamNetworkingIdentity> { Kind = playerKind, Address = address },
+                    playerHandle
+                );
             }
             _session = builder.StartP2PSession<GameState>(client);
             _inputBuffer = new InputBuffer();
@@ -71,11 +82,17 @@ namespace Game
             }
         }
 
-        public override void Stop() { OnDisable(); }
+        public override void Stop()
+        {
+            OnDisable();
+        }
 
         public override void Poll(float deltaTime)
         {
-            if (!_initialized) { return; }
+            if (!_initialized)
+            {
+                return;
+            }
 
             _inputBuffer.Saturate();
 
@@ -110,7 +127,10 @@ namespace Game
 
         void GameLoop()
         {
-            if (_session.CurrentState != SessionState.Running) { return; }
+            if (_session.CurrentState != SessionState.Running)
+            {
+                return;
+            }
 
             if (_waitRemaining > 0)
             {

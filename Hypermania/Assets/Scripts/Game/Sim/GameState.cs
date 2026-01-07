@@ -13,8 +13,9 @@ namespace Game.Sim
     {
         public Frame Frame;
         public FighterState[] Fighters;
-        // public HitboxState[] Hitboxes;     
-        // public ProjectileState[] Projectiles; 
+
+        // public HitboxState[] Hitboxes;
+        // public ProjectileState[] Projectiles;
 
         /// <summary>
         /// Use this static builder instead of the constructor for creating new GameStates. This is because MemoryPack, which we use to serialize

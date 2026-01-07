@@ -21,7 +21,8 @@ namespace Netcode.P2P
 
         public async Task<CSteamID> Create(int maxMembers = 2)
         {
-            if (maxMembers <= 0) throw new ArgumentOutOfRangeException(nameof(maxMembers));
+            if (maxMembers <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maxMembers));
             Debug.Log($"[Matchmaking] Create(maxMembers={maxMembers})");
             await Leave();
 
@@ -45,7 +46,8 @@ namespace Netcode.P2P
 
         public async Task Join(CSteamID lobbyId)
         {
-            if (!lobbyId.IsValid()) throw new ArgumentException("Invalid lobby id.", nameof(lobbyId));
+            if (!lobbyId.IsValid())
+                throw new ArgumentException("Invalid lobby id.", nameof(lobbyId));
             Debug.Log($"[Matchmaking] Join(lobbyId={lobbyId.m_SteamID})");
             await Leave();
 
@@ -73,7 +75,8 @@ namespace Netcode.P2P
 
         public Task StartGame()
         {
-            if (!_currentLobby.IsValid()) throw new InvalidOperationException("Not in a lobby.");
+            if (!_currentLobby.IsValid())
+                throw new InvalidOperationException("Not in a lobby.");
 
             CSteamID host = SteamMatchmaking.GetLobbyOwner(_currentLobby);
 
@@ -105,7 +108,6 @@ namespace Netcode.P2P
         private Callback<LobbyDataUpdate_t> _lobbyDataUpdateCb;
         private bool _waitingForPlayers;
 
-
         private TaskCompletionSource<CSteamID> _lobbyCreatedTcs;
         private TaskCompletionSource<bool> _lobbyEnterTcs;
 
@@ -129,12 +131,15 @@ namespace Netcode.P2P
                 return;
             }
 
-            Debug.Log($"[Matchmaking] OnLobbyCreated: ioFailure={ioFailure}, result={data.m_eResult}, lobby={data.m_ulSteamIDLobby}");
+            Debug.Log(
+                $"[Matchmaking] OnLobbyCreated: ioFailure={ioFailure}, result={data.m_eResult}, lobby={data.m_ulSteamIDLobby}"
+            );
 
             if (ioFailure || data.m_eResult != EResult.k_EResultOK)
             {
                 _lobbyCreatedTcs.TrySetException(
-                    new InvalidOperationException($"CreateLobby failed: ioFailure={ioFailure}, result={data.m_eResult}"));
+                    new InvalidOperationException($"CreateLobby failed: ioFailure={ioFailure}, result={data.m_eResult}")
+                );
                 return;
             }
 
@@ -143,13 +148,18 @@ namespace Netcode.P2P
 
         private void OnLobbyEnter(LobbyEnter_t data)
         {
-            Debug.Log($"[Matchmaking] OnLobbyEnter: lobby={data.m_ulSteamIDLobby}, response={data.m_EChatRoomEnterResponse}");
+            Debug.Log(
+                $"[Matchmaking] OnLobbyEnter: lobby={data.m_ulSteamIDLobby}, response={data.m_EChatRoomEnterResponse}"
+            );
 
             bool ok = data.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess;
             if (!ok)
             {
                 _lobbyEnterTcs?.TrySetException(
-                    new InvalidOperationException($"JoinLobby failed: EChatRoomEnterResponse={data.m_EChatRoomEnterResponse}"));
+                    new InvalidOperationException(
+                        $"JoinLobby failed: EChatRoomEnterResponse={data.m_EChatRoomEnterResponse}"
+                    )
+                );
                 return;
             }
 
@@ -160,7 +170,9 @@ namespace Netcode.P2P
         {
             if (!_currentLobby.IsValid() || data.m_ulSteamIDLobby != _currentLobby.m_SteamID)
                 return;
-            Debug.Log($"[Matchmaking] OnLobbyChatUpdate: lobby={data.m_ulSteamIDLobby}, userChanged={data.m_ulSteamIDUserChanged}, makingChange={data.m_ulSteamIDMakingChange}, stateChange={data.m_rgfChatMemberStateChange}");
+            Debug.Log(
+                $"[Matchmaking] OnLobbyChatUpdate: lobby={data.m_ulSteamIDLobby}, userChanged={data.m_ulSteamIDUserChanged}, makingChange={data.m_ulSteamIDMakingChange}, stateChange={data.m_rgfChatMemberStateChange}"
+            );
         }
 
         private void OnLobbyChatMessage(LobbyChatMsg_t data)
@@ -178,9 +190,11 @@ namespace Netcode.P2P
                 out user,
                 buffer,
                 buffer.Length,
-                out type);
+                out type
+            );
 
-            if (len <= 0) return;
+            if (len <= 0)
+                return;
 
             string text = System.Text.Encoding.UTF8.GetString(buffer, 0, len).TrimEnd('\0');
             Debug.Log($"[Matchmaking] OnLobbyChatMessage: from={user.m_SteamID}, type={type}, text='{text}'");
@@ -192,8 +206,14 @@ namespace Netcode.P2P
 
                 SteamMatchmaking.RequestLobbyData(_currentLobby);
                 var players = GetPlayersFromLobbyData();
-                if (players == null) { _waitingForPlayers = true; }
-                else { OnStartWithPlayers?.Invoke(players); }
+                if (players == null)
+                {
+                    _waitingForPlayers = true;
+                }
+                else
+                {
+                    OnStartWithPlayers?.Invoke(players);
+                }
             }
         }
 
@@ -225,7 +245,8 @@ namespace Netcode.P2P
 
         private void PublishPlayersToLobby()
         {
-            if (!_currentLobby.IsValid()) return;
+            if (!_currentLobby.IsValid())
+                return;
 
             if (SteamUser.GetSteamID() != SteamMatchmaking.GetLobbyOwner(_currentLobby))
             {
@@ -233,12 +254,14 @@ namespace Netcode.P2P
             }
 
             int count = SteamMatchmaking.GetNumLobbyMembers(_currentLobby);
-            if (count <= 0) return;
+            if (count <= 0)
+                return;
             var players = new List<CSteamID>(count);
             for (int i = 0; i < count; i++)
             {
                 var m = SteamMatchmaking.GetLobbyMemberByIndex(_currentLobby, i);
-                if (!m.IsValid()) continue;
+                if (!m.IsValid())
+                    continue;
                 players.Add(m);
             }
             players.Sort((a, b) => a.m_SteamID.CompareTo(b.m_SteamID));

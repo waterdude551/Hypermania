@@ -8,7 +8,7 @@ namespace Design.Animation
     public enum HitboxKind
     {
         Hurtbox,
-        Hitbox
+        Hitbox,
     }
 
     [Serializable]
@@ -21,16 +21,14 @@ namespace Design.Animation
         public int BlockstunTicks;
         public Vector2 Knockback;
 
-        public bool Equals(BoxProps other)
-            => Kind == other.Kind && HitstunTicks == other.HitstunTicks;
+        public bool Equals(BoxProps other) => Kind == other.Kind && HitstunTicks == other.HitstunTicks;
 
-        public override bool Equals(object obj)
-            => obj is BoxProps other && Equals(other);
+        public override bool Equals(object obj) => obj is BoxProps other && Equals(other);
 
-        public override int GetHashCode()
-            => HashCode.Combine(Kind, HitstunTicks);
+        public override int GetHashCode() => HashCode.Combine(Kind, HitstunTicks);
 
         public static bool operator ==(BoxProps a, BoxProps b) => a.Equals(b);
+
         public static bool operator !=(BoxProps a, BoxProps b) => !a.Equals(b);
     }
 
@@ -43,7 +41,6 @@ namespace Design.Animation
         public Vector2 SizeLocal;
         public BoxProps Props;
 
-
         public bool Equals(BoxData other)
         {
             return Name == other.Name
@@ -52,24 +49,16 @@ namespace Design.Animation
                 && Props.Equals(other.Props);
         }
 
-        public override bool Equals(object obj)
-            => obj is BoxData other && Equals(other);
+        public override bool Equals(object obj) => obj is BoxData other && Equals(other);
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(
-                Name,
-                CenterLocal,
-                SizeLocal,
-                Props
-            );
+            return HashCode.Combine(Name, CenterLocal, SizeLocal, Props);
         }
 
-        public static bool operator ==(BoxData left, BoxData right)
-            => left.Equals(right);
+        public static bool operator ==(BoxData left, BoxData right) => left.Equals(right);
 
-        public static bool operator !=(BoxData left, BoxData right)
-            => !left.Equals(right);
+        public static bool operator !=(BoxData left, BoxData right) => !left.Equals(right);
     }
 
     [Serializable]
@@ -92,8 +81,10 @@ namespace Design.Animation
             {
                 throw new InvalidOperationException("total ticks must be >= 1");
             }
-            while (Frames.Count < totalTicks) Frames.Add(new FrameData());
-            while (Frames.Count > totalTicks) Frames.RemoveAt(Frames.Count - 1);
+            while (Frames.Count < totalTicks)
+                Frames.Add(new FrameData());
+            while (Frames.Count > totalTicks)
+                Frames.RemoveAt(Frames.Count - 1);
         }
 
         public FrameData GetFrame(int tick)

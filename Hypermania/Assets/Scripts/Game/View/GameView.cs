@@ -7,21 +7,26 @@ namespace Game.View
 {
     public class GameView : MonoBehaviour
     {
-        [SerializeField] FighterView _fighter1;
-        [SerializeField] FighterView _fighter2;
+        public FighterView[] Fighters => _fighters;
+        private FighterView[] _fighters;
         private CharacterConfig[] _characters;
 
         public void Init(CharacterConfig[] characters)
         {
+            _fighters = new FighterView[characters.Length];
             _characters = characters;
-            _fighter1.Init(characters[0]);
-            _fighter2.Init(characters[1]);
+            for (int i = 0; i < characters.Length; i++)
+            {
+                _fighters[i].Init(characters[i]);
+            }
         }
 
         public void Render(in GameState state)
         {
-            _fighter1.Render(state.Frame, state.Fighters[0]);
-            _fighter2.Render(state.Frame, state.Fighters[1]);
+            for (int i = 0; i < _fighters.Length; i++)
+            {
+                _fighters[i].Render(state.Frame, state.Fighters[i]);
+            }
         }
     }
 }

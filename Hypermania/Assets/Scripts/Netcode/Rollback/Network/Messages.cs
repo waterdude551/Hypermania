@@ -10,11 +10,8 @@ namespace Netcode.Rollback.Network
         public bool Disconnected;
         public Frame LastFrame;
 
-        public static readonly ConnectionStatus Default = new()
-        {
-            Disconnected = false,
-            LastFrame = Frame.NullFrame
-        };
+        public static readonly ConnectionStatus Default = new() { Disconnected = false, LastFrame = Frame.NullFrame };
+
         public int Deserialize(ReadOnlySpan<byte> inBytes)
         {
             int ptr = 0;
@@ -23,6 +20,7 @@ namespace Netcode.Rollback.Network
             ptr += LastFrame.Deserialize(inBytes[ptr..]);
             return ptr;
         }
+
         public int Serialize(Span<byte> outBytes)
         {
             int ptr = 0;
@@ -31,7 +29,11 @@ namespace Netcode.Rollback.Network
             ptr += LastFrame.Serialize(outBytes[ptr..]);
             return ptr;
         }
-        public int SerdeSize() { return sizeof(byte) + LastFrame.SerdeSize(); }
+
+        public int SerdeSize()
+        {
+            return sizeof(byte) + LastFrame.SerdeSize();
+        }
     }
 
     public enum MessageKind : int
@@ -55,12 +57,17 @@ namespace Netcode.Rollback.Network
             Magic = BinaryPrimitives.ReadUInt16LittleEndian(inBytes);
             return sizeof(ushort);
         }
+
         public int Serialize(Span<byte> outBytes)
         {
             BinaryPrimitives.WriteUInt16LittleEndian(outBytes, Magic);
             return sizeof(ushort);
         }
-        public int SerdeSize() { return sizeof(ushort); }
+
+        public int SerdeSize()
+        {
+            return sizeof(ushort);
+        }
     }
 
     public struct MessageBody : ISerializable
@@ -74,12 +81,17 @@ namespace Netcode.Rollback.Network
                 RandomRequest = BinaryPrimitives.ReadUInt32LittleEndian(inBytes);
                 return sizeof(uint);
             }
+
             public int Serialize(Span<byte> outBytes)
             {
                 BinaryPrimitives.WriteUInt32LittleEndian(outBytes, RandomRequest);
                 return sizeof(uint);
             }
-            public int SerdeSize() { return sizeof(uint); }
+
+            public int SerdeSize()
+            {
+                return sizeof(uint);
+            }
         }
 
         public struct SyncReply : ISerializable
@@ -91,12 +103,17 @@ namespace Netcode.Rollback.Network
                 RandomReply = BinaryPrimitives.ReadUInt32LittleEndian(inBytes);
                 return sizeof(uint);
             }
+
             public int Serialize(Span<byte> outBytes)
             {
                 BinaryPrimitives.WriteUInt32LittleEndian(outBytes, RandomReply);
                 return sizeof(uint);
             }
-            public int SerdeSize() { return sizeof(uint); }
+
+            public int SerdeSize()
+            {
+                return sizeof(uint);
+            }
         }
 
         public struct Input : ISerializable
@@ -121,7 +138,10 @@ namespace Netcode.Rollback.Network
                 int ptr = 0;
                 int numConnStat = BinaryPrimitives.ReadInt32LittleEndian(inBytes[ptr..]);
                 ptr += sizeof(int);
-                if (numConnStat > SessionConstants.MAX_NUM_PLAYERS) { throw new InvalidOperationException("too many connStats"); }
+                if (numConnStat > SessionConstants.MAX_NUM_PLAYERS)
+                {
+                    throw new InvalidOperationException("too many connStats");
+                }
                 PeerConnectStatus = new ConnectionStatus[numConnStat];
 
                 for (int i = 0; i < numConnStat; i++)
@@ -137,7 +157,10 @@ namespace Netcode.Rollback.Network
 
                 int numBytes = BinaryPrimitives.ReadInt32LittleEndian(inBytes[ptr..]);
                 ptr += sizeof(int);
-                if (numBytes > SessionConstants.MAX_INPUT_PAYLOAD) { throw new InvalidOperationException("input payload too big"); }
+                if (numBytes > SessionConstants.MAX_INPUT_PAYLOAD)
+                {
+                    throw new InvalidOperationException("input payload too big");
+                }
                 Bytes = new byte[numBytes];
 
                 inBytes.Slice(ptr, numBytes).CopyTo(Bytes);
@@ -145,6 +168,7 @@ namespace Netcode.Rollback.Network
 
                 return ptr;
             }
+
             public int Serialize(Span<byte> outBytes)
             {
                 int ptr = 0;
@@ -162,7 +186,6 @@ namespace Netcode.Rollback.Network
                     BinaryPrimitives.WriteInt32LittleEndian(outBytes[ptr..], 0);
                     ptr += sizeof(int);
                 }
-
 
                 outBytes[ptr] = DisconnectRequested ? (byte)1 : (byte)0;
                 ptr++;
@@ -185,6 +208,7 @@ namespace Netcode.Rollback.Network
                 }
                 return ptr;
             }
+
             public int SerdeSize()
             {
                 int cnt = 0;
@@ -206,10 +230,7 @@ namespace Netcode.Rollback.Network
         {
             public Frame AckFrame;
 
-            public static readonly InputAck Default = new()
-            {
-                AckFrame = Frame.NullFrame
-            };
+            public static readonly InputAck Default = new() { AckFrame = Frame.NullFrame };
 
             public int Deserialize(ReadOnlySpan<byte> inBytes)
             {
@@ -217,12 +238,14 @@ namespace Netcode.Rollback.Network
                 ptr += AckFrame.Deserialize(inBytes[ptr..]);
                 return ptr;
             }
+
             public int Serialize(Span<byte> outBytes)
             {
                 int ptr = 0;
                 ptr += AckFrame.Serialize(outBytes[ptr..]);
                 return ptr;
             }
+
             public int SerdeSize()
             {
                 return AckFrame.SerdeSize();
@@ -243,6 +266,7 @@ namespace Netcode.Rollback.Network
                 ptr += sizeof(ulong);
                 return ptr;
             }
+
             public int Serialize(Span<byte> outBytes)
             {
                 int ptr = 0;
@@ -252,7 +276,11 @@ namespace Netcode.Rollback.Network
                 ptr += sizeof(ulong);
                 return ptr;
             }
-            public int SerdeSize() { return sizeof(short) + sizeof(ulong); }
+
+            public int SerdeSize()
+            {
+                return sizeof(short) + sizeof(ulong);
+            }
         }
 
         public struct QualityReply : ISerializable
@@ -264,12 +292,17 @@ namespace Netcode.Rollback.Network
                 Pong = BinaryPrimitives.ReadUInt64LittleEndian(inBytes);
                 return sizeof(ulong);
             }
+
             public int Serialize(Span<byte> outBytes)
             {
                 BinaryPrimitives.WriteUInt64LittleEndian(outBytes, Pong);
                 return sizeof(ulong);
             }
-            public int SerdeSize() { return sizeof(ulong); }
+
+            public int SerdeSize()
+            {
+                return sizeof(ulong);
+            }
         }
 
         public struct ChecksumReport : ISerializable
@@ -285,6 +318,7 @@ namespace Netcode.Rollback.Network
                 ptr += Frame.Deserialize(inBytes[ptr..]);
                 return ptr;
             }
+
             public int Serialize(Span<byte> outBytes)
             {
                 int ptr = 0;
@@ -293,14 +327,29 @@ namespace Netcode.Rollback.Network
                 ptr += Frame.Serialize(outBytes[ptr..]);
                 return ptr;
             }
-            public int SerdeSize() { return sizeof(ulong) + Frame.SerdeSize(); }
+
+            public int SerdeSize()
+            {
+                return sizeof(ulong) + Frame.SerdeSize();
+            }
         }
 
         public struct KeepAlive : ISerializable
         {
-            public int Deserialize(ReadOnlySpan<byte> inBytes) { return 0; }
-            public int Serialize(Span<byte> outBytes) { return 0; }
-            public int SerdeSize() { return 0; }
+            public int Deserialize(ReadOnlySpan<byte> inBytes)
+            {
+                return 0;
+            }
+
+            public int Serialize(Span<byte> outBytes)
+            {
+                return 0;
+            }
+
+            public int SerdeSize()
+            {
+                return 0;
+            }
         }
 
         public MessageKind Kind;
@@ -317,14 +366,11 @@ namespace Netcode.Rollback.Network
         public static MessageBody From(in SyncRequest body) =>
             new() { Kind = MessageKind.SyncRequest, _syncRequest = body };
 
-        public static MessageBody From(in SyncReply body) =>
-            new() { Kind = MessageKind.SyncReply, _syncReply = body };
+        public static MessageBody From(in SyncReply body) => new() { Kind = MessageKind.SyncReply, _syncReply = body };
 
-        public static MessageBody From(in Input body) =>
-            new() { Kind = MessageKind.Input, _input = body };
+        public static MessageBody From(in Input body) => new() { Kind = MessageKind.Input, _input = body };
 
-        public static MessageBody From(in InputAck body) =>
-            new() { Kind = MessageKind.InputAck, _inputAck = body };
+        public static MessageBody From(in InputAck body) => new() { Kind = MessageKind.InputAck, _inputAck = body };
 
         public static MessageBody From(in QualityReport body) =>
             new() { Kind = MessageKind.QualityReport, _qualityReport = body };
@@ -335,8 +381,7 @@ namespace Netcode.Rollback.Network
         public static MessageBody From(in ChecksumReport body) =>
             new() { Kind = MessageKind.ChecksumReport, _checksumReport = body };
 
-        public static MessageBody From(in KeepAlive body) =>
-            new() { Kind = MessageKind.KeepAlive, _keepAlive = body };
+        public static MessageBody From(in KeepAlive body) => new() { Kind = MessageKind.KeepAlive, _keepAlive = body };
 
         public SyncRequest GetSyncRequest() =>
             Kind == MessageKind.SyncRequest ? _syncRequest : throw new InvalidOperationException("body type mismatch");
@@ -351,13 +396,19 @@ namespace Netcode.Rollback.Network
             Kind == MessageKind.InputAck ? _inputAck : throw new InvalidOperationException("body type mismatch");
 
         public QualityReport GetQualityReport() =>
-            Kind == MessageKind.QualityReport ? _qualityReport : throw new InvalidOperationException("body type mismatch");
+            Kind == MessageKind.QualityReport
+                ? _qualityReport
+                : throw new InvalidOperationException("body type mismatch");
 
         public QualityReply GetQualityReply() =>
-            Kind == MessageKind.QualityReply ? _qualityReply : throw new InvalidOperationException("body type mismatch");
+            Kind == MessageKind.QualityReply
+                ? _qualityReply
+                : throw new InvalidOperationException("body type mismatch");
 
         public ChecksumReport GetChecksumReport() =>
-            Kind == MessageKind.ChecksumReport ? _checksumReport : throw new InvalidOperationException("body type mismatch");
+            Kind == MessageKind.ChecksumReport
+                ? _checksumReport
+                : throw new InvalidOperationException("body type mismatch");
 
         public KeepAlive GetKeepAlive() =>
             Kind == MessageKind.KeepAlive ? _keepAlive : throw new InvalidOperationException("body type mismatch");
@@ -396,6 +447,7 @@ namespace Netcode.Rollback.Network
             }
             return ptr;
         }
+
         public int Serialize(Span<byte> outBytes)
         {
             int ptr = 0;
@@ -430,6 +482,7 @@ namespace Netcode.Rollback.Network
             }
             return ptr;
         }
+
         public int SerdeSize()
         {
             int cnt = 0;
@@ -477,6 +530,7 @@ namespace Netcode.Rollback.Network
             ptr += Body.Deserialize(inBytes[ptr..]);
             return ptr;
         }
+
         public int Serialize(Span<byte> outBytes)
         {
             int ptr = 0;
@@ -484,6 +538,7 @@ namespace Netcode.Rollback.Network
             ptr += Body.Serialize(outBytes[ptr..]);
             return ptr;
         }
+
         public int SerdeSize()
         {
             return Header.SerdeSize() + Body.SerdeSize();

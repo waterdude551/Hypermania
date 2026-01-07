@@ -7,7 +7,8 @@ using Utils;
 
 namespace Netcode.Rollback
 {
-    public struct GameStateCell<TState> where TState : IState<TState>
+    public struct GameStateCell<TState>
+        where TState : IState<TState>
     {
         public GameStateCtx State;
 
@@ -34,15 +35,18 @@ namespace Netcode.Rollback
             State.Data = new byte[len];
             Writer.WrittenSpan.CopyTo(State.Data);
         }
+
         public void Load(out TState data)
         {
             data = MemoryPackSerializer.Deserialize<TState>(State.Data);
         }
     }
 
-    public struct SavedStates<TState> where TState : IState<TState>
+    public struct SavedStates<TState>
+        where TState : IState<TState>
     {
         public GameStateCell<TState>[] States;
+
         public SavedStates(uint maxPrediction)
         {
             int numCells = (int)maxPrediction + 1;
@@ -55,8 +59,8 @@ namespace Netcode.Rollback
                     {
                         Frame = Frame.NullFrame,
                         Data = default,
-                        Checksum = default
-                    }
+                        Checksum = default,
+                    },
                 };
             }
             States = states;
@@ -98,16 +102,19 @@ namespace Netcode.Rollback
         }
 
         public Frame CurrentFrame => _currentFrame;
+
         public void AdvanceFrame() => _currentFrame += 1;
 
         public RollbackRequest<TState, TInput> SaveCurrentState()
         {
             _lastSavedFrame = _currentFrame;
-            return RollbackRequest<TState, TInput>.From(new RollbackRequest<TState, TInput>.SaveGameState
-            {
-                Cell = _savedStates.GetCell(_currentFrame),
-                Frame = CurrentFrame,
-            });
+            return RollbackRequest<TState, TInput>.From(
+                new RollbackRequest<TState, TInput>.SaveGameState
+                {
+                    Cell = _savedStates.GetCell(_currentFrame),
+                    Frame = CurrentFrame,
+                }
+            );
         }
 
         public void SetFrameDelay(PlayerHandle playerHandle, uint delay)
@@ -118,24 +125,31 @@ namespace Netcode.Rollback
 
         public void ResetPrediction()
         {
-            for (int i = 0; i < _numPlayers; i++) { _inputQueues[i].ResetPrediction(); }
+            for (int i = 0; i < _numPlayers; i++)
+            {
+                _inputQueues[i].ResetPrediction();
+            }
         }
 
         public RollbackRequest<TState, TInput> LoadFrame(Frame frameToLoad)
         {
             Assert.IsTrue(frameToLoad != Frame.NullFrame, "cannot load null frame");
-            Assert.IsTrue(frameToLoad < _currentFrame, $"must load frame in past (frame to load is {frameToLoad}, current frame is {_currentFrame})");
-            Assert.IsTrue(frameToLoad >= _currentFrame - (int)_maxPrediction, "cannot load frame outside of prediction window");
+            Assert.IsTrue(
+                frameToLoad < _currentFrame,
+                $"must load frame in past (frame to load is {frameToLoad}, current frame is {_currentFrame})"
+            );
+            Assert.IsTrue(
+                frameToLoad >= _currentFrame - (int)_maxPrediction,
+                "cannot load frame outside of prediction window"
+            );
 
             GameStateCell<TState> cell = _savedStates.GetCell(frameToLoad);
             Assert.IsTrue(cell.State.Frame == frameToLoad);
             _currentFrame = frameToLoad;
 
-            return RollbackRequest<TState, TInput>.From(new RollbackRequest<TState, TInput>.LoadGameState
-            {
-                Cell = cell,
-                Frame = frameToLoad,
-            });
+            return RollbackRequest<TState, TInput>.From(
+                new RollbackRequest<TState, TInput>.LoadGameState { Cell = cell, Frame = frameToLoad }
+            );
         }
 
         public Frame AddLocalInput(PlayerHandle playerHandle, in PlayerInput<TInput> input)
@@ -154,8 +168,14 @@ namespace Netcode.Rollback
             (TInput input, InputStatus status)[] inputs = new (TInput input, InputStatus status)[connectStatus.Length];
             for (int i = 0; i < connectStatus.Length; i++)
             {
-                if (connectStatus[i].Disconnected && connectStatus[i].LastFrame < _currentFrame) { inputs[i] = (default, InputStatus.Disconnected); }
-                else { inputs[i] = _inputQueues[i].Input(_currentFrame); }
+                if (connectStatus[i].Disconnected && connectStatus[i].LastFrame < _currentFrame)
+                {
+                    inputs[i] = (default, InputStatus.Disconnected);
+                }
+                else
+                {
+                    inputs[i] = _inputQueues[i].Input(_currentFrame);
+                }
             }
             return inputs;
         }
@@ -169,7 +189,10 @@ namespace Netcode.Rollback
                 {
                     inputs[i] = PlayerInput<TInput>.BlankInput(Frame.NullFrame);
                 }
-                else { inputs[i] = _inputQueues[i].ConfirmedInput(frame); }
+                else
+                {
+                    inputs[i] = _inputQueues[i].ConfirmedInput(frame);
+                }
             }
             return inputs;
         }
@@ -182,7 +205,10 @@ namespace Netcode.Rollback
                 firstIncorrect = Frame.Max(firstIncorrect, _inputQueues[i].FirstIncorrectFrame);
             }
 
-            if (SparseSaving) { frame = Frame.Min(frame, _lastSavedFrame); }
+            if (SparseSaving)
+            {
+                frame = Frame.Min(frame, _lastSavedFrame);
+            }
             frame = Frame.Min(frame, _currentFrame);
 
             Assert.IsTrue(firstIncorrect == Frame.NullFrame || firstIncorrect >= frame);
@@ -213,7 +239,10 @@ namespace Netcode.Rollback
         public GameStateCell<TState> SavedStateByFrame(Frame frame)
         {
             GameStateCell<TState> cell = _savedStates.GetCell(frame);
-            if (cell.State.Frame == frame) { return cell; }
+            if (cell.State.Frame == frame)
+            {
+                return cell;
+            }
             throw new InvalidOperationException($"state missing for frame {frame}");
         }
 

@@ -7,25 +7,37 @@ namespace Game.Sim
     public struct GameInput : IInput<GameInput>
     {
         public InputFlags Flags;
-        public readonly bool Equals(GameInput other) { return Flags == other.Flags; }
+
+        public readonly bool Equals(GameInput other)
+        {
+            return Flags == other.Flags;
+        }
 
         public int Deserialize(ReadOnlySpan<byte> inBytes)
         {
             Flags = (InputFlags)BinaryPrimitives.ReadInt32LittleEndian(inBytes);
             return sizeof(int);
         }
+
         public int Serialize(Span<byte> outBytes)
         {
             BinaryPrimitives.WriteInt32LittleEndian(outBytes, (int)Flags);
             return sizeof(int);
         }
+
         /// <summary>
         /// Input's serialization size is assumed to be constant regardless of the input's value in the networking code.
         /// </summary>
         /// <returns></returns>
-        public int SerdeSize() { return sizeof(int); }
+        public int SerdeSize()
+        {
+            return sizeof(int);
+        }
 
-        public GameInput(InputFlags flags) { Flags = flags; }
+        public GameInput(InputFlags flags)
+        {
+            Flags = flags;
+        }
     }
 
     // Input is an enum that uses the Flags attribute, which means that it can use bitwise operations on initialization and when checking whether certain enum values are present in an Input.
@@ -43,6 +55,6 @@ namespace Game.Sim
         MediumAttack = 1 << 6,
         SpecialAttack = 1 << 7,
         SuperAttack = 1 << 8,
-        Grab = 1 << 9
+        Grab = 1 << 9,
     }
 }

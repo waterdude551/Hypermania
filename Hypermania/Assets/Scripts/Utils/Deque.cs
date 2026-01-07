@@ -62,20 +62,23 @@ namespace Utils
 
         public T Front()
         {
-            if (_count == 0) throw new InvalidOperationException();
+            if (_count == 0)
+                throw new InvalidOperationException();
             return _buffer[_head];
         }
 
         public T Back()
         {
-            if (_count == 0) throw new InvalidOperationException();
+            if (_count == 0)
+                throw new InvalidOperationException();
             int idx = Index(_count - 1);
             return _buffer[idx];
         }
 
         public T PopFront()
         {
-            if (_count == 0) throw new InvalidOperationException();
+            if (_count == 0)
+                throw new InvalidOperationException();
             T value = _buffer[_head];
             _buffer[_head] = default!;
             _head = (_head + 1) & Mask;
@@ -85,7 +88,8 @@ namespace Utils
 
         public T PopBack()
         {
-            if (_count == 0) throw new InvalidOperationException();
+            if (_count == 0)
+                throw new InvalidOperationException();
             int idx = Index(_count - 1);
             T value = _buffer[idx];
             _buffer[idx] = default!;
@@ -95,7 +99,10 @@ namespace Utils
 
         public void Clear()
         {
-            if (_count == 0) { return; }
+            if (_count == 0)
+            {
+                return;
+            }
             if (!typeof(T).IsValueType)
             {
                 for (int i = 0; i < _count; i++)
@@ -111,10 +118,10 @@ namespace Utils
                 yield return _buffer[Index(i)];
         }
 
-
         private void EnsureCapacity(int size)
         {
-            if (size <= _buffer.Length) return;
+            if (size <= _buffer.Length)
+                return;
 
             int newCap = _buffer.Length << 1;
             T[] newBuf = new T[newCap];

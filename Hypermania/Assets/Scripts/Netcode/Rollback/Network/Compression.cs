@@ -22,7 +22,8 @@ namespace Netcode.Rollback.Network
 
         public static byte[] Encode(in InputBytes refInput, IEnumerable<InputBytes> pendingInput)
         {
-            if (pendingInput == null) throw new ArgumentNullException(nameof(pendingInput));
+            if (pendingInput == null)
+                throw new ArgumentNullException(nameof(pendingInput));
             Assert.AreNotEqual(refInput.Bytes.Length, 0, "reference input cannot be empty");
 
             byte[] scratch = Scratch;
@@ -34,7 +35,8 @@ namespace Netcode.Rollback.Network
 
             void FlushRun()
             {
-                if (!hasRun) return;
+                if (!hasRun)
+                    return;
 
                 if (outPtr + 2 > scratch.Length)
                     throw new InvalidOperationException($"Compression scratch overflow (>{MAX_SCRATCH_BYTES} bytes).");
@@ -132,7 +134,9 @@ namespace Netcode.Rollback.Network
                 Assert.IsTrue(count != 0, "RLE run count cannot be 0");
 
                 if (outPtr + count > scratch.Length)
-                    throw new InvalidOperationException($"Decompression scratch overflow (>{MAX_SCRATCH_BYTES} bytes).");
+                    throw new InvalidOperationException(
+                        $"Decompression scratch overflow (>{MAX_SCRATCH_BYTES} bytes)."
+                    );
 
                 for (int k = 0; k < count; k++)
                     scratch[outPtr++] = value;

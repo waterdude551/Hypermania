@@ -9,7 +9,8 @@ namespace Design.Animation.Editors
         [MenuItem("Tools/Hypermania/Move Builder")]
         public static void Open() => GetWindow<MoveBuilderWindow>("Move Builder");
 
-        [SerializeField] private MoveBuilderModel _model;
+        [SerializeField]
+        private MoveBuilderModel _model;
         private MoveBuilderControlsView _controls;
         private MoveBuilderPreviewView _preview;
 
@@ -27,7 +28,8 @@ namespace Design.Animation.Editors
         {
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
 
-            if (_model != null) _model.Changed -= Repaint;
+            if (_model != null)
+                _model.Changed -= Repaint;
 
             _preview?.Dispose();
             _preview = null;
@@ -80,8 +82,14 @@ namespace Design.Animation.Editors
                     e.Use();
                     break;
                 case KeyCode.A:
-                    if (e.shift) { m.AddBox(HitboxKind.Hurtbox); }
-                    else { m.AddBox(HitboxKind.Hitbox); }
+                    if (e.shift)
+                    {
+                        m.AddBox(HitboxKind.Hurtbox);
+                    }
+                    else
+                    {
+                        m.AddBox(HitboxKind.Hitbox);
+                    }
                     e.Use();
                     break;
                 case KeyCode.F:
@@ -96,16 +104,19 @@ namespace Design.Animation.Editors
 
         private void OnGUI()
         {
-            if (_model == null) return;
+            if (_model == null)
+                return;
 
             HandleGlobalKeyShortcuts(_model);
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                using (new EditorGUILayout.VerticalScope(new GUIStyle
-                {
-                    padding = new RectOffset(8, 8, 8, 8)
-                }, GUILayout.Width(380)))
+                using (
+                    new EditorGUILayout.VerticalScope(
+                        new GUIStyle { padding = new RectOffset(8, 8, 8, 8) },
+                        GUILayout.Width(380)
+                    )
+                )
                 {
                     _controls.DrawLeft(_model, GameManager.TPS);
                 }
@@ -113,9 +124,11 @@ namespace Design.Animation.Editors
                 using (new EditorGUILayout.VerticalScope(GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)))
                 {
                     Rect previewRect = GUILayoutUtility.GetRect(
-                        10, 10,
+                        10,
+                        10,
                         GUILayout.ExpandWidth(true),
-                        GUILayout.ExpandHeight(true));
+                        GUILayout.ExpandHeight(true)
+                    );
 
                     _preview.Draw(previewRect, _model, GameManager.TPS);
                     _controls.DrawBottomTimelineLayout(_model, GameManager.TPS);

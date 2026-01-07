@@ -22,15 +22,21 @@ namespace Netcode.Rollback.Sessions
             Spectators = new Dictionary<TAddress, UdpProtocol<TInput, TAddress>>();
         }
 
-        public bool IsLocal(PlayerHandle handle) => Handles.TryGetValue(handle, out PlayerType<TAddress> type) && type.Kind == PlayerKind.Local;
-        public bool IsRemote(PlayerHandle handle) => Handles.TryGetValue(handle, out PlayerType<TAddress> type) && type.Kind == PlayerKind.Remote;
-        public bool IsSpectator(PlayerHandle handle) => Handles.TryGetValue(handle, out PlayerType<TAddress> type) && type.Kind == PlayerKind.Spectator;
+        public bool IsLocal(PlayerHandle handle) =>
+            Handles.TryGetValue(handle, out PlayerType<TAddress> type) && type.Kind == PlayerKind.Local;
+
+        public bool IsRemote(PlayerHandle handle) =>
+            Handles.TryGetValue(handle, out PlayerType<TAddress> type) && type.Kind == PlayerKind.Remote;
+
+        public bool IsSpectator(PlayerHandle handle) =>
+            Handles.TryGetValue(handle, out PlayerType<TAddress> type) && type.Kind == PlayerKind.Spectator;
 
         public IEnumerable<PlayerHandle> LocalPlayerHandles()
         {
             foreach ((PlayerHandle handle, PlayerType<TAddress> type) in Handles)
             {
-                if (type.Kind == PlayerKind.Local) yield return handle;
+                if (type.Kind == PlayerKind.Local)
+                    yield return handle;
             }
         }
 
@@ -38,7 +44,8 @@ namespace Netcode.Rollback.Sessions
         {
             foreach ((PlayerHandle handle, PlayerType<TAddress> type) in Handles)
             {
-                if (type.Kind == PlayerKind.Remote) yield return handle;
+                if (type.Kind == PlayerKind.Remote)
+                    yield return handle;
             }
         }
 
@@ -46,7 +53,8 @@ namespace Netcode.Rollback.Sessions
         {
             foreach ((PlayerHandle handle, PlayerType<TAddress> type) in Handles)
             {
-                if (type.Kind == PlayerKind.Spectator) yield return handle;
+                if (type.Kind == PlayerKind.Spectator)
+                    yield return handle;
             }
         }
 
@@ -55,7 +63,10 @@ namespace Netcode.Rollback.Sessions
             int cnt = 0;
             foreach (PlayerType<TAddress> type in Handles.Values)
             {
-                if (type.Kind == PlayerKind.Local || type.Kind == PlayerKind.Remote) { cnt++; }
+                if (type.Kind == PlayerKind.Local || type.Kind == PlayerKind.Remote)
+                {
+                    cnt++;
+                }
             }
             return cnt;
         }
@@ -65,7 +76,10 @@ namespace Netcode.Rollback.Sessions
             int cnt = 0;
             foreach (PlayerType<TAddress> type in Handles.Values)
             {
-                if (type.Kind == PlayerKind.Spectator) { cnt++; }
+                if (type.Kind == PlayerKind.Spectator)
+                {
+                    cnt++;
+                }
             }
             return cnt;
         }
@@ -96,7 +110,15 @@ namespace Netcode.Rollback.Sessions
         private Dictionary<Frame, ulong> _localChecksumHistory;
         private Frame _lastSentChecksumFrame;
 
-        public P2PSession(int numPlayers, uint maxPrediction, INonBlockingSocket<TAddress> socket, PlayerRegisty<TInput, TAddress> players, bool sparseSaving, in DesyncDetection desyncDetection, uint inputDelay)
+        public P2PSession(
+            int numPlayers,
+            uint maxPrediction,
+            INonBlockingSocket<TAddress> socket,
+            PlayerRegisty<TInput, TAddress> players,
+            bool sparseSaving,
+            in DesyncDetection desyncDetection,
+            uint inputDelay
+        )
         {
             _localConnectStatus = new ConnectionStatus[numPlayers];
             for (int i = 0; i < numPlayers; i++)
@@ -111,7 +133,10 @@ namespace Netcode.Rollback.Sessions
                     _syncLayer.SetFrameDelay(handle, inputDelay);
                 }
             }
-            _state = players.Remotes.Count + players.Spectators.Count == 0 ? SessionState.Running : SessionState.Synchronizing;
+            _state =
+                players.Remotes.Count + players.Spectators.Count == 0
+                    ? SessionState.Running
+                    : SessionState.Synchronizing;
             _sparseSaving = (maxPrediction == 0 && sparseSaving) ? false : sparseSaving;
 
             _numPlayers = numPlayers;
@@ -138,7 +163,7 @@ namespace Netcode.Rollback.Sessions
             PlayerInput<TInput> playerInput = new PlayerInput<TInput>
             {
                 Frame = _syncLayer.CurrentFrame,
-                Input = input
+                Input = input,
             };
             _localInputs[playerHandle] = playerInput;
         }
@@ -156,7 +181,9 @@ namespace Netcode.Rollback.Sessions
             {
                 if (!_localInputs.ContainsKey(handle))
                 {
-                    throw new InvalidOperationException($"missing local inputs for handle {handle}, cannot AdvanceFrame()");
+                    throw new InvalidOperationException(
+                        $"missing local inputs for handle {handle}, cannot AdvanceFrame()"
+                    );
                 }
             }
 
@@ -188,8 +215,14 @@ namespace Netcode.Rollback.Sessions
                 }
 
                 Frame lastSaved = _syncLayer.LastSavedFrame;
-                if (_sparseSaving) { CheckLastSavedState(lastSaved, confirmedFrame, requests); }
-                else { requests.Add(_syncLayer.SaveCurrentState()); }
+                if (_sparseSaving)
+                {
+                    CheckLastSavedState(lastSaved, confirmedFrame, requests);
+                }
+                else
+                {
+                    requests.Add(_syncLayer.SaveCurrentState());
+                }
             }
 
             SendConfirmedInputsToSpectators(confirmedFrame);
@@ -221,7 +254,10 @@ namespace Netcode.Rollback.Sessions
             bool canAdvance = _syncLayer.LastConfirmedFrame == _syncLayer.CurrentFrame; // assuming lockstep
             if (!lockstep)
             {
-                int framesAhead = _syncLayer.LastConfirmedFrame == Frame.NullFrame ? _syncLayer.CurrentFrame.No : _syncLayer.CurrentFrame - _syncLayer.LastConfirmedFrame;
+                int framesAhead =
+                    _syncLayer.LastConfirmedFrame == Frame.NullFrame
+                        ? _syncLayer.CurrentFrame.No
+                        : _syncLayer.CurrentFrame - _syncLayer.LastConfirmedFrame;
                 canAdvance = framesAhead < _maxPrediction;
             }
 
@@ -230,12 +266,16 @@ namespace Netcode.Rollback.Sessions
                 (TInput input, InputStatus status)[] inputs = _syncLayer.SynchronizedInputs(_localConnectStatus);
                 _syncLayer.AdvanceFrame();
                 _localInputs.Clear();
-                requests.Add(RollbackRequest<TState, TInput>.From(new RollbackRequest<TState, TInput>.AdvanceFrame
-                {
-                    Inputs = inputs
-                }));
+                requests.Add(
+                    RollbackRequest<TState, TInput>.From(
+                        new RollbackRequest<TState, TInput>.AdvanceFrame { Inputs = inputs }
+                    )
+                );
             }
-            else { Debug.Log($"[Rollback] prediction threshold reached, skipping on frame {_syncLayer.CurrentFrame}"); }
+            else
+            {
+                Debug.Log($"[Rollback] prediction threshold reached, skipping on frame {_syncLayer.CurrentFrame}");
+            }
 
             return requests;
         }
@@ -244,8 +284,14 @@ namespace Netcode.Rollback.Sessions
         {
             foreach ((TAddress addr, Message msg) in _socket.ReceiveAllMessages())
             {
-                if (_playerRegistry.Remotes.TryGetValue(addr, out UdpProtocol<TInput, TAddress> ep1)) { ep1.HandleMessage(msg); }
-                if (_playerRegistry.Spectators.TryGetValue(addr, out var ep2)) { ep2.HandleMessage(msg); }
+                if (_playerRegistry.Remotes.TryGetValue(addr, out UdpProtocol<TInput, TAddress> ep1))
+                {
+                    ep1.HandleMessage(msg);
+                }
+                if (_playerRegistry.Spectators.TryGetValue(addr, out var ep2))
+                {
+                    ep2.HandleMessage(msg);
+                }
             }
 
             foreach (UdpProtocol<TInput, TAddress> remoteEp in _playerRegistry.Remotes.Values)
@@ -256,19 +302,26 @@ namespace Netcode.Rollback.Sessions
                 }
             }
 
-            Deque<(Event<TInput> ev, PlayerHandle[] handles, TAddress addr)> events = new Deque<(Event<TInput> ev, PlayerHandle[] handles, TAddress addr)>();
+            Deque<(Event<TInput> ev, PlayerHandle[] handles, TAddress addr)> events =
+                new Deque<(Event<TInput> ev, PlayerHandle[] handles, TAddress addr)>();
 
             foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Remotes.Values)
             {
                 PlayerHandle[] handles = (PlayerHandle[])ep.Handles.Clone();
                 TAddress addr = ep.PeerAddr;
-                foreach (Event<TInput> ev in ep.Poll(_localConnectStatus)) { events.PushBack((ev, handles, addr)); }
+                foreach (Event<TInput> ev in ep.Poll(_localConnectStatus))
+                {
+                    events.PushBack((ev, handles, addr));
+                }
             }
             foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Spectators.Values)
             {
                 PlayerHandle[] handles = (PlayerHandle[])ep.Handles.Clone();
                 TAddress addr = ep.PeerAddr;
-                foreach (Event<TInput> ev in ep.Poll(_localConnectStatus)) { events.PushBack((ev, handles, addr)); }
+                foreach (Event<TInput> ev in ep.Poll(_localConnectStatus))
+                {
+                    events.PushBack((ev, handles, addr));
+                }
             }
 
             while (events.Count > 0)
@@ -277,8 +330,14 @@ namespace Netcode.Rollback.Sessions
                 HandleEvent(ev, handles, addr);
             }
 
-            foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Remotes.Values) { ep.SendAllMessages(_socket); }
-            foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Spectators.Values) { ep.SendAllMessages(_socket); }
+            foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Remotes.Values)
+            {
+                ep.SendAllMessages(_socket);
+            }
+            foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Spectators.Values)
+            {
+                ep.SendAllMessages(_socket);
+            }
         }
 
         public void DisconnectPlayer(PlayerHandle playerHandle)
@@ -346,14 +405,20 @@ namespace Netcode.Rollback.Sessions
 
         public IEnumerable<RollbackEvent<TInput, TAddress>> DrainEvents()
         {
-            while (_eventQueue.Count > 0) { yield return _eventQueue.PopFront(); }
+            while (_eventQueue.Count > 0)
+            {
+                yield return _eventQueue.PopFront();
+            }
         }
 
         public int NumPlayers() => _playerRegistry.NumPlayers();
+
         public int NumSpectators() => _playerRegistry.NumSpectators();
 
         public IEnumerable<PlayerHandle> LocalPlayerHandles() => _playerRegistry.LocalPlayerHandles();
+
         public IEnumerable<PlayerHandle> RemotePlayerHandles() => _playerRegistry.RemotePlayerHandles();
+
         public IEnumerable<PlayerHandle> SpectatorHandles() => _playerRegistry.SpectatorHandles();
 
         private void DisconnectPlayerAtFrame(PlayerHandle playerHandle, Frame lastFrame)
@@ -364,9 +429,15 @@ namespace Netcode.Rollback.Sessions
                 {
                     case PlayerKind.Remote:
                         UdpProtocol<TInput, TAddress> ep1 = _playerRegistry.Remotes[type.Address];
-                        foreach (PlayerHandle handle in ep1.Handles) { _localConnectStatus[handle.Id].Disconnected = true; }
+                        foreach (PlayerHandle handle in ep1.Handles)
+                        {
+                            _localConnectStatus[handle.Id].Disconnected = true;
+                        }
                         ep1.Disconnect();
-                        if (_syncLayer.CurrentFrame > lastFrame) { _disconnectFrame = lastFrame + 1; }
+                        if (_syncLayer.CurrentFrame > lastFrame)
+                        {
+                            _disconnectFrame = lastFrame + 1;
+                        }
                         break;
                     case PlayerKind.Spectator:
                         UdpProtocol<TInput, TAddress> ep2 = _playerRegistry.Spectators[type.Address];
@@ -379,19 +450,28 @@ namespace Netcode.Rollback.Sessions
 
         private void CheckInitialSync()
         {
-            if (_state != SessionState.Synchronizing) { return; }
+            if (_state != SessionState.Synchronizing)
+            {
+                return;
+            }
             foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Remotes.Values)
             {
-                if (!ep.IsSynchronized) return;
+                if (!ep.IsSynchronized)
+                    return;
             }
             foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Spectators.Values)
             {
-                if (!ep.IsSynchronized) return;
+                if (!ep.IsSynchronized)
+                    return;
             }
             _state = SessionState.Running;
         }
 
-        private void AdjustGameState(Frame firstIncorrect, Frame minConfirmed, List<RollbackRequest<TState, TInput>> requests)
+        private void AdjustGameState(
+            Frame firstIncorrect,
+            Frame minConfirmed,
+            List<RollbackRequest<TState, TInput>> requests
+        )
         {
             Frame currentFrame = _syncLayer.CurrentFrame;
             Frame frameToLoad = _sparseSaving ? _syncLayer.LastSavedFrame : firstIncorrect;
@@ -409,25 +489,42 @@ namespace Netcode.Rollback.Sessions
                 (TInput input, InputStatus status)[] inputs = _syncLayer.SynchronizedInputs(_localConnectStatus);
                 if (_sparseSaving)
                 {
-                    if (_syncLayer.CurrentFrame == minConfirmed) { requests.Add(_syncLayer.SaveCurrentState()); }
+                    if (_syncLayer.CurrentFrame == minConfirmed)
+                    {
+                        requests.Add(_syncLayer.SaveCurrentState());
+                    }
                 }
-                else { if (i > 0) { requests.Add(_syncLayer.SaveCurrentState()); } }
+                else
+                {
+                    if (i > 0)
+                    {
+                        requests.Add(_syncLayer.SaveCurrentState());
+                    }
+                }
 
                 _syncLayer.AdvanceFrame();
-                requests.Add(RollbackRequest<TState, TInput>.From(new RollbackRequest<TState, TInput>.AdvanceFrame { Inputs = inputs }));
+                requests.Add(
+                    RollbackRequest<TState, TInput>.From(
+                        new RollbackRequest<TState, TInput>.AdvanceFrame { Inputs = inputs }
+                    )
+                );
             }
             Assert.IsTrue(_syncLayer.CurrentFrame == currentFrame);
         }
 
         private void SendConfirmedInputsToSpectators(Frame confirmedFrame)
         {
-            if (NumSpectators() == 0) { return; }
+            if (NumSpectators() == 0)
+            {
+                return;
+            }
             while (_nextSpectatorFrame <= confirmedFrame)
             {
                 PlayerInput<TInput>[] inputs = _syncLayer.ConfirmedInputs(_nextSpectatorFrame, _localConnectStatus);
                 Assert.IsTrue(inputs.Length == _numPlayers);
 
-                Dictionary<PlayerHandle, PlayerInput<TInput>> inputMap = new Dictionary<PlayerHandle, PlayerInput<TInput>>();
+                Dictionary<PlayerHandle, PlayerInput<TInput>> inputMap =
+                    new Dictionary<PlayerHandle, PlayerInput<TInput>>();
                 for (int i = 0; i < inputs.Length; i++)
                 {
                     Assert.IsTrue(inputs[i].Frame == Frame.NullFrame || inputs[i].Frame == _nextSpectatorFrame);
@@ -436,7 +533,10 @@ namespace Netcode.Rollback.Sessions
 
                 foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Spectators.Values)
                 {
-                    if (ep.IsRunning) { ep.SendInput(inputMap, _localConnectStatus); }
+                    if (ep.IsRunning)
+                    {
+                        ep.SendInput(inputMap, _localConnectStatus);
+                    }
                 }
                 _nextSpectatorFrame += 1;
             }
@@ -452,7 +552,10 @@ namespace Netcode.Rollback.Sessions
 
                 foreach (UdpProtocol<TInput, TAddress> ep in _playerRegistry.Remotes.Values)
                 {
-                    if (!ep.IsRunning) { continue; }
+                    if (!ep.IsRunning)
+                    {
+                        continue;
+                    }
                     ConnectionStatus conStatus = ep.PeerConnectStatus(handle);
                     bool connected = !conStatus.Disconnected;
                     Frame minConfirmed = conStatus.LastFrame;
@@ -492,7 +595,10 @@ namespace Netcode.Rollback.Sessions
                     }
                 }
             }
-            if (interval == int.MinValue) { return 0; }
+            if (interval == int.MinValue)
+            {
+                return 0;
+            }
             return interval;
         }
 
@@ -502,18 +608,35 @@ namespace Netcode.Rollback.Sessions
             if (_syncLayer.CurrentFrame > _nextRecommendedSleep && _framesAhead >= MIN_RECOMMENDATION)
             {
                 _nextRecommendedSleep = _syncLayer.CurrentFrame + RECOMMENDATION_INTERVAL;
-                _eventQueue.PushBack(RollbackEvent<TInput, TAddress>.From(new RollbackEvent<TInput, TAddress>.WaitRecommendation { SkipFrames = (uint)_framesAhead }));
+                _eventQueue.PushBack(
+                    RollbackEvent<TInput, TAddress>.From(
+                        new RollbackEvent<TInput, TAddress>.WaitRecommendation { SkipFrames = (uint)_framesAhead }
+                    )
+                );
             }
         }
 
-        private void CheckLastSavedState(Frame lastSaved, Frame confirmedFrame, List<RollbackRequest<TState, TInput>> requests)
+        private void CheckLastSavedState(
+            Frame lastSaved,
+            Frame confirmedFrame,
+            List<RollbackRequest<TState, TInput>> requests
+        )
         {
             if (_syncLayer.CurrentFrame - lastSaved >= _maxPrediction)
             {
-                if (confirmedFrame >= _syncLayer.CurrentFrame) { requests.Add(_syncLayer.SaveCurrentState()); }
-                else { AdjustGameState(lastSaved, confirmedFrame, requests); }
+                if (confirmedFrame >= _syncLayer.CurrentFrame)
+                {
+                    requests.Add(_syncLayer.SaveCurrentState());
+                }
+                else
+                {
+                    AdjustGameState(lastSaved, confirmedFrame, requests);
+                }
 
-                Assert.IsTrue(confirmedFrame == Frame.NullFrame || _syncLayer.LastSavedFrame == Frame.Min(confirmedFrame, _syncLayer.CurrentFrame));
+                Assert.IsTrue(
+                    confirmedFrame == Frame.NullFrame
+                        || _syncLayer.LastSavedFrame == Frame.Min(confirmedFrame, _syncLayer.CurrentFrame)
+                );
             }
         }
 
@@ -523,44 +646,56 @@ namespace Netcode.Rollback.Sessions
             {
                 case EventKind.Synchronizing:
                     Event<TInput>.Synchronizing synchronizing = ev.GetSynchronizing();
-                    _eventQueue.PushBack(RollbackEvent<TInput, TAddress>.From(new RollbackEvent<TInput, TAddress>.Synchronizing
-                    {
-                        Addr = addr,
-                        Total = synchronizing.Total,
-                        Count = synchronizing.Count
-                    }));
+                    _eventQueue.PushBack(
+                        RollbackEvent<TInput, TAddress>.From(
+                            new RollbackEvent<TInput, TAddress>.Synchronizing
+                            {
+                                Addr = addr,
+                                Total = synchronizing.Total,
+                                Count = synchronizing.Count,
+                            }
+                        )
+                    );
                     break;
                 case EventKind.NetworkInterrupted:
                     Event<TInput>.NetworkInterrupted nwInterrupted = ev.GetNetworkInterrupted();
-                    _eventQueue.PushBack(RollbackEvent<TInput, TAddress>.From(new RollbackEvent<TInput, TAddress>.NetworkInterrupted
-                    {
-                        Addr = addr,
-                        DisconnectTimeout = nwInterrupted.DisconnectTimeout
-                    }));
+                    _eventQueue.PushBack(
+                        RollbackEvent<TInput, TAddress>.From(
+                            new RollbackEvent<TInput, TAddress>.NetworkInterrupted
+                            {
+                                Addr = addr,
+                                DisconnectTimeout = nwInterrupted.DisconnectTimeout,
+                            }
+                        )
+                    );
                     break;
                 case EventKind.NetworkResumed:
-                    _eventQueue.PushBack(RollbackEvent<TInput, TAddress>.From(new RollbackEvent<TInput, TAddress>.NetworkResumed
-                    {
-                        Addr = addr,
-                    }));
+                    _eventQueue.PushBack(
+                        RollbackEvent<TInput, TAddress>.From(
+                            new RollbackEvent<TInput, TAddress>.NetworkResumed { Addr = addr }
+                        )
+                    );
                     break;
                 case EventKind.Synchronized:
                     CheckInitialSync();
-                    _eventQueue.PushBack(RollbackEvent<TInput, TAddress>.From(new RollbackEvent<TInput, TAddress>.Synchronized
-                    {
-                        Addr = addr,
-                    }));
+                    _eventQueue.PushBack(
+                        RollbackEvent<TInput, TAddress>.From(
+                            new RollbackEvent<TInput, TAddress>.Synchronized { Addr = addr }
+                        )
+                    );
                     break;
                 case EventKind.Disconnected:
                     foreach (PlayerHandle handle in playerHandles)
                     {
-                        Frame lastFrame = handle.Id < _numPlayers ? _localConnectStatus[handle.Id].LastFrame : Frame.NullFrame;
+                        Frame lastFrame =
+                            handle.Id < _numPlayers ? _localConnectStatus[handle.Id].LastFrame : Frame.NullFrame;
                         DisconnectPlayerAtFrame(handle, lastFrame);
                     }
-                    _eventQueue.PushBack(RollbackEvent<TInput, TAddress>.From(new RollbackEvent<TInput, TAddress>.Disconnected
-                    {
-                        Addr = addr,
-                    }));
+                    _eventQueue.PushBack(
+                        RollbackEvent<TInput, TAddress>.From(
+                            new RollbackEvent<TInput, TAddress>.Disconnected { Addr = addr }
+                        )
+                    );
                     break;
                 case EventKind.Input:
                     Event<TInput>.Input input = ev.GetInput();
@@ -568,51 +703,73 @@ namespace Netcode.Rollback.Sessions
                     if (!_localConnectStatus[input.Player.Id].Disconnected)
                     {
                         Frame currentRemoteFrame = _localConnectStatus[input.Player.Id].LastFrame;
-                        Assert.IsTrue(currentRemoteFrame == Frame.NullFrame || currentRemoteFrame + 1 == input.Data.Frame);
+                        Assert.IsTrue(
+                            currentRemoteFrame == Frame.NullFrame || currentRemoteFrame + 1 == input.Data.Frame
+                        );
                         _localConnectStatus[input.Player.Id].LastFrame = input.Data.Frame;
                         _syncLayer.AddRemoteInput(input.Player, input.Data);
                     }
                     break;
             }
 
-            while (_eventQueue.Count > SessionConstants.MAX_EVENT_QUEUE_SIZE) { _eventQueue.PopFront(); }
+            while (_eventQueue.Count > SessionConstants.MAX_EVENT_QUEUE_SIZE)
+            {
+                _eventQueue.PopFront();
+            }
         }
 
         private void CompareLocalChecksumsAgainstPeers()
         {
-            if (!_desyncDetection.On) { return; }
+            if (!_desyncDetection.On)
+            {
+                return;
+            }
             foreach (UdpProtocol<TInput, TAddress> remote in _playerRegistry.Remotes.Values)
             {
                 List<Frame> checkedFrames = new List<Frame>();
                 foreach ((Frame remoteFrame, ulong remoteChecksum) in remote.PendingChecksums)
                 {
-                    if (remoteFrame >= _syncLayer.LastConfirmedFrame) { continue; }
+                    if (remoteFrame >= _syncLayer.LastConfirmedFrame)
+                    {
+                        continue;
+                    }
                     if (_localChecksumHistory.TryGetValue(remoteFrame, out ulong localChecksum))
                     {
                         if (localChecksum != remoteChecksum)
                         {
-                            _eventQueue.PushBack(RollbackEvent<TInput, TAddress>.From(new RollbackEvent<TInput, TAddress>.DesyncDetected
-                            {
-                                Frame = remoteFrame,
-                                LocalChecksum = localChecksum,
-                                RemoteChecksum = remoteChecksum,
-                                Addr = remote.PeerAddr
-                            }));
+                            _eventQueue.PushBack(
+                                RollbackEvent<TInput, TAddress>.From(
+                                    new RollbackEvent<TInput, TAddress>.DesyncDetected
+                                    {
+                                        Frame = remoteFrame,
+                                        LocalChecksum = localChecksum,
+                                        RemoteChecksum = remoteChecksum,
+                                        Addr = remote.PeerAddr,
+                                    }
+                                )
+                            );
                         }
                         checkedFrames.Add(remoteFrame);
                     }
                 }
 
-                foreach (Frame frame in checkedFrames) { remote.PendingChecksums.Remove(frame); }
+                foreach (Frame frame in checkedFrames)
+                {
+                    remote.PendingChecksums.Remove(frame);
+                }
             }
         }
 
         private void CheckChecksumSendInterval()
         {
-            if (!_desyncDetection.On) { return; }
-            Frame frameToSend = _lastSentChecksumFrame == Frame.NullFrame
-                ? new Frame { No = (int)_desyncDetection.Interval }
-                : _lastSentChecksumFrame + (int)_desyncDetection.Interval;
+            if (!_desyncDetection.On)
+            {
+                return;
+            }
+            Frame frameToSend =
+                _lastSentChecksumFrame == Frame.NullFrame
+                    ? new Frame { No = (int)_desyncDetection.Interval }
+                    : _lastSentChecksumFrame + (int)_desyncDetection.Interval;
 
             if (frameToSend <= _syncLayer.LastConfirmedFrame && frameToSend <= _syncLayer.LastSavedFrame)
             {
@@ -630,10 +787,17 @@ namespace Netcode.Rollback.Sessions
 
                 if (_localChecksumHistory.Count > ProtocolConstants.MAX_CHECKSUM_HISTORY_SIZE)
                 {
-                    Frame oldestFrameToKeep = frameToSend - (ProtocolConstants.MAX_CHECKSUM_HISTORY_SIZE - 1) * (int)_desyncDetection.Interval;
+                    Frame oldestFrameToKeep =
+                        frameToSend
+                        - (ProtocolConstants.MAX_CHECKSUM_HISTORY_SIZE - 1) * (int)_desyncDetection.Interval;
                     List<Frame> framesToRemove = new List<Frame>();
-                    foreach (Frame frame in _localChecksumHistory.Keys) { if (frame < oldestFrameToKeep) framesToRemove.Add(frame); }
-                    foreach (Frame frame in framesToRemove) _localChecksumHistory.Remove(frame);
+                    foreach (Frame frame in _localChecksumHistory.Keys)
+                    {
+                        if (frame < oldestFrameToKeep)
+                            framesToRemove.Add(frame);
+                    }
+                    foreach (Frame frame in framesToRemove)
+                        _localChecksumHistory.Remove(frame);
                 }
             }
         }

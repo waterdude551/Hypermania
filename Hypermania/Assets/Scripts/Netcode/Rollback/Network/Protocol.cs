@@ -21,18 +21,14 @@ namespace Netcode.Rollback.Network
         public Frame Frame;
         public byte[] Bytes;
 
-        public static InputBytes Zeroed<TInput>(int numPlayers) where TInput : IInput<TInput>
+        public static InputBytes Zeroed<TInput>(int numPlayers)
+            where TInput : IInput<TInput>
         {
             int size = Serializer<TInput>.DefaultSize() * numPlayers;
-            return new InputBytes
-            {
-                Frame = Frame.NullFrame,
-                Bytes = new byte[size],
-            };
+            return new InputBytes { Frame = Frame.NullFrame, Bytes = new byte[size] };
         }
 
-        public static InputBytes FromInputs<TInput>(
-            Dictionary<PlayerHandle, PlayerInput<TInput>> inputs)
+        public static InputBytes FromInputs<TInput>(Dictionary<PlayerHandle, PlayerInput<TInput>> inputs)
             where TInput : IInput<TInput>
         {
             Frame frame = Frame.NullFrame;
@@ -45,7 +41,8 @@ namespace Netcode.Rollback.Network
                 if (inputs.TryGetValue(handle, out PlayerInput<TInput> pi))
                 {
                     Assert.IsTrue(frame == Frame.NullFrame || pi.Frame == Frame.NullFrame || frame == pi.Frame);
-                    if (pi.Frame != Frame.NullFrame) frame = pi.Frame;
+                    if (pi.Frame != Frame.NullFrame)
+                        frame = pi.Frame;
                     pi.Input.Serialize(buf.AsSpan().Slice(ptr, Serializer<TInput>.DefaultSize()));
                     ptr += Serializer<TInput>.DefaultSize();
                 }
@@ -53,7 +50,6 @@ namespace Netcode.Rollback.Network
 
             return new InputBytes { Frame = frame, Bytes = buf };
         }
-
 
         public PlayerInput<TInput>[] ToInputs<TInput>(int numPlayers)
             where TInput : IInput<TInput>
@@ -91,7 +87,8 @@ namespace Netcode.Rollback.Network
         public const int MAX_CHECKSUM_HISTORY_SIZE = 32;
     }
 
-    public class UdpProtocol<TInput, TAddress> where TInput : IInput<TInput>
+    public class UdpProtocol<TInput, TAddress>
+        where TInput : IInput<TInput>
     {
         const uint NUM_SYNC_PACKETS = 5;
         const ulong UDP_SHUTDOWN_TIMER = 5000;
@@ -153,9 +150,8 @@ namespace Netcode.Rollback.Network
         private DesyncDetection _desyncDetection;
         public Dictionary<Frame, ulong> PendingChecksums => _pendingChecksums;
 
-        // cached 
+        // cached
         private System.Random _random;
-
 
         public UdpProtocol(
             ReadOnlySpan<PlayerHandle> handles,
@@ -165,7 +161,9 @@ namespace Netcode.Rollback.Network
             uint maxPrediction,
             TimeSpan disconnectTimeout,
             TimeSpan disconnectNotifyStart,
-            uint fps, DesyncDetection desyncDetection)
+            uint fps,
+            DesyncDetection desyncDetection
+        )
         {
             _random = new System.Random();
             ushort magic = 0;
@@ -182,7 +180,7 @@ namespace Netcode.Rollback.Network
 
             Dictionary<Frame, InputBytes> recvInputs = new Dictionary<Frame, InputBytes>
             {
-                { Frame.NullFrame, InputBytes.Zeroed<TInput>(recvPlayerNum) }
+                { Frame.NullFrame, InputBytes.Zeroed<TInput>(recvPlayerNum) },
             };
 
             _numPlayers = numPlayers;
@@ -231,7 +229,10 @@ namespace Netcode.Rollback.Network
 
         public void UpdateLocalFrameAdvantage(Frame localFrame)
         {
-            if (localFrame == Frame.NullFrame || _lastRecvFrame == Frame.NullFrame) { return; }
+            if (localFrame == Frame.NullFrame || _lastRecvFrame == Frame.NullFrame)
+            {
+                return;
+            }
             int ping = (int)(_roundTripTime / 2);
             int remoteFrame = _lastRecvFrame.No + ping * (int)_fps / 1000;
             _localFrameAdvantage = remoteFrame - localFrame.No;
@@ -239,10 +240,16 @@ namespace Netcode.Rollback.Network
 
         public NetworkStats NetworkStats()
         {
-            if (_state != ProtocolState.Synchronizing && _state != ProtocolState.Running) { throw new InvalidOperationException("not synchronized"); }
+            if (_state != ProtocolState.Synchronizing && _state != ProtocolState.Running)
+            {
+                throw new InvalidOperationException("not synchronized");
+            }
             ulong now = Helpers.MillisSinceEpoch();
             ulong secs = (now - _statsStartTime) / 1000;
-            if (secs == 0) { throw new InvalidOperationException("not synchronized"); }
+            if (secs == 0)
+            {
+                throw new InvalidOperationException("not synchronized");
+            }
 
             return new NetworkStats
             {
@@ -265,7 +272,10 @@ namespace Netcode.Rollback.Network
 
         public void Disconnect()
         {
-            if (_state == ProtocolState.Shutdown) { return; }
+            if (_state == ProtocolState.Shutdown)
+            {
+                return;
+            }
             _state = ProtocolState.Disconnected;
             _shutdownTimeout = Instant.Now() + TimeSpan.FromMilliseconds(UDP_SHUTDOWN_TIMER);
         }
@@ -310,7 +320,14 @@ namespace Netcode.Rollback.Network
                     if (!_disconnectNotifySent && _lastRecvTime + _disconnectNotifyStart < now)
                     {
                         TimeSpan duration = _disconnectTimeout - _disconnectNotifyStart;
-                        _eventQueue.PushBack(Event<TInput>.From(new Event<TInput>.NetworkInterrupted { DisconnectTimeout = (ulong)duration.TotalMilliseconds }));
+                        _eventQueue.PushBack(
+                            Event<TInput>.From(
+                                new Event<TInput>.NetworkInterrupted
+                                {
+                                    DisconnectTimeout = (ulong)duration.TotalMilliseconds,
+                                }
+                            )
+                        );
                         _disconnectNotifySent = true;
                     }
 
@@ -321,10 +338,16 @@ namespace Netcode.Rollback.Network
                     }
                     break;
                 case ProtocolState.Disconnected:
-                    if (_shutdownTimeout < Instant.Now()) { _state = ProtocolState.Shutdown; }
+                    if (_shutdownTimeout < Instant.Now())
+                    {
+                        _state = ProtocolState.Shutdown;
+                    }
                     break;
             }
-            while (_eventQueue.Count > 0) { yield return _eventQueue.PopFront(); }
+            while (_eventQueue.Count > 0)
+            {
+                yield return _eventQueue.PopFront();
+            }
         }
 
         public void PopPendingOutput(Frame ackFrame)
@@ -332,8 +355,14 @@ namespace Netcode.Rollback.Network
             while (_pendingOutput.Count > 0)
             {
                 InputBytes input = _pendingOutput.Front();
-                if (input.Frame <= ackFrame) { _lastAckedInput = _pendingOutput.PopFront(); }
-                else { break; }
+                if (input.Frame <= ackFrame)
+                {
+                    _lastAckedInput = _pendingOutput.PopFront();
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
@@ -346,15 +375,24 @@ namespace Netcode.Rollback.Network
                 return;
             }
 
-            if (_sendQueue.Count == 0) { return; }
+            if (_sendQueue.Count == 0)
+            {
+                return;
+            }
 
             // Debug.Log($"[Rollback] Sending {_sendQueue.Count} messages");
-            while (_sendQueue.Count > 0) { socket.SendTo(_sendQueue.PopFront(), _peerAddr); }
+            while (_sendQueue.Count > 0)
+            {
+                socket.SendTo(_sendQueue.PopFront(), _peerAddr);
+            }
         }
 
         public void SendInput(Dictionary<PlayerHandle, PlayerInput<TInput>> inputs, ConnectionStatus[] connectStatus)
         {
-            if (!IsRunning) { return; }
+            if (!IsRunning)
+            {
+                return;
+            }
             Assert.IsTrue(inputs.Count == _localPlayers);
             InputBytes endpointData = InputBytes.FromInputs(inputs);
             _timeSyncLayer.AdvanceFrame(endpointData.Frame, _localFrameAdvantage, _remoteFrameAdvantage);
@@ -371,7 +409,10 @@ namespace Netcode.Rollback.Network
         private void SendPendingOutput(ConnectionStatus[] connectStatus)
         {
             MessageBody.Input body = MessageBody.Input.Default;
-            if (_pendingOutput.Count == 0) { return; }
+            if (_pendingOutput.Count == 0)
+            {
+                return;
+            }
 
             InputBytes input = _pendingOutput.Front();
             Assert.IsTrue(_lastAckedInput.Frame == Frame.NullFrame || _lastAckedInput.Frame + 1 == input.Frame);
@@ -380,7 +421,10 @@ namespace Netcode.Rollback.Network
             body.Bytes = Compression.Encode(_lastAckedInput, _pendingOutput.Iter());
 
             int totalBytes = 0;
-            foreach (InputBytes bytes in _pendingOutput.Iter()) { totalBytes += bytes.Bytes.Length; }
+            foreach (InputBytes bytes in _pendingOutput.Iter())
+            {
+                totalBytes += bytes.Bytes.Length;
+            }
             // Debug.Log($"[Rollback] Encoded {totalBytes} bytes from {_pendingOutput.Count} pending outputs(s) into {body.Bytes.Length} bytes");
 
             body.AckFrame = _lastRecvFrame;
@@ -394,7 +438,7 @@ namespace Netcode.Rollback.Network
 
         private void SendInputAck()
         {
-            MessageBody.InputAck body = new MessageBody.InputAck { AckFrame = _lastRecvFrame, };
+            MessageBody.InputAck body = new MessageBody.InputAck { AckFrame = _lastRecvFrame };
             QueueMessage(MessageBody.From(body));
         }
 
@@ -427,7 +471,11 @@ namespace Netcode.Rollback.Network
 
         public void SendChecksumReport(Frame frameToSend, ulong checksum)
         {
-            MessageBody.ChecksumReport body = new MessageBody.ChecksumReport { Frame = frameToSend, Checksum = checksum };
+            MessageBody.ChecksumReport body = new MessageBody.ChecksumReport
+            {
+                Frame = frameToSend,
+                Checksum = checksum,
+            };
             QueueMessage(MessageBody.From(body));
         }
 
@@ -444,8 +492,14 @@ namespace Netcode.Rollback.Network
 
         public void HandleMessage(in Message msg)
         {
-            if (_state == ProtocolState.Shutdown) { return; }
-            if (_remoteMagic != 0 && msg.Header.Magic != _remoteMagic) { return; }
+            if (_state == ProtocolState.Shutdown)
+            {
+                return;
+            }
+            if (_remoteMagic != 0 && msg.Header.Magic != _remoteMagic)
+            {
+                return;
+            }
 
             _lastRecvTime = Instant.Now();
 
@@ -490,8 +544,14 @@ namespace Netcode.Rollback.Network
 
         private void OnSyncReply(in MessageHeader header, in MessageBody.SyncReply body)
         {
-            if (_state != ProtocolState.Synchronizing) { return; }
-            if (!_syncRandomRequests.Remove(body.RandomReply)) { return; }
+            if (_state != ProtocolState.Synchronizing)
+            {
+                return;
+            }
+            if (!_syncRandomRequests.Remove(body.RandomReply))
+            {
+                return;
+            }
 
             _syncRemainingRoundtrips -= 1;
             if (_syncRemainingRoundtrips > 0)
@@ -529,8 +589,12 @@ namespace Netcode.Rollback.Network
                 Assert.IsTrue(_numPlayers == _peerConnectStatus.Length);
                 for (int i = 0; i < _numPlayers; i++)
                 {
-                    _peerConnectStatus[i].Disconnected = body.PeerConnectStatus[i].Disconnected || _peerConnectStatus[i].Disconnected;
-                    _peerConnectStatus[i].LastFrame = Frame.Max(_peerConnectStatus[i].LastFrame, body.PeerConnectStatus[i].LastFrame);
+                    _peerConnectStatus[i].Disconnected =
+                        body.PeerConnectStatus[i].Disconnected || _peerConnectStatus[i].Disconnected;
+                    _peerConnectStatus[i].LastFrame = Frame.Max(
+                        _peerConnectStatus[i].LastFrame,
+                        body.PeerConnectStatus[i].LastFrame
+                    );
                 }
             }
 
@@ -545,7 +609,10 @@ namespace Netcode.Rollback.Network
                 for (int i = 0; i < recvInputs.GetLength(0); i++)
                 {
                     Frame inpFrame = body.StartFrame + i;
-                    if (inpFrame <= _lastRecvFrame) { continue; }
+                    if (inpFrame <= _lastRecvFrame)
+                    {
+                        continue;
+                    }
                     InputBytes inpData = new InputBytes { Frame = inpFrame, Bytes = recvInputs[i] };
                     _recvInputs[inpData.Frame] = inpData;
                     _lastRecvFrame = Frame.Max(_lastRecvFrame, inpData.Frame);
@@ -553,11 +620,9 @@ namespace Netcode.Rollback.Network
                     PlayerInput<TInput>[] inputs = inpData.ToInputs<TInput>(_handles.Length);
                     for (int j = 0; j < inputs.Length; j++)
                     {
-                        _eventQueue.PushBack(Event<TInput>.From(new Event<TInput>.Input
-                        {
-                            Data = inputs[j],
-                            Player = _handles[j],
-                        }));
+                        _eventQueue.PushBack(
+                            Event<TInput>.From(new Event<TInput>.Input { Data = inputs[j], Player = _handles[j] })
+                        );
                     }
                 }
 
@@ -566,11 +631,20 @@ namespace Netcode.Rollback.Network
                 List<Frame> inputsToRemove = new List<Frame>();
                 foreach (Frame frame in _recvInputs.Keys)
                 {
-                    if (frame < _lastRecvFrame - 2 * (int)_maxPrediction) { inputsToRemove.Add(frame); }
+                    if (frame < _lastRecvFrame - 2 * (int)_maxPrediction)
+                    {
+                        inputsToRemove.Add(frame);
+                    }
                 }
-                foreach (Frame frame in inputsToRemove) { _recvInputs.Remove(frame); }
+                foreach (Frame frame in inputsToRemove)
+                {
+                    _recvInputs.Remove(frame);
+                }
                 _lastRecvFrame = Frame.NullFrame;
-                foreach (Frame frame in _recvInputs.Keys) { _lastRecvFrame = Frame.Max(_lastRecvFrame, frame); }
+                foreach (Frame frame in _recvInputs.Keys)
+                {
+                    _lastRecvFrame = Frame.Max(_lastRecvFrame, frame);
+                }
             }
         }
 
@@ -598,19 +672,31 @@ namespace Netcode.Rollback.Network
             uint interval = 1;
             if (!_desyncDetection.On)
             {
-                Debug.Log("[Rollback] Received checksum report but desync detection is off, check for consistent configuration");
+                Debug.Log(
+                    "[Rollback] Received checksum report but desync detection is off, check for consistent configuration"
+                );
             }
-            else { interval = _desyncDetection.Interval; }
+            else
+            {
+                interval = _desyncDetection.Interval;
+            }
 
             if (_pendingChecksums.Count >= ProtocolConstants.MAX_CHECKSUM_HISTORY_SIZE)
             {
-                Frame oldestFrameToKeep = body.Frame - (ProtocolConstants.MAX_CHECKSUM_HISTORY_SIZE - 1) * (int)interval;
+                Frame oldestFrameToKeep =
+                    body.Frame - (ProtocolConstants.MAX_CHECKSUM_HISTORY_SIZE - 1) * (int)interval;
                 List<Frame> toRemove = new List<Frame>();
                 foreach (Frame frame in _pendingChecksums.Keys)
                 {
-                    if (frame < oldestFrameToKeep) { toRemove.Add(frame); }
+                    if (frame < oldestFrameToKeep)
+                    {
+                        toRemove.Add(frame);
+                    }
                 }
-                foreach (Frame frame in toRemove) { _pendingChecksums.Remove(frame); }
+                foreach (Frame frame in toRemove)
+                {
+                    _pendingChecksums.Remove(frame);
+                }
             }
             _pendingChecksums.Add(body.Frame, body.Checksum);
         }

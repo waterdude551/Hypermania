@@ -28,13 +28,18 @@ namespace Netcode.P2P
                 Outgoing = HSteamNetConnection.Invalid;
             }
 
-            public bool ShouldConnect =>
-                SteamUser.GetSteamID().m_SteamID < PeerIdentity.GetSteamID().m_SteamID;
+            public bool ShouldConnect => SteamUser.GetSteamID().m_SteamID < PeerIdentity.GetSteamID().m_SteamID;
 
             public HSteamNetConnection GetConnection()
             {
-                if (ShouldConnect) { return Outgoing; }
-                else { return Incoming; }
+                if (ShouldConnect)
+                {
+                    return Outgoing;
+                }
+                else
+                {
+                    return Incoming;
+                }
             }
         }
 
@@ -82,7 +87,8 @@ namespace Netcode.P2P
 
         public void Dispose()
         {
-            if (!_initialized) return;
+            if (!_initialized)
+                return;
             _initialized = false;
 
             _connStatusCb?.Dispose();
@@ -124,7 +130,10 @@ namespace Netcode.P2P
 
             foreach ((SteamNetworkingIdentity identity, P2PConnection connection) in _connections)
             {
-                if (!connection.ShouldConnect) { continue; }
+                if (!connection.ShouldConnect)
+                {
+                    continue;
+                }
 
                 Debug.Log($"[Connecting] Setting connect options for peer {identity.GetSteamID()}");
 
@@ -153,65 +162,85 @@ namespace Netcode.P2P
 
         private void OnNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t data)
         {
-            Debug.Log($"[Connecting] OnNetConnectionStatusChanged: conn={data.m_hConn.m_HSteamNetConnection}, old={data.m_eOldState}, new={data.m_info.m_eState}, listen={data.m_info.m_hListenSocket.m_HSteamListenSocket}, endReason={data.m_info.m_eEndReason}");
+            Debug.Log(
+                $"[Connecting] OnNetConnectionStatusChanged: conn={data.m_hConn.m_HSteamNetConnection}, old={data.m_eOldState}, new={data.m_info.m_eState}, listen={data.m_info.m_hListenSocket.m_HSteamListenSocket}, endReason={data.m_info.m_eEndReason}"
+            );
 
-            bool isIncoming =
-                data.m_info.m_hListenSocket != HSteamListenSocket.Invalid;
+            bool isIncoming = data.m_info.m_hListenSocket != HSteamListenSocket.Invalid;
 
             switch (data.m_info.m_eState)
             {
                 case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting:
+                {
+                    if (isIncoming)
                     {
-                        if (isIncoming)
-                        {
-                            Debug.Log("[Connecting] Incoming connection in Connecting state. Accepting now.");
-                            var r = SteamNetworkingSockets.AcceptConnection(data.m_hConn);
-                            Debug.Log($"[Connecting] AcceptConnection result: {r}");
-                        }
-                        else { Debug.Log("[Connecting] Outbound connection in Connecting state."); }
-                        break;
+                        Debug.Log("[Connecting] Incoming connection in Connecting state. Accepting now.");
+                        var r = SteamNetworkingSockets.AcceptConnection(data.m_hConn);
+                        Debug.Log($"[Connecting] AcceptConnection result: {r}");
                     }
+                    else
+                    {
+                        Debug.Log("[Connecting] Outbound connection in Connecting state.");
+                    }
+                    break;
+                }
 
                 case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
+                {
+                    if (isIncoming)
                     {
-                        if (isIncoming) { _connections[data.m_info.m_identityRemote].Incoming = data.m_hConn; }
-                        else
-                        {
-                            // the connection should have been set when ConnectP2P was called
-                            Assert.IsTrue(data.m_hConn == _connections[data.m_info.m_identityRemote].Outgoing);
-                        }
-                        Debug.Log($"[Connecting] Connected. Remote SteamID={data.m_info.m_identityRemote.GetSteamID()}");
-
-                        if (_connections.Values.All((conn) => conn.GetConnection() != HSteamNetConnection.Invalid))
-                        {
-                            OnAllPeersConnected?.Invoke();
-                        }
-                        break;
+                        _connections[data.m_info.m_identityRemote].Incoming = data.m_hConn;
                     }
+                    else
+                    {
+                        // the connection should have been set when ConnectP2P was called
+                        Assert.IsTrue(data.m_hConn == _connections[data.m_info.m_identityRemote].Outgoing);
+                    }
+                    Debug.Log($"[Connecting] Connected. Remote SteamID={data.m_info.m_identityRemote.GetSteamID()}");
+
+                    if (_connections.Values.All((conn) => conn.GetConnection() != HSteamNetConnection.Invalid))
+                    {
+                        OnAllPeersConnected?.Invoke();
+                    }
+                    break;
+                }
 
                 case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
                 case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ClosedByPeer:
+                {
+                    Debug.LogWarning(
+                        $"[Connecting] Connection ended. state={data.m_info.m_eState}, endReason={data.m_info.m_eEndReason}, debug='{data.m_info.m_szEndDebug}'"
+                    );
+                    if (isIncoming)
                     {
-                        Debug.LogWarning($"[Connecting] Connection ended. state={data.m_info.m_eState}, endReason={data.m_info.m_eEndReason}, debug='{data.m_info.m_szEndDebug}'");
-                        if (isIncoming)
-                        {
-                            SteamNetworkingSockets.CloseConnection(_connections[data.m_info.m_identityRemote].Incoming, 0, "closed", false);
-                            _connections[data.m_info.m_identityRemote].Incoming = HSteamNetConnection.Invalid;
-                        }
-                        else
-                        {
-                            SteamNetworkingSockets.CloseConnection(_connections[data.m_info.m_identityRemote].Outgoing, 0, "closed", false);
-                            _connections[data.m_info.m_identityRemote].Outgoing = HSteamNetConnection.Invalid;
-                        }
-                        OnPeerDisconnected?.Invoke(data.m_info.m_identityRemote);
-                        break;
+                        SteamNetworkingSockets.CloseConnection(
+                            _connections[data.m_info.m_identityRemote].Incoming,
+                            0,
+                            "closed",
+                            false
+                        );
+                        _connections[data.m_info.m_identityRemote].Incoming = HSteamNetConnection.Invalid;
                     }
+                    else
+                    {
+                        SteamNetworkingSockets.CloseConnection(
+                            _connections[data.m_info.m_identityRemote].Outgoing,
+                            0,
+                            "closed",
+                            false
+                        );
+                        _connections[data.m_info.m_identityRemote].Outgoing = HSteamNetConnection.Invalid;
+                    }
+                    OnPeerDisconnected?.Invoke(data.m_info.m_identityRemote);
+                    break;
+                }
             }
         }
 
         public void SendTo(in Message message, SteamNetworkingIdentity addr)
         {
-            if (addr.IsInvalid()) throw new ArgumentException("Invalid addr.", nameof(addr));
+            if (addr.IsInvalid())
+                throw new ArgumentException("Invalid addr.", nameof(addr));
 
             HSteamNetConnection connection = _connections[addr].GetConnection();
             if (connection == HSteamNetConnection.Invalid)
@@ -228,7 +257,8 @@ namespace Netcode.P2P
                         (IntPtr)pData,
                         (uint)payload.Length,
                         Constants.k_nSteamNetworkingSend_UnreliableNoNagle,
-                        out _);
+                        out _
+                    );
 
                     if (res != EResult.k_EResultOK)
                         throw new InvalidOperationException($"SendMessageToConnection failed: {res}");
@@ -246,12 +276,16 @@ namespace Netcode.P2P
             foreach ((SteamNetworkingIdentity identity, P2PConnection connection) in _connections)
             {
                 HSteamNetConnection conn = connection.GetConnection();
-                if (conn == HSteamNetConnection.Invalid) { continue; }
+                if (conn == HSteamNetConnection.Invalid)
+                {
+                    continue;
+                }
 
                 while (true)
                 {
                     int n = SteamNetworkingSockets.ReceiveMessagesOnConnection(conn, ptrs, BATCH);
-                    if (n <= 0) break;
+                    if (n <= 0)
+                        break;
                     for (int i = 0; i < n; i++)
                     {
                         var msg = Marshal.PtrToStructure<SteamNetworkingMessage_t>(ptrs[i]);

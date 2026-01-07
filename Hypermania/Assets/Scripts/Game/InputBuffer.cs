@@ -8,6 +8,7 @@ namespace Game
     public class InputBuffer
     {
         private InputFlags _curInput;
+
         public void Saturate()
         {
             InputFlags input = InputFlags.None;

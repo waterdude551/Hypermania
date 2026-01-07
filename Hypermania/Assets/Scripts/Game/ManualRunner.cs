@@ -13,7 +13,10 @@ namespace Game
     {
         public override void Poll(float deltaTime)
         {
-            if (!_initialized) { return; }
+            if (!_initialized)
+            {
+                return;
+            }
             GameLoop();
         }
     }

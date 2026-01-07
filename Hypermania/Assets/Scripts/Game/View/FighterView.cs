@@ -36,25 +36,27 @@ namespace Game.View
 
             _spriteRenderer.flipX = state.FacingDirection.x < 0f;
 
-            int diffFrames = frame - state.ModeSt;
-            int totalFrames = _characterConfig.Walk.TotalTicks;
-            string animation = GetAnimationFromState(frame, state, out var normalized);
+            CharacterAnimation animation = GetAnimationFromState(frame, state, out var normalized, out int _);
 
-            // by default loop anims, the fighter state should not remain in a move state for more than the move animation has
-            normalized -= Mathf.Floor(normalized);
-
-            _animator.Play(animation, 0, normalized);
+            _animator.Play(animation.ToString(), 0, normalized);
             _animator.Update(0f); // force pose evaluation this frame while paused
         }
 
-        private string GetAnimationFromState(Frame frame, in FighterState state, out float duration)
+        public CharacterAnimation GetAnimationFromState(
+            Frame frame,
+            in FighterState state,
+            out float duration,
+            out int ticks
+        )
         {
             if (state.Mode == FighterMode.Attacking)
             {
                 if (state.AttackType == FighterAttackType.Light)
                 {
-                    duration = (float)(frame - state.ModeSt) / _characterConfig.LightAttack.TotalTicks;
-                    return "LightAttack";
+                    ticks = frame - state.ModeSt;
+                    duration = (float)ticks / _characterConfig.LightAttack.TotalTicks;
+                    duration -= Mathf.Floor(duration);
+                    return CharacterAnimation.LightAtttack;
                 }
             }
 
@@ -62,17 +64,23 @@ namespace Game.View
             {
                 if (state.Location == FighterLocation.Airborne)
                 {
-                    duration = (float)(frame - state.LocationSt) / _characterConfig.Jump.TotalTicks;
-                    return "Jump";
+                    ticks = frame - state.ModeSt;
+                    duration = (float)ticks / _characterConfig.Jump.TotalTicks;
+                    duration = Mathf.Min(duration, 0.99f);
+                    return CharacterAnimation.Jump;
                 }
                 if (state.Velocity.magnitude > 0.01f)
                 {
-                    duration = (float)(frame - state.ModeSt) / _characterConfig.Walk.TotalTicks;
-                    return "Walk";
+                    ticks = frame - state.ModeSt;
+                    duration = (float)ticks / _characterConfig.Walk.TotalTicks;
+                    duration -= Mathf.Floor(duration);
+                    return CharacterAnimation.Walk;
                 }
             }
-            duration = (float)(frame - state.ModeSt) / _characterConfig.Idle.TotalTicks;
-            return "Idle";
+            ticks = frame - state.ModeSt;
+            duration = (float)ticks / _characterConfig.Idle.TotalTicks;
+            duration -= Mathf.Floor(duration);
+            return CharacterAnimation.Idle;
         }
     }
 }

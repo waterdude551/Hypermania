@@ -10,7 +10,8 @@ namespace Netcode.Rollback.Network
         NetworkResumed,
     }
 
-    public struct Event<TInput> where TInput : IInput<TInput>
+    public struct Event<TInput>
+        where TInput : IInput<TInput>
     {
         public struct Synchronizing
         {
@@ -50,8 +51,7 @@ namespace Netcode.Rollback.Network
         public static Event<TInput> From(in Synchronized e) =>
             new() { Kind = EventKind.Synchronized, _synchronized = e };
 
-        public static Event<TInput> From(in Input e) =>
-            new() { Kind = EventKind.Input, _input = e };
+        public static Event<TInput> From(in Input e) => new() { Kind = EventKind.Input, _input = e };
 
         public static Event<TInput> From(in Disconnected e) =>
             new() { Kind = EventKind.Disconnected, _disconnected = e };
@@ -63,21 +63,31 @@ namespace Netcode.Rollback.Network
             new() { Kind = EventKind.NetworkResumed, _networkResumed = e };
 
         public Synchronizing GetSynchronizing() =>
-            Kind == EventKind.Synchronizing ? _synchronizing : throw new System.InvalidOperationException("event type mismatch");
+            Kind == EventKind.Synchronizing
+                ? _synchronizing
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public Synchronized GetSynchronized() =>
-            Kind == EventKind.Synchronized ? _synchronized : throw new System.InvalidOperationException("event type mismatch");
+            Kind == EventKind.Synchronized
+                ? _synchronized
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public Input GetInput() =>
             Kind == EventKind.Input ? _input : throw new System.InvalidOperationException("event type mismatch");
 
         public Disconnected GetDisconnected() =>
-            Kind == EventKind.Disconnected ? _disconnected : throw new System.InvalidOperationException("event type mismatch");
+            Kind == EventKind.Disconnected
+                ? _disconnected
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public NetworkInterrupted GetNetworkInterrupted() =>
-            Kind == EventKind.NetworkInterrupted ? _networkInterrupted : throw new System.InvalidOperationException("event type mismatch");
+            Kind == EventKind.NetworkInterrupted
+                ? _networkInterrupted
+                : throw new System.InvalidOperationException("event type mismatch");
 
         public NetworkResumed GetNetworkResumed() =>
-            Kind == EventKind.NetworkResumed ? _networkResumed : throw new System.InvalidOperationException("event type mismatch");
+            Kind == EventKind.NetworkResumed
+                ? _networkResumed
+                : throw new System.InvalidOperationException("event type mismatch");
     }
 }

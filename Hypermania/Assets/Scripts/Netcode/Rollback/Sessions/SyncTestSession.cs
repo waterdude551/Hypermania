@@ -21,10 +21,16 @@ namespace Netcode.Rollback.Sessions
         public SyncTestSession(int numPlayers, uint maxPrediction, uint checkDistance, uint inputDelay)
         {
             _dummyConnectStatus = new ConnectionStatus[numPlayers];
-            for (int i = 0; i < numPlayers; i++) { _dummyConnectStatus[i] = ConnectionStatus.Default; }
+            for (int i = 0; i < numPlayers; i++)
+            {
+                _dummyConnectStatus[i] = ConnectionStatus.Default;
+            }
 
             _syncLayer = new SyncLayer<TState, TInput>(numPlayers, maxPrediction);
-            for (int i = 0; i < numPlayers; i++) { _syncLayer.SetFrameDelay(new PlayerHandle(i), inputDelay); }
+            for (int i = 0; i < numPlayers; i++)
+            {
+                _syncLayer.SetFrameDelay(new PlayerHandle(i), inputDelay);
+            }
 
             _numPlayers = numPlayers;
             _maxPrediction = maxPrediction;
@@ -35,9 +41,16 @@ namespace Netcode.Rollback.Sessions
 
         public void AddLocalInput(PlayerHandle handle, TInput input)
         {
-            if (handle.Id >= _numPlayers) { throw new InvalidOperationException("player handle is invalid"); }
+            if (handle.Id >= _numPlayers)
+            {
+                throw new InvalidOperationException("player handle is invalid");
+            }
 
-            PlayerInput<TInput> playerInput = new PlayerInput<TInput> { Frame = _syncLayer.CurrentFrame, Input = input };
+            PlayerInput<TInput> playerInput = new PlayerInput<TInput>
+            {
+                Frame = _syncLayer.CurrentFrame,
+                Input = input,
+            };
             _localInputs[handle] = playerInput;
         }
 
@@ -52,33 +65,52 @@ namespace Netcode.Rollback.Sessions
                 List<Frame> mismatchedFrames = new List<Frame>();
                 for (Frame i = oldestFrameToCheck; i <= currentFrame; i += 1)
                 {
-                    if (ChecksumsConsistent(i)) { continue; }
+                    if (ChecksumsConsistent(i))
+                    {
+                        continue;
+                    }
                     mismatchedFrames.Add(i);
                 }
 
-                if (mismatchedFrames.Count > 0) { throw new InvalidOperationException("Invalid checksum"); }
+                if (mismatchedFrames.Count > 0)
+                {
+                    throw new InvalidOperationException("Invalid checksum");
+                }
 
                 Frame frameTo = _syncLayer.CurrentFrame - (int)_checkDistance;
                 AdjustGameState(frameTo, requests);
             }
 
-            if (_numPlayers != _localInputs.Count) { throw new InvalidOperationException("missing local inputs"); }
-            foreach ((PlayerHandle handle, PlayerInput<TInput> input) in _localInputs) { _syncLayer.AddLocalInput(handle, input); }
+            if (_numPlayers != _localInputs.Count)
+            {
+                throw new InvalidOperationException("missing local inputs");
+            }
+            foreach ((PlayerHandle handle, PlayerInput<TInput> input) in _localInputs)
+            {
+                _syncLayer.AddLocalInput(handle, input);
+            }
             _localInputs.Clear();
 
-            if (_checkDistance > 0) { requests.Add(_syncLayer.SaveCurrentState()); }
+            if (_checkDistance > 0)
+            {
+                requests.Add(_syncLayer.SaveCurrentState());
+            }
 
             (TInput input, InputStatus status)[] inputs = _syncLayer.SynchronizedInputs(_dummyConnectStatus);
-            requests.Add(RollbackRequest<TState, TInput>.From(new RollbackRequest<TState, TInput>.AdvanceFrame
-            {
-                Inputs = inputs
-            }));
+            requests.Add(
+                RollbackRequest<TState, TInput>.From(
+                    new RollbackRequest<TState, TInput>.AdvanceFrame { Inputs = inputs }
+                )
+            );
             _syncLayer.AdvanceFrame();
 
             Frame safeFrame = _syncLayer.CurrentFrame - (int)_checkDistance;
             _syncLayer.SetLastConfirmedFrame(safeFrame, false);
 
-            for (int i = 0; i < _numPlayers; i++) { _dummyConnectStatus[i].LastFrame = _syncLayer.CurrentFrame; }
+            for (int i = 0; i < _numPlayers; i++)
+            {
+                _dummyConnectStatus[i].LastFrame = _syncLayer.CurrentFrame;
+            }
             return requests;
         }
 
@@ -93,21 +125,33 @@ namespace Netcode.Rollback.Sessions
             List<Frame> framesToRemove = new List<Frame>();
             foreach (Frame frame in _checksumHistory.Keys)
             {
-                if (frame < oldestAllowedFrame) { framesToRemove.Add(frame); }
+                if (frame < oldestAllowedFrame)
+                {
+                    framesToRemove.Add(frame);
+                }
             }
-            foreach (Frame frame in framesToRemove) { _checksumHistory.Remove(frame); }
+            foreach (Frame frame in framesToRemove)
+            {
+                _checksumHistory.Remove(frame);
+            }
 
             try
             {
                 GameStateCell<TState> cell = _syncLayer.SavedStateByFrame(frameToCheck);
-                if (_checksumHistory.TryGetValue(cell.State.Frame, out var cs)) { return cs == cell.State.Checksum; }
+                if (_checksumHistory.TryGetValue(cell.State.Frame, out var cs))
+                {
+                    return cs == cell.State.Checksum;
+                }
                 else
                 {
                     _checksumHistory.Add(cell.State.Frame, cell.State.Checksum);
                     return true;
                 }
             }
-            catch (InvalidOperationException) { return true; }
+            catch (InvalidOperationException)
+            {
+                return true;
+            }
         }
 
         private void AdjustGameState(Frame frameTo, List<RollbackRequest<TState, TInput>> requests)
@@ -122,12 +166,16 @@ namespace Netcode.Rollback.Sessions
             for (int i = 0; i < count; i++)
             {
                 (TInput input, InputStatus status)[] inputs = _syncLayer.SynchronizedInputs(_dummyConnectStatus);
-                if (i > 0) { requests.Add(_syncLayer.SaveCurrentState()); }
-                _syncLayer.AdvanceFrame();
-                requests.Add(RollbackRequest<TState, TInput>.From(new RollbackRequest<TState, TInput>.AdvanceFrame
+                if (i > 0)
                 {
-                    Inputs = inputs
-                }));
+                    requests.Add(_syncLayer.SaveCurrentState());
+                }
+                _syncLayer.AdvanceFrame();
+                requests.Add(
+                    RollbackRequest<TState, TInput>.From(
+                        new RollbackRequest<TState, TInput>.AdvanceFrame { Inputs = inputs }
+                    )
+                );
             }
             Assert.IsTrue(_syncLayer.CurrentFrame == startFrame);
         }

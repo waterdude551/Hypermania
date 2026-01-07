@@ -8,14 +8,12 @@ namespace Design.Animation.Editors
     {
         public void DrawLeft(MoveBuilderModel m, int tps)
         {
-            m.CharacterPrefab = (GameObject)EditorGUILayout.ObjectField(
-                "Character Prefab", m.CharacterPrefab, typeof(GameObject), false);
+            m.CharacterPrefab = (GameObject)
+                EditorGUILayout.ObjectField("Character Prefab", m.CharacterPrefab, typeof(GameObject), false);
 
-            m.Clip = (AnimationClip)EditorGUILayout.ObjectField(
-                "Animation Clip", m.Clip, typeof(AnimationClip), false);
+            m.Clip = (AnimationClip)EditorGUILayout.ObjectField("Animation Clip", m.Clip, typeof(AnimationClip), false);
 
-            m.Data = (HitboxData)EditorGUILayout.ObjectField(
-                "Move Data (Asset)", m.Data, typeof(HitboxData), false);
+            m.Data = (HitboxData)EditorGUILayout.ObjectField("Move Data (Asset)", m.Data, typeof(HitboxData), false);
 
             EditorGUILayout.Space(8);
 
@@ -25,7 +23,8 @@ namespace Design.Animation.Editors
                 return;
             }
 
-            if (GUILayout.Button("Initialize Data")) m.BindDataToClipLength(m, GameManager.TPS);
+            if (GUILayout.Button("Initialize Data"))
+                m.BindDataToClipLength(m, GameManager.TPS);
             EditorGUILayout.Space(8);
 
             DrawBoxList(m);
@@ -36,10 +35,7 @@ namespace Design.Animation.Editors
 
             if (m.HasUnsavedChanges)
             {
-                EditorGUILayout.HelpBox(
-                    "You have unsaved changes.",
-                    MessageType.Warning
-                );
+                EditorGUILayout.HelpBox("You have unsaved changes.", MessageType.Warning);
             }
             using (new EditorGUI.DisabledScope(!m.HasUnsavedChanges))
             {
@@ -62,14 +58,19 @@ namespace Design.Animation.Editors
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("<<", GUILayout.Width(36))) m.SetTick(0);
-                    if (GUILayout.Button("<", GUILayout.Width(36))) m.SetTick(m.CurrentTick - 1);
+                    if (GUILayout.Button("<<", GUILayout.Width(36)))
+                        m.SetTick(0);
+                    if (GUILayout.Button("<", GUILayout.Width(36)))
+                        m.SetTick(m.CurrentTick - 1);
 
                     int newTick = EditorGUILayout.IntSlider(m.CurrentTick, 0, total - 1);
-                    if (newTick != m.CurrentTick) m.SetTick(newTick);
+                    if (newTick != m.CurrentTick)
+                        m.SetTick(newTick);
 
-                    if (GUILayout.Button(">", GUILayout.Width(36))) m.SetTick(m.CurrentTick + 1);
-                    if (GUILayout.Button(">>", GUILayout.Width(36))) m.SetTick(total - 1);
+                    if (GUILayout.Button(">", GUILayout.Width(36)))
+                        m.SetTick(m.CurrentTick + 1);
+                    if (GUILayout.Button(">>", GUILayout.Width(36)))
+                        m.SetTick(total - 1);
 
                     GUILayout.Space(8);
 
@@ -77,7 +78,8 @@ namespace Design.Animation.Editors
                     GUILayout.Label(
                         $"Tick {m.CurrentTick}/{total - 1}  ({time:0.000}s @ {tps}Hz)",
                         EditorStyles.miniLabel,
-                        GUILayout.Width(220));
+                        GUILayout.Width(220)
+                    );
                 }
             }
         }
@@ -85,18 +87,24 @@ namespace Design.Animation.Editors
         private void DrawBoxList(MoveBuilderModel m)
         {
             var frame = m.GetCurrentFrame();
-            if (frame == null) return;
+            if (frame == null)
+                return;
 
-            if (GUILayout.Button("Add Hurtbox (Shift A)")) m.AddBox(HitboxKind.Hurtbox);
-            if (GUILayout.Button("Add Hitbox (A)")) m.AddBox(HitboxKind.Hitbox);
+            if (GUILayout.Button("Add Hurtbox (Shift A)"))
+                m.AddBox(HitboxKind.Hurtbox);
+            if (GUILayout.Button("Add Hitbox (A)"))
+                m.AddBox(HitboxKind.Hitbox);
             using (new EditorGUI.DisabledScope(m.SelectedBoxIndex < 0 || m.SelectedBoxIndex >= frame.Boxes.Count))
             {
-                if (GUILayout.Button("Duplicate Selected (Ctrl D)")) m.DuplicateSelected();
-                if (GUILayout.Button("Delete Selected (Backspace/Delete)")) m.DeleteSelected();
+                if (GUILayout.Button("Duplicate Selected (Ctrl D)"))
+                    m.DuplicateSelected();
+                if (GUILayout.Button("Delete Selected (Backspace/Delete)"))
+                    m.DeleteSelected();
             }
             using (new EditorGUI.DisabledScope(m.CurrentTick <= 0))
             {
-                if (GUILayout.Button("Set Hitboxes from Previous Frame (Ctrl F)")) m.SetBoxesFromPreviousFrame();
+                if (GUILayout.Button("Set Hitboxes from Previous Frame (Ctrl F)"))
+                    m.SetBoxesFromPreviousFrame();
             }
 
             EditorGUILayout.Space(6);
@@ -115,7 +123,8 @@ namespace Design.Animation.Editors
         private void DrawSelectedBoxInspector(MoveBuilderModel m)
         {
             var frame = m.GetCurrentFrame();
-            if (frame == null) return;
+            if (frame == null)
+                return;
 
             if (m.SelectedBoxIndex < 0 || m.SelectedBoxIndex >= frame.Boxes.Count)
             {

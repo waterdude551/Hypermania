@@ -1,4 +1,3 @@
-
 using System;
 using Utils;
 
@@ -13,10 +12,12 @@ namespace Game.Sim
 
         public Pool(int maxObjects)
         {
-            if (maxObjects <= 0) throw new ArgumentOutOfRangeException(nameof(maxObjects));
+            if (maxObjects <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maxObjects));
             _objects = new (T, bool)[maxObjects];
             _freeList = new Deque<int>(maxObjects); // must be pow2-safe internally
-            for (int i = 0; i < maxObjects; i++) _freeList.PushBack(i);
+            for (int i = 0; i < maxObjects; i++)
+                _freeList.PushBack(i);
         }
 
         public int Spawn()
@@ -59,8 +60,6 @@ namespace Game.Sim
             return ref _objects[ind].item;
         }
 
-        public bool IsValid(int ind) =>
-            (uint)ind < (uint)_objects.Length && _objects[ind].valid;
+        public bool IsValid(int ind) => (uint)ind < (uint)_objects.Length && _objects[ind].valid;
     }
-
 }

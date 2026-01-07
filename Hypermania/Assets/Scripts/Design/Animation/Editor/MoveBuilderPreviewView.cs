@@ -21,8 +21,14 @@ namespace Design.Animation.Editors
         private enum ResizeHandle
         {
             None,
-            N, S, E, W,
-            NE, NW, SE, SW
+            N,
+            S,
+            E,
+            W,
+            NE,
+            NW,
+            SE,
+            SW,
         }
 
         private bool _resizing;
@@ -92,7 +98,8 @@ namespace Design.Animation.Editors
 
         private void EnsurePreviewUtility()
         {
-            if (_preview != null) return;
+            if (_preview != null)
+                return;
 
             _preview = new PreviewRenderUtility();
             _preview.ambientColor = new Color(0.25f, 0.25f, 0.25f, 1f);
@@ -110,7 +117,8 @@ namespace Design.Animation.Editors
             // No injection: the Model never sees the preview GO.
             // The view recreates its preview GO whenever the Model’s prefab reference changes.
             int prefabId = model.CharacterPrefab.GetInstanceID();
-            if (_previewGO != null && prefabId == _lastPrefabId) return;
+            if (_previewGO != null && prefabId == _lastPrefabId)
+                return;
 
             ResetPreviewObjects();
             _lastPrefabId = prefabId;
@@ -124,7 +132,8 @@ namespace Design.Animation.Editors
         private void HandleViewInput(Rect rect, ref bool clickConsumed)
         {
             var e = Event.current;
-            if (e == null) return;
+            if (e == null)
+                return;
 
             // Always end drag on mouse up (even if outside the rect).
             if ((_dragging || _resizing) && e.type == EventType.MouseUp && e.button == 0)
@@ -136,7 +145,8 @@ namespace Design.Animation.Editors
                 _activeHandle = ResizeHandle.None;
             }
 
-            if (!rect.Contains(e.mousePosition)) return;
+            if (!rect.Contains(e.mousePosition))
+                return;
 
             if (e.type == EventType.ScrollWheel)
             {
@@ -168,7 +178,8 @@ namespace Design.Animation.Editors
 
         private void SampleAnimation(MoveBuilderModel model, int tps)
         {
-            if (!model.Clip) return;
+            if (!model.Clip)
+                return;
             if (!_animationMode)
             {
                 AnimationMode.StartAnimationMode();
@@ -193,7 +204,8 @@ namespace Design.Animation.Editors
         private void DrawHitboxOverlay(Rect rect, MoveBuilderModel model)
         {
             var frame = model.GetCurrentFrame();
-            if (frame == null) return;
+            if (frame == null)
+                return;
 
             Transform root = _previewGO.transform;
             Camera cam = _preview.camera;
@@ -209,8 +221,11 @@ namespace Design.Animation.Editors
                 Color color = box.Props.Kind == HitboxKind.Hurtbox ? Color.blue : Color.red;
                 DrawRectOutline(guiRect, thickness, color);
 
-                GUI.Label(new Rect(guiRect.xMin, guiRect.yMin - 16, 180, 16),
-                    $"{i}:{box.Props.Kind}", EditorStyles.whiteMiniLabel);
+                GUI.Label(
+                    new Rect(guiRect.xMin, guiRect.yMin - 16, 180, 16),
+                    $"{i}:{box.Props.Kind}",
+                    EditorStyles.whiteMiniLabel
+                );
 
                 HandleBoxDrag(rect, model, frame, i, guiRect, root, cam);
                 if (i == model.SelectedBoxIndex)
@@ -229,11 +244,14 @@ namespace Design.Animation.Editors
             int index,
             Rect guiRect,
             Transform root,
-            Camera cam)
+            Camera cam
+        )
         {
             var e = Event.current;
-            if (e == null) return;
-            if (!rect.Contains(e.mousePosition)) return;
+            if (e == null)
+                return;
+            if (!rect.Contains(e.mousePosition))
+                return;
 
             if (e.type == EventType.MouseDown && e.button == 0 && guiRect.Contains(e.mousePosition))
             {
@@ -271,10 +289,12 @@ namespace Design.Animation.Editors
             int index,
             Rect guiRect,
             Transform root,
-            Camera cam)
+            Camera cam
+        )
         {
             var e = Event.current;
-            if (e == null) return;
+            if (e == null)
+                return;
 
             // We compute handle GUI rects from the current box GUI rect.
             const float size = 8f;
@@ -289,27 +309,34 @@ namespace Design.Animation.Editors
             Rect rSW = HandleRect(guiRect.xMin, guiRect.yMax, size);
 
             // Draw handles
-            DrawHandle(rN); DrawHandle(rS); DrawHandle(rE); DrawHandle(rW);
-            DrawHandle(rNE); DrawHandle(rNW); DrawHandle(rSE); DrawHandle(rSW);
+            DrawHandle(rN);
+            DrawHandle(rS);
+            DrawHandle(rE);
+            DrawHandle(rW);
+            DrawHandle(rNE);
+            DrawHandle(rNW);
+            DrawHandle(rSE);
+            DrawHandle(rSW);
 
             // Mouse down: pick active handle
             if (!_resizing && e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
             {
                 ResizeHandle picked =
-                    rNE.Contains(e.mousePosition) ? ResizeHandle.NE :
-                    rNW.Contains(e.mousePosition) ? ResizeHandle.NW :
-                    rSE.Contains(e.mousePosition) ? ResizeHandle.SE :
-                    rSW.Contains(e.mousePosition) ? ResizeHandle.SW :
-                    rN.Contains(e.mousePosition) ? ResizeHandle.N :
-                    rS.Contains(e.mousePosition) ? ResizeHandle.S :
-                    rE.Contains(e.mousePosition) ? ResizeHandle.E :
-                    rW.Contains(e.mousePosition) ? ResizeHandle.W :
-                    ResizeHandle.None;
+                    rNE.Contains(e.mousePosition) ? ResizeHandle.NE
+                    : rNW.Contains(e.mousePosition) ? ResizeHandle.NW
+                    : rSE.Contains(e.mousePosition) ? ResizeHandle.SE
+                    : rSW.Contains(e.mousePosition) ? ResizeHandle.SW
+                    : rN.Contains(e.mousePosition) ? ResizeHandle.N
+                    : rS.Contains(e.mousePosition) ? ResizeHandle.S
+                    : rE.Contains(e.mousePosition) ? ResizeHandle.E
+                    : rW.Contains(e.mousePosition) ? ResizeHandle.W
+                    : ResizeHandle.None;
 
                 if (picked != ResizeHandle.None)
                 {
                     var frame = model.GetCurrentFrame();
-                    if (frame == null || index < 0 || index >= frame.Boxes.Count) return;
+                    if (frame == null || index < 0 || index >= frame.Boxes.Count)
+                        return;
 
                     _resizing = true;
                     _activeHandle = picked;
@@ -346,15 +373,35 @@ namespace Design.Animation.Editors
                 // Apply edge motion based on handle
                 switch (_activeHandle)
                 {
-                    case ResizeHandle.E: right += d.x; break;
-                    case ResizeHandle.W: left += d.x; break;
-                    case ResizeHandle.N: top += d.y; break;
-                    case ResizeHandle.S: bottom += d.y; break;
+                    case ResizeHandle.E:
+                        right += d.x;
+                        break;
+                    case ResizeHandle.W:
+                        left += d.x;
+                        break;
+                    case ResizeHandle.N:
+                        top += d.y;
+                        break;
+                    case ResizeHandle.S:
+                        bottom += d.y;
+                        break;
 
-                    case ResizeHandle.NE: right += d.x; top += d.y; break;
-                    case ResizeHandle.NW: left += d.x; top += d.y; break;
-                    case ResizeHandle.SE: right += d.x; bottom += d.y; break;
-                    case ResizeHandle.SW: left += d.x; bottom += d.y; break;
+                    case ResizeHandle.NE:
+                        right += d.x;
+                        top += d.y;
+                        break;
+                    case ResizeHandle.NW:
+                        left += d.x;
+                        top += d.y;
+                        break;
+                    case ResizeHandle.SE:
+                        right += d.x;
+                        bottom += d.y;
+                        break;
+                    case ResizeHandle.SW:
+                        left += d.x;
+                        bottom += d.y;
+                        break;
                 }
 
                 // Optional: Shift preserves aspect ratio from start box.
@@ -366,8 +413,10 @@ namespace Design.Animation.Editors
 
                 // Prevent inverted/degenerate sizes
                 const float minSize = 0.001f;
-                if (right < left + minSize) right = left + minSize;
-                if (top < bottom + minSize) top = bottom + minSize;
+                if (right < left + minSize)
+                    right = left + minSize;
+                if (top < bottom + minSize)
+                    top = bottom + minSize;
 
                 BoxData updated = _resizeStartBox;
                 updated.CenterLocal = new Vector2((left + right) * 0.5f, (bottom + top) * 0.5f);
@@ -379,16 +428,13 @@ namespace Design.Animation.Editors
             }
         }
 
-        private void HandleBackgroundDeselection(
-            Rect rect,
-            MoveBuilderModel model)
+        private void HandleBackgroundDeselection(Rect rect, MoveBuilderModel model)
         {
             Event e = Event.current;
-            if (e == null) return;
+            if (e == null)
+                return;
 
-            if (e.type == EventType.MouseDown &&
-                e.button == 0 &&
-                rect.Contains(e.mousePosition))
+            if (e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
             {
                 if (model.SelectedBoxIndex != -1)
                 {
@@ -397,7 +443,6 @@ namespace Design.Animation.Editors
                 e.Use();
             }
         }
-
 
         private static Rect HandleRect(float x, float y, float size)
         {
@@ -418,8 +463,13 @@ namespace Design.Animation.Editors
         }
 
         private static void ApplyAspectConstraint(
-            ref float left, ref float right, ref float bottom, ref float top,
-            float aspect, ResizeHandle handle)
+            ref float left,
+            ref float right,
+            ref float bottom,
+            ref float top,
+            float aspect,
+            ResizeHandle handle
+        )
         {
             // Maintain width/height = aspect by adjusting the "secondary" axis.
             // For corner handles, we keep the dragged corner and adjust the opposite axis extent.
@@ -427,14 +477,20 @@ namespace Design.Animation.Editors
             float width = right - left;
             float height = top - bottom;
 
-            if (width <= 0f || height <= 0f) return;
+            if (width <= 0f || height <= 0f)
+                return;
 
             float targetHeight = width / aspect;
             float targetWidth = height * aspect;
 
             bool adjustHeight = Mathf.Abs(targetHeight - height) < Mathf.Abs(targetWidth - width);
 
-            if (handle == ResizeHandle.N || handle == ResizeHandle.S || handle == ResizeHandle.E || handle == ResizeHandle.W)
+            if (
+                handle == ResizeHandle.N
+                || handle == ResizeHandle.S
+                || handle == ResizeHandle.E
+                || handle == ResizeHandle.W
+            )
             {
                 // Edge: adjust orthogonal dimension around center
                 float cy = (top + bottom) * 0.5f;
@@ -463,10 +519,18 @@ namespace Design.Animation.Editors
                     float newH = Mathf.Max(0.0001f, targetHeight);
                     switch (handle)
                     {
-                        case ResizeHandle.NE: bottom = top - newH; break;
-                        case ResizeHandle.NW: bottom = top - newH; break;
-                        case ResizeHandle.SE: top = bottom + newH; break;
-                        case ResizeHandle.SW: top = bottom + newH; break;
+                        case ResizeHandle.NE:
+                            bottom = top - newH;
+                            break;
+                        case ResizeHandle.NW:
+                            bottom = top - newH;
+                            break;
+                        case ResizeHandle.SE:
+                            top = bottom + newH;
+                            break;
+                        case ResizeHandle.SW:
+                            top = bottom + newH;
+                            break;
                     }
                 }
                 else
@@ -474,10 +538,18 @@ namespace Design.Animation.Editors
                     float newW = Mathf.Max(0.0001f, targetWidth);
                     switch (handle)
                     {
-                        case ResizeHandle.NE: left = right - newW; break;
-                        case ResizeHandle.NW: right = left + newW; break;
-                        case ResizeHandle.SE: left = right - newW; break;
-                        case ResizeHandle.SW: right = left + newW; break;
+                        case ResizeHandle.NE:
+                            left = right - newW;
+                            break;
+                        case ResizeHandle.NW:
+                            right = left + newW;
+                            break;
+                        case ResizeHandle.SE:
+                            left = right - newW;
+                            break;
+                        case ResizeHandle.SW:
+                            right = left + newW;
+                            break;
                     }
                 }
             }
@@ -531,7 +603,7 @@ namespace Design.Animation.Editors
             var style = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
             {
                 alignment = TextAnchor.MiddleCenter,
-                wordWrap = true
+                wordWrap = true,
             };
             GUI.Label(r, text, style);
         }

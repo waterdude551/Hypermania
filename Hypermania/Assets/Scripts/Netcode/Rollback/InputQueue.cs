@@ -4,7 +4,8 @@ using Utils;
 
 namespace Netcode.Rollback
 {
-    public class InputQueue<TInput> where TInput : struct, IInput<TInput>
+    public class InputQueue<TInput>
+        where TInput : struct, IInput<TInput>
     {
         const int INPUT_QUEUE_LENGTH = 128;
         private int _head;
@@ -37,7 +38,10 @@ namespace Netcode.Rollback
 
         public Frame FirstIncorrectFrame => _firstIncorrectFrame;
 
-        public void SetFrameDelay(uint delay) { _frameDelay = delay; }
+        public void SetFrameDelay(uint delay)
+        {
+            _frameDelay = delay;
+        }
 
         public void ResetPrediction()
         {
@@ -49,14 +53,21 @@ namespace Netcode.Rollback
         public PlayerInput<TInput> ConfirmedInput(Frame requestedFrame)
         {
             int offset = requestedFrame.No % INPUT_QUEUE_LENGTH;
-            if (_inputs[offset].Frame == requestedFrame) { return _inputs[offset]; }
+            if (_inputs[offset].Frame == requestedFrame)
+            {
+                return _inputs[offset];
+            }
             throw new InvalidOperationException("should not have asked for known incorrect frame");
         }
 
         public void DiscardConfirmedFrames(Frame frame)
         {
-            if (_lastAddedFrame == Frame.NullFrame) return; // nothing real to discard
-            if (_lastRequestedFrame != Frame.NullFrame) { frame = Frame.Min(frame, _lastRequestedFrame); }
+            if (_lastAddedFrame == Frame.NullFrame)
+                return; // nothing real to discard
+            if (_lastRequestedFrame != Frame.NullFrame)
+            {
+                frame = Frame.Min(frame, _lastRequestedFrame);
+            }
             // move tail to delete inputs
             if (frame >= _lastAddedFrame)
             {
@@ -89,7 +100,10 @@ namespace Netcode.Rollback
                     return (_inputs[offset].Input, InputStatus.Confirmed);
                 }
 
-                if (requestedFrame == Frame.FirstFrame || _lastAddedFrame == Frame.NullFrame) { _prediction = PlayerInput<TInput>.BlankInput(_prediction.Frame); }
+                if (requestedFrame == Frame.FirstFrame || _lastAddedFrame == Frame.NullFrame)
+                {
+                    _prediction = PlayerInput<TInput>.BlankInput(_prediction.Frame);
+                }
                 else
                 {
                     int previousPosition = _head == 0 ? INPUT_QUEUE_LENGTH - 1 : _head - 1;
@@ -104,10 +118,16 @@ namespace Netcode.Rollback
 
         public Frame AddInput(PlayerInput<TInput> input)
         {
-            if (_lastAddedFrame != Frame.NullFrame && input.Frame + (int)_frameDelay != _lastAddedFrame + 1) { return Frame.NullFrame; }
+            if (_lastAddedFrame != Frame.NullFrame && input.Frame + (int)_frameDelay != _lastAddedFrame + 1)
+            {
+                return Frame.NullFrame;
+            }
 
             Frame newFrame = AdvanceQueueHead(input.Frame);
-            if (newFrame != Frame.NullFrame) { AddInputByFrame(input, newFrame); }
+            if (newFrame != Frame.NullFrame)
+            {
+                AddInputByFrame(input, newFrame);
+            }
             return newFrame;
         }
 
@@ -128,10 +148,19 @@ namespace Netcode.Rollback
             if (_prediction.Frame != Frame.NullFrame)
             {
                 Assert.IsTrue(frame == _prediction.Frame);
-                if (_firstIncorrectFrame == Frame.NullFrame && !_prediction.Equal(input, true)) { _firstIncorrectFrame = frame; }
+                if (_firstIncorrectFrame == Frame.NullFrame && !_prediction.Equal(input, true))
+                {
+                    _firstIncorrectFrame = frame;
+                }
 
-                if (_prediction.Frame == _lastRequestedFrame && _firstIncorrectFrame == Frame.NullFrame) { _prediction.Frame = Frame.NullFrame; }
-                else { _prediction.Frame += 1; }
+                if (_prediction.Frame == _lastRequestedFrame && _firstIncorrectFrame == Frame.NullFrame)
+                {
+                    _prediction.Frame = Frame.NullFrame;
+                }
+                else
+                {
+                    _prediction.Frame += 1;
+                }
             }
         }
 
@@ -140,7 +169,10 @@ namespace Netcode.Rollback
             int previousPosition = _head == 0 ? INPUT_QUEUE_LENGTH - 1 : _head - 1;
             Frame expectedFrame = _firstFrame ? Frame.FirstFrame : _inputs[previousPosition].Frame + 1;
             inputFrame += (int)_frameDelay;
-            if (expectedFrame > inputFrame) { return Frame.NullFrame; }
+            if (expectedFrame > inputFrame)
+            {
+                return Frame.NullFrame;
+            }
 
             while (expectedFrame < inputFrame)
             {

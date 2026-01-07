@@ -12,9 +12,7 @@ namespace Utils
         public static Instant Now() => new(Stopwatch.GetTimestamp());
 
         public TimeSpan Elapsed =>
-            TimeSpan.FromSeconds(
-                (Stopwatch.GetTimestamp() - _timestamp) / (double)Stopwatch.Frequency
-            );
+            TimeSpan.FromSeconds((Stopwatch.GetTimestamp() - _timestamp) / (double)Stopwatch.Frequency);
 
         public int CompareTo(Instant other) => _timestamp.CompareTo(other._timestamp);
 
@@ -25,20 +23,21 @@ namespace Utils
         public override int GetHashCode() => _timestamp.GetHashCode();
 
         public static bool operator ==(Instant a, Instant b) => a.Equals(b);
+
         public static bool operator !=(Instant a, Instant b) => !a.Equals(b);
 
         public static bool operator <(Instant a, Instant b) => a._timestamp < b._timestamp;
+
         public static bool operator >(Instant a, Instant b) => a._timestamp > b._timestamp;
+
         public static bool operator <=(Instant a, Instant b) => a._timestamp <= b._timestamp;
+
         public static bool operator >=(Instant a, Instant b) => a._timestamp >= b._timestamp;
 
         public static Instant operator +(Instant a, TimeSpan b) =>
             new(a._timestamp + (long)(b.TotalSeconds * Stopwatch.Frequency));
 
         public static TimeSpan operator -(Instant a, Instant b) =>
-            TimeSpan.FromSeconds(
-                (a._timestamp - b._timestamp) / (double)Stopwatch.Frequency
-            );
+            TimeSpan.FromSeconds((a._timestamp - b._timestamp) / (double)Stopwatch.Frequency);
     }
-
 }

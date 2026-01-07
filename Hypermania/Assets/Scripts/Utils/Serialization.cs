@@ -9,9 +9,14 @@ namespace Utils
         public abstract int Deserialize(ReadOnlySpan<byte> inBytes);
     }
 
-    public static class Serializer<T> where T : ISerializable
+    public static class Serializer<T>
+        where T : ISerializable
     {
-        private readonly static T _sample = default;
-        public static int DefaultSize() { return _sample.SerdeSize(); }
+        private static readonly T _sample = default;
+
+        public static int DefaultSize()
+        {
+            return _sample.SerdeSize();
+        }
     }
 }

@@ -10,6 +10,7 @@ namespace Netcode.Rollback.Sessions
         public const int MAX_NUM_PLAYERS = 16;
         public const int MAX_INPUT_PAYLOAD = 400;
     }
+
     public class SessionBuilder<TInput, TAddress>
         where TInput : struct, IInput<TInput>
     {
@@ -70,19 +71,25 @@ namespace Netcode.Rollback.Sessions
                     _localPlayers += 1;
                     if (playerHandle.Id >= _numPlayers)
                     {
-                        throw new InvalidOperationException("local player handle is invalid: should be in [0, numPlayers)");
+                        throw new InvalidOperationException(
+                            "local player handle is invalid: should be in [0, numPlayers)"
+                        );
                     }
                     break;
                 case PlayerKind.Remote:
                     if (playerHandle.Id >= _numPlayers)
                     {
-                        throw new InvalidOperationException("remote player handle is invalid: should be in [0, numPlayers)");
+                        throw new InvalidOperationException(
+                            "remote player handle is invalid: should be in [0, numPlayers)"
+                        );
                     }
                     break;
                 case PlayerKind.Spectator:
                     if (playerHandle.Id < _numPlayers)
                     {
-                        throw new InvalidOperationException("spectator handle is invalid: should be in [numPlayers, infinity)");
+                        throw new InvalidOperationException(
+                            "spectator handle is invalid: should be in [numPlayers, infinity)"
+                        );
                     }
                     break;
             }
@@ -138,7 +145,10 @@ namespace Netcode.Rollback.Sessions
 
         public SessionBuilder<TInput, TAddress> WithFps(uint fps)
         {
-            if (fps == 0) { throw new InvalidOperationException("fps should be higher than 0"); }
+            if (fps == 0)
+            {
+                throw new InvalidOperationException("fps should be higher than 0");
+            }
             _fps = fps;
             return this;
         }
@@ -151,7 +161,10 @@ namespace Netcode.Rollback.Sessions
 
         public SessionBuilder<TInput, TAddress> WithMaxFramesBehind(uint maxFramesBehind)
         {
-            if (maxFramesBehind < 1) { throw new InvalidOperationException("max frames cannot be smaller than 1"); }
+            if (maxFramesBehind < 1)
+            {
+                throw new InvalidOperationException("max frames cannot be smaller than 1");
+            }
             if (maxFramesBehind >= SpectatorConstants.SPECTATOR_BUFFER_SIZE)
             {
                 throw new InvalidOperationException("max frames cannot be larger than the spectator buffer size");
@@ -162,7 +175,8 @@ namespace Netcode.Rollback.Sessions
 
         public SessionBuilder<TInput, TAddress> WithCatchupSpeed(uint catchupSpeed)
         {
-            if (catchupSpeed < 1) throw new InvalidOperationException("catchup speed cannot be smaller than 1");
+            if (catchupSpeed < 1)
+                throw new InvalidOperationException("catchup speed cannot be smaller than 1");
             if (catchupSpeed >= _maxFramesBehind)
             {
                 throw new InvalidOperationException("catchup speed cannot be >= allowed max frames behind host");
@@ -182,7 +196,8 @@ namespace Netcode.Rollback.Sessions
                 }
             }
 
-            Dictionary<PlayerType<TAddress>, List<PlayerHandle>> addrCount = new Dictionary<PlayerType<TAddress>, List<PlayerHandle>>();
+            Dictionary<PlayerType<TAddress>, List<PlayerHandle>> addrCount =
+                new Dictionary<PlayerType<TAddress>, List<PlayerHandle>>();
             foreach ((PlayerHandle handle, PlayerType<TAddress> playerType) in _playerRegistry.Handles)
             {
                 if (playerType.Kind == PlayerKind.Remote || playerType.Kind == PlayerKind.Spectator)
@@ -201,40 +216,83 @@ namespace Netcode.Rollback.Sessions
                 switch (playerType.Kind)
                 {
                     case PlayerKind.Remote:
-                        _playerRegistry.Remotes.Add(playerType.Address, CreateEndpoint(handles, playerType.Address, _localPlayers));
+                        _playerRegistry.Remotes.Add(
+                            playerType.Address,
+                            CreateEndpoint(handles, playerType.Address, _localPlayers)
+                        );
                         break;
                     case PlayerKind.Spectator:
-                        _playerRegistry.Spectators.Add(playerType.Address, CreateEndpoint(handles, playerType.Address, _numPlayers));
+                        _playerRegistry.Spectators.Add(
+                            playerType.Address,
+                            CreateEndpoint(handles, playerType.Address, _numPlayers)
+                        );
                         break;
                 }
             }
 
             MarkStarted();
-            return new P2PSession<TState, TInput, TAddress>(_numPlayers, _maxPrediction, socket, _playerRegistry, _sparseSaving, _desyncDetection, _inputDelay);
+            return new P2PSession<TState, TInput, TAddress>(
+                _numPlayers,
+                _maxPrediction,
+                socket,
+                _playerRegistry,
+                _sparseSaving,
+                _desyncDetection,
+                _inputDelay
+            );
         }
 
-        public SpectatorSession<TState, TInput, TAddress> StartSpectatorSession<TState>(TAddress hostAddr, INonBlockingSocket<TAddress> socket)
+        public SpectatorSession<TState, TInput, TAddress> StartSpectatorSession<TState>(
+            TAddress hostAddr,
+            INonBlockingSocket<TAddress> socket
+        )
             where TState : IState<TState>
         {
             PlayerHandle[] handles = new PlayerHandle[_numPlayers];
-            for (int i = 0; i < _numPlayers; i++) { handles[i] = new PlayerHandle(i); }
-            UdpProtocol<TInput, TAddress> host = new UdpProtocol<TInput, TAddress>(handles, hostAddr, _numPlayers, 1, _maxPrediction, _disconnectTimeout, _disconnectNotifyStart, _fps, new DesyncDetection { On = false });
+            for (int i = 0; i < _numPlayers; i++)
+            {
+                handles[i] = new PlayerHandle(i);
+            }
+            UdpProtocol<TInput, TAddress> host = new UdpProtocol<TInput, TAddress>(
+                handles,
+                hostAddr,
+                _numPlayers,
+                1,
+                _maxPrediction,
+                _disconnectTimeout,
+                _disconnectNotifyStart,
+                _fps,
+                new DesyncDetection { On = false }
+            );
             host.Synchronize();
 
             MarkStarted();
-            return new SpectatorSession<TState, TInput, TAddress>(_numPlayers, socket, host, _maxFramesBehind, _catchupSpeed);
+            return new SpectatorSession<TState, TInput, TAddress>(
+                _numPlayers,
+                socket,
+                host,
+                _maxFramesBehind,
+                _catchupSpeed
+            );
         }
 
         public SyncTestSession<TState, TInput, TAddress> StartSynctestSession<TState>()
             where TState : IState<TState>
         {
-            if (_checkDist >= _maxPrediction) { throw new InvalidOperationException("check distance too big"); }
+            if (_checkDist >= _maxPrediction)
+            {
+                throw new InvalidOperationException("check distance too big");
+            }
 
             MarkStarted();
             return new SyncTestSession<TState, TInput, TAddress>(_numPlayers, _maxPrediction, _checkDist, _inputDelay);
         }
 
-        private UdpProtocol<TInput, TAddress> CreateEndpoint(List<PlayerHandle> handles, TAddress peerAddr, int localPlayers)
+        private UdpProtocol<TInput, TAddress> CreateEndpoint(
+            List<PlayerHandle> handles,
+            TAddress peerAddr,
+            int localPlayers
+        )
         {
             UdpProtocol<TInput, TAddress> endpoint = new UdpProtocol<TInput, TAddress>(
                 handles.ToArray(),
@@ -242,8 +300,8 @@ namespace Netcode.Rollback.Sessions
                 _numPlayers,
                 localPlayers,
                 _maxPrediction,
-                _disconnectTimeout
-                , _disconnectNotifyStart,
+                _disconnectTimeout,
+                _disconnectNotifyStart,
                 _fps,
                 _desyncDetection
             );
@@ -253,7 +311,8 @@ namespace Netcode.Rollback.Sessions
 
         private void MarkStarted()
         {
-            if (_started) throw new InvalidOperationException("session already started");
+            if (_started)
+                throw new InvalidOperationException("session already started");
             _started = true;
         }
     }

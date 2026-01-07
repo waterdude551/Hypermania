@@ -29,7 +29,7 @@ namespace Game.Sim
         Light,
         Medium,
         Special,
-        Super
+        Super,
     }
 
     [MemoryPackable]
@@ -43,13 +43,13 @@ namespace Game.Sim
         public Frame ModeSt { get; private set; }
 
         /// <summary>
-        /// The number of ticks remaining for the current mode. If the mode is Neutral or another mode that should last indefinitely, you can set 
+        /// The number of ticks remaining for the current mode. If the mode is Neutral or another mode that should last indefinitely, you can set
         /// this value to int.MaxValue.
         /// <br/><br/>
-        /// Note that if you perform a transition in the middle of a frame, the value you set to ModeT will depend on which part of the frame you 
+        /// Note that if you perform a transition in the middle of a frame, the value you set to ModeT will depend on which part of the frame you
         /// set it on. In general, if the state transition happens before physics/projectile/hurtbox calculations, ModeT should be set to the true value:
-        /// i.e. a move lasting one frame (which is applied right after inputs) should set ModeT to 1. If the state transition happens after 
-        /// physics/projectile/hurtbox calculations, you should set ModeT to the true value + 1: i.e. a 1 frame HitStun applied after physics 
+        /// i.e. a move lasting one frame (which is applied right after inputs) should set ModeT to 1. If the state transition happens after
+        /// physics/projectile/hurtbox calculations, you should set ModeT to the true value + 1: i.e. a 1 frame HitStun applied after physics
         /// calculations should set ModeT to 2.
         /// </summary>
         public int ModeT;
@@ -61,7 +61,10 @@ namespace Game.Sim
         {
             get
             {
-                if (Position.y > Globals.GROUND) { return FighterLocation.Airborne; }
+                if (Position.y > Globals.GROUND)
+                {
+                    return FighterLocation.Airborne;
+                }
                 return FighterLocation.Grounded;
             }
         }

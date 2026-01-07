@@ -15,7 +15,8 @@ namespace Game.Editors
             DrawDefaultInspector();
 
             var gm = (GameManager)target;
-            if (gm == null) return;
+            if (gm == null)
+                return;
 
             bool inPlayMode = Application.isPlaying;
             bool isSinglePlayer = gm.Runner is SingleplayerRunner;

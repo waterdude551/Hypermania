@@ -27,7 +27,8 @@ namespace Design.Animation.Editors
         #region Data Binding
         public void BindDataToClipLength(MoveBuilderModel model, int tps)
         {
-            if (!Data || !Clip) return;
+            if (!Data || !Clip)
+                return;
 
             Data.Clip = Clip;
 
@@ -53,7 +54,8 @@ namespace Design.Animation.Editors
 
         public FrameData GetCurrentFrame()
         {
-            if (!Data) return null;
+            if (!Data)
+                return null;
             return Data.GetFrame(CurrentTick);
         }
 
@@ -67,7 +69,8 @@ namespace Design.Animation.Editors
         public void AddBox(HitboxKind kind)
         {
             var frame = GetCurrentFrame();
-            if (frame == null) return;
+            if (frame == null)
+                return;
 
             RecordUndo("Add Box");
 
@@ -76,11 +79,7 @@ namespace Design.Animation.Editors
                 Name = kind == HitboxKind.Hitbox ? "Hit" : "Hurt",
                 CenterLocal = Vector2.zero,
                 SizeLocal = new Vector2(0.5f, 0.5f),
-                Props = new BoxProps
-                {
-                    Kind = kind,
-                    HitstunTicks = kind == HitboxKind.Hitbox ? 12 : 0
-                }
+                Props = new BoxProps { Kind = kind, HitstunTicks = kind == HitboxKind.Hitbox ? 12 : 0 },
             };
 
             frame.Boxes.Add(b);
@@ -92,8 +91,10 @@ namespace Design.Animation.Editors
         public void DuplicateSelected()
         {
             var frame = GetCurrentFrame();
-            if (frame == null) return;
-            if (SelectedBoxIndex < 0 || SelectedBoxIndex >= frame.Boxes.Count) return;
+            if (frame == null)
+                return;
+            if (SelectedBoxIndex < 0 || SelectedBoxIndex >= frame.Boxes.Count)
+                return;
 
             RecordUndo("Duplicate Box");
 
@@ -109,8 +110,10 @@ namespace Design.Animation.Editors
         public void DeleteSelected()
         {
             var frame = GetCurrentFrame();
-            if (frame == null) return;
-            if (SelectedBoxIndex < 0 || SelectedBoxIndex >= frame.Boxes.Count) return;
+            if (frame == null)
+                return;
+            if (SelectedBoxIndex < 0 || SelectedBoxIndex >= frame.Boxes.Count)
+                return;
 
             RecordUndo("Delete Box");
 
@@ -123,11 +126,14 @@ namespace Design.Animation.Editors
         public void MoveBoxCenter(int index, Vector2 newCenterLocal)
         {
             var frame = GetCurrentFrame();
-            if (frame == null) return;
-            if (index < 0 || index >= frame.Boxes.Count) return;
+            if (frame == null)
+                return;
+            if (index < 0 || index >= frame.Boxes.Count)
+                return;
 
             var b = frame.Boxes[index];
-            if (b.CenterLocal == newCenterLocal) return;
+            if (b.CenterLocal == newCenterLocal)
+                return;
 
             RecordUndo("Move Box");
 
@@ -140,11 +146,14 @@ namespace Design.Animation.Editors
         public void SetBox(int index, BoxData updated)
         {
             var frame = GetCurrentFrame();
-            if (frame == null) return;
-            if (index < 0 || index >= frame.Boxes.Count) return;
+            if (frame == null)
+                return;
+            if (index < 0 || index >= frame.Boxes.Count)
+                return;
 
             var cur = frame.Boxes[index];
-            if (cur == updated) return; 
+            if (cur == updated)
+                return;
 
             RecordUndo("Edit Box");
 
@@ -155,12 +164,15 @@ namespace Design.Animation.Editors
 
         public void SetBoxesFromPreviousFrame()
         {
-            if (!Data) return;
-            if (CurrentTick <= 0) return;
+            if (!Data)
+                return;
+            if (CurrentTick <= 0)
+                return;
 
             var prev = Data.GetFrame(CurrentTick - 1);
             var cur = Data.GetFrame(CurrentTick);
-            if (prev == null || cur == null) return;
+            if (prev == null || cur == null)
+                return;
 
             RecordUndo("Copy Boxes From Previous Frame");
 
@@ -175,14 +187,16 @@ namespace Design.Animation.Editors
                     Name = src.Name,
                     CenterLocal = src.CenterLocal,
                     SizeLocal = src.SizeLocal,
-                    Props = src.Props
+                    Props = src.Props,
                 };
 
                 cur.Boxes.Add(dst);
             }
 
-            if (SelectedBoxIndex >= cur.Boxes.Count) SelectedBoxIndex = cur.Boxes.Count - 1;
-            if (cur.Boxes.Count == 0) SelectedBoxIndex = -1;
+            if (SelectedBoxIndex >= cur.Boxes.Count)
+                SelectedBoxIndex = cur.Boxes.Count - 1;
+            if (cur.Boxes.Count == 0)
+                SelectedBoxIndex = -1;
 
             MarkDirty();
         }
@@ -191,13 +205,15 @@ namespace Design.Animation.Editors
         #region Helpers
         public void SaveAsset()
         {
-            if (!Data) return;
+            if (!Data)
+                return;
 
             EditorUtility.SetDirty(Data);
             AssetDatabase.SaveAssets();
 
             _hasUnsavedChanges = false;
         }
+
         private void MarkDirty()
         {
             if (Data)
@@ -210,7 +226,8 @@ namespace Design.Animation.Editors
         private void RecordUndo(string label)
         {
             // Important: Undo needs to record the ScriptableObject (Data), not the frame/box contents.
-            if (Data) Undo.RecordObject(Data, label);
+            if (Data)
+                Undo.RecordObject(Data, label);
         }
         #endregion
     }
