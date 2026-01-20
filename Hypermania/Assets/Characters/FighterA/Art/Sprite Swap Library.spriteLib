@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Library:
+  - m_Name: hand_L
+    m_Hash: 660200837
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: fist back of hand forwards
+      m_Hash: 116863314
+      m_Sprite: {fileID: -6890686444602784120, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6890686444602784120, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    - m_Name: fist back of hand forwards_0
+      m_Hash: 57711315
+      m_Sprite: {fileID: -7118304063245842187, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7118304063245842187, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    - m_Name: fist fingers forward
+      m_Hash: 22714943
+      m_Sprite: {fileID: 1158549651518619092, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1158549651518619092, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    - m_Name: fist fingers forward_0
+      m_Hash: 304575220
+      m_Sprite: {fileID: -8472407291431439151, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8472407291431439151, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    - m_Name: fist middle view
+      m_Hash: 798936908
+      m_Sprite: {fileID: 6386564603956804885, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6386564603956804885, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 5
+  - m_Name: hand_R
+    m_Hash: 492232934
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: fist back of hand forwards
+      m_Hash: 116863314
+      m_Sprite: {fileID: 3925159745447631472, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3925159745447631472, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    - m_Name: fist back of hand forwards_0
+      m_Hash: 57711315
+      m_Sprite: {fileID: 5184908192844886857, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5184908192844886857, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    - m_Name: fist fingers forward
+      m_Hash: 22714943
+      m_Sprite: {fileID: 7631950586776981563, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7631950586776981563, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    - m_Name: fist fingers forward_0
+      m_Hash: 304575220
+      m_Sprite: {fileID: -778643440486145226, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -778643440486145226, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    - m_Name: fist middle view
+      m_Hash: 798936908
+      m_Sprite: {fileID: -2944916742475966246, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2944916742475966246, guid: 48489e67798e571068bfc4d51a0721e3, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 5
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 639044709033111080
+  m_Version: 1
