@@ -15,7 +15,7 @@ namespace Game.Sim
         public static LT_inputHistory Create()
         {
             LT_inputHistory history = new LT_inputHistory();
-            history.buffer = new GameInput[8];
+            history.buffer = new GameInput[64];
             history.front = 0;
             history.count = 0;
             return history;
@@ -28,12 +28,6 @@ namespace Game.Sim
             {
                 count = count + 1;
             }
-            InputFlags[] bufI = new InputFlags[8];
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                bufI[i] = buffer[i].Flags;
-            }
-            Debug.Log(string.Join(" : ", bufI));
         }
 
         public GameInput getInput(int framesAgo)

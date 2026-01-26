@@ -179,7 +179,7 @@ namespace Game.Sim
             if (ModeT <= 0)
             {
                 // Checks if beforehand, the super attack was inputted 8 frames or below. If so, execute immediately after cooldown.
-                if ((inputH.wasPressed(InputFlags.SuperAttack, 6)) && Location(config) == FighterLocation.Grounded)
+                if ((inputH.wasPressed(InputFlags.SuperAttack, 8)) && Location(config) == FighterLocation.Grounded)
                 {
                     Velocity = SVector2.zero;
                     Mode = FighterMode.Attacking;
