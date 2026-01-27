@@ -22,6 +22,8 @@ namespace Game.View
 
         [SerializeField]
         private DJ_CameraControl CameraControl;
+        [SerializeField]
+        private DJ_CameraIndicator CameraIndicator;
 
         public void Init(CharacterConfig[] characters)
         {
@@ -78,6 +80,7 @@ namespace Game.View
                 }
             }
             CameraControl.UpdateCamera(interestPoints, Zoom, Time.deltaTime);
+            CameraIndicator.Track(_fighters);
         }
 
         public void DeInit()
