@@ -9,8 +9,10 @@ using UnityEngine;
 
 namespace Game
 {
+    [DisallowMultipleComponent]
     public class GameManager : MonoBehaviour
     {
+        [SerializeField]
         public GameRunner Runner;
         private SteamMatchmakingClient _matchmakingClient;
         private P2PClient _p2pClient;
@@ -25,10 +27,13 @@ namespace Game
 
             _p2pClient = null;
             _players = new List<(PlayerHandle handle, PlayerKind playerKind, SteamNetworkingIdentity netId)>();
+        }
 
+        void OnValidate()
+        {
             if (Runner == null)
             {
-                Debug.LogError($"{nameof(GameManager)}: {Runner} reference is not assigned.", this);
+                Debug.LogError($"{nameof(GameManager)}: Runner component is required.", this);
             }
         }
 

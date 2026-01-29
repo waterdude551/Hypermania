@@ -38,10 +38,10 @@ namespace Game.View
 
             _spriteRenderer.flipX = state.FacingDir == FighterFacing.Left;
 
-            CharacterAnimation animation = state.AnimState;
+            CharacterState animation = state.State;
             int totalTicks = _characterConfig.GetHitboxData(animation).TotalTicks;
 
-            int ticks = frame - state.AnimSt;
+            int ticks = frame - state.StateStart;
             if (_characterConfig.AnimLoops(animation))
             {
                 ticks %= totalTicks;

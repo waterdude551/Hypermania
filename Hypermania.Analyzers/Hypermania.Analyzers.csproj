@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <Target Name="CopyAnalyzerToUnity" AfterTargets="Build">
+    <PropertyGroup>
+      <UnityAnalyzerDir>../Hypermania/Assets/Analyzers</UnityAnalyzerDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(UnityAnalyzerDir)" />
+    <Copy
+      SourceFiles="$(OutputPath)Hypermania.Analyzers.dll"
+      DestinationFolder="$(UnityAnalyzerDir)"
+      SkipUnchangedFiles="true"
+    />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference
+      Include="Microsoft.CodeAnalysis.Analyzers"
+      Version="3.3.4"
+      PrivateAssets="all"
+    />
+    <PackageReference
+      Include="Microsoft.CodeAnalysis.CSharp"
+      Version="4.10.0"
+      PrivateAssets="all"
+    />
+  </ItemGroup>
+</Project>

@@ -82,8 +82,8 @@ namespace Game.Runners
             for (int i = 0; i < _curState.Fighters.Length; i++)
             {
                 var fighterView = _view.Fighters[i];
-                CharacterAnimation anim = _curState.Fighters[i].AnimState;
-                int tick = _curState.Frame - _curState.Fighters[i].AnimSt;
+                CharacterState anim = _curState.Fighters[i].State;
+                int tick = _curState.Frame - _curState.Fighters[i].StateStart;
                 FrameData frame = _characters[i].GetFrameData(anim, tick);
 
                 Transform t = fighterView.transform;

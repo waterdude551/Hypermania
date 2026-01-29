@@ -3,6 +3,7 @@ using Design.Animation;
 using Game;
 using Game.View;
 using UnityEngine;
+using Utils.EnumArray;
 
 namespace Design
 {
@@ -14,28 +15,10 @@ namespace Design
         public AnimatorOverrideController AnimationController;
         public float Speed;
         public float JumpVelocity;
-        public HitboxData Walk;
-        public HitboxData Idle;
-        public HitboxData Hit;
-        public HitboxData Knockdown;
-        public HitboxData Jump;
-        public HitboxData LightAerial;
-        public HitboxData LightCrouching;
-        public HitboxData LightAttack;
-        public HitboxData MediumAerial;
-        public HitboxData MediumCrouching;
-        public HitboxData MediumAttack;
-        public HitboxData SuperAerial;
-        public HitboxData SuperCrouching;
-        public HitboxData SuperAttack;
-        public HitboxData SpecialAerial;
-        public HitboxData SpecialCrouching;
-        public HitboxData SpecialAttack;
-        public HitboxData Ultimate;
+        public float Health;
+        public EnumArray<CharacterState, HitboxData> Hitboxes;
 
-        // TODO: many more
-
-        public FrameData GetFrameData(CharacterAnimation anim, int tick)
+        public FrameData GetFrameData(CharacterState anim, int tick)
         {
             HitboxData data = GetHitboxData(anim);
             // By default loop the animation, but this should never happen because we would have switched to a different
@@ -44,34 +27,14 @@ namespace Design
             return data.Frames[tick];
         }
 
-        public bool AnimLoops(CharacterAnimation anim)
+        public bool AnimLoops(CharacterState anim)
         {
             return GetHitboxData(anim).Clip.isLooping;
         }
 
-        public HitboxData GetHitboxData(CharacterAnimation anim)
+        public HitboxData GetHitboxData(CharacterState anim)
         {
-            switch (anim)
-            {
-                case CharacterAnimation.Walk:
-                    return Walk;
-                case CharacterAnimation.Idle:
-                    return Idle;
-                case CharacterAnimation.Jump:
-                    return Jump;
-                case CharacterAnimation.Hit:
-                    return Hit;
-                case CharacterAnimation.LightAttack:
-                    return LightAttack;
-                case CharacterAnimation.LightAerial:
-                    return LightAerial;
-                case CharacterAnimation.SuperAttack:
-                    return SuperAttack;
-                default:
-                    throw new InvalidOperationException(
-                        $"Tried to get hitbox data for {anim} (not registered). Did you add a new type of animation and forget to add it to CharacterConfig.GetHitboxData()?"
-                    );
-            }
+            return Hitboxes[anim];
         }
     }
 }

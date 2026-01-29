@@ -30,7 +30,7 @@ MonoBehaviour:
       SizeLocal: {x: 0.60891086, y: 0.17326735}
       Props:
         Kind: 1
-        Damage: 0
+        Damage: 5
         HitstunTicks: 12
         BlockstunTicks: 0
         StartsRhythmCombo: 0
@@ -51,7 +51,7 @@ MonoBehaviour:
       SizeLocal: {x: 0.60891086, y: 0.17326735}
       Props:
         Kind: 1
-        Damage: 0
+        Damage: 5
         HitstunTicks: 12
         BlockstunTicks: 0
         StartsRhythmCombo: 0
@@ -72,7 +72,7 @@ MonoBehaviour:
       SizeLocal: {x: 0.60891086, y: 0.17326735}
       Props:
         Kind: 1
-        Damage: 0
+        Damage: 5
         HitstunTicks: 12
         BlockstunTicks: 0
         StartsRhythmCombo: 0
@@ -93,7 +93,7 @@ MonoBehaviour:
       SizeLocal: {x: 0.60891086, y: 0.17326735}
       Props:
         Kind: 1
-        Damage: 0
+        Damage: 5
         HitstunTicks: 12
         BlockstunTicks: 0
         StartsRhythmCombo: 0
@@ -114,7 +114,7 @@ MonoBehaviour:
       SizeLocal: {x: 0.60891086, y: 0.17326735}
       Props:
         Kind: 1
-        Damage: 0
+        Damage: 5
         HitstunTicks: 12
         BlockstunTicks: 0
         StartsRhythmCombo: 0
@@ -135,7 +135,7 @@ MonoBehaviour:
       SizeLocal: {x: 0.60891086, y: 0.17326735}
       Props:
         Kind: 1
-        Damage: 0
+        Damage: 5
         HitstunTicks: 12
         BlockstunTicks: 0
         StartsRhythmCombo: 0

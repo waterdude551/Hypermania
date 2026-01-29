@@ -10,6 +10,7 @@ namespace Utils
         public int No;
         public static readonly Frame NullFrame = new Frame { No = -1 };
         public static readonly Frame FirstFrame = new Frame { No = 0 };
+        public static readonly Frame Infinity = new Frame { No = int.MaxValue };
 
         public int CompareTo(Frame other) => No.CompareTo(other.No);
 

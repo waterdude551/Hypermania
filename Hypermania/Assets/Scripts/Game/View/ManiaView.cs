@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Game.Sim;
 using UnityEngine;
+using UnityEngine.UI;
 using Utils;
 
 namespace Game.View
@@ -9,97 +10,106 @@ namespace Game.View
     [Serializable]
     public struct ManiaViewConfig
     {
-        public float Width;
-        public float Height;
-        public float Border;
-        public float Gap;
-        public float HitLine;
         public float ScrollSpeed;
-        public float NoteHeight;
-        public Sprite Background;
-        public Sprite Note;
+        public Transform[] Anchors;
+        public GameObject[] Notes;
+
+        public void Validate()
+        {
+            if (ScrollSpeed == 0f)
+            {
+                throw new InvalidOperationException("Scroll speed in ManiaViewConfig cannot be 0");
+            }
+            if (Anchors == null || Anchors.Length == 0)
+            {
+                throw new InvalidOperationException("Must set note anchors");
+            }
+            if (Notes == null || Notes.Length == 0)
+            {
+                throw new InvalidOperationException("Must set note prefabs");
+            }
+        }
     }
 
-    [RequireComponent(typeof(SpriteRenderer))]
     public class ManiaView : MonoBehaviour
     {
-        private ManiaViewConfig _config;
-        private SpriteRenderer _spriteRenderer;
-        private static readonly float[] _channelGapsToCenter = { -0.5f, 0.5f, -1.5f, 1.5f, -2.5f, 2.5f };
-        private List<GameObject> _activeNotes;
+        [SerializeField]
+        public ManiaViewConfig Config;
+        private Dictionary<int, GameObject> _activeNotes;
 
-        public void Init(Vector2 center, in ManiaViewConfig config)
+        public void Init()
         {
-            _config = config;
-            transform.position = center;
-            _activeNotes = new List<GameObject>();
-            _spriteRenderer = GetComponent<SpriteRenderer>();
-            _spriteRenderer.sprite = _config.Background;
+            _activeNotes = new Dictionary<int, GameObject>();
             gameObject.SetActive(false);
         }
 
         public void DeInit()
         {
-            for (int i = 0; i < _activeNotes.Count; i++)
+            foreach (var obj in _activeNotes.Values)
             {
-                Destroy(_activeNotes[i]);
+                Destroy(obj);
             }
             _activeNotes = null;
-            _spriteRenderer.sprite = null;
-            _spriteRenderer = null;
+        }
+
+        public void OnValidate()
+        {
+            Config.Validate();
         }
 
         public void Render(Frame frame, in ManiaState state)
         {
             gameObject.SetActive(state.EndFrame != Frame.NullFrame);
-            int viewId = 0;
+
+            Dictionary<int, GameObject> renderedNow = new Dictionary<int, GameObject>();
+
             for (int i = 0; i < state.Config.NumKeys; i++)
             {
                 for (int j = 0; j < state.Channels[i].Notes.Count; j++)
                 {
-                    if (!RenderNote(frame, state.Config.NumKeys, i, viewId, state.Channels[i].Notes[j]))
+                    if (!RenderNote(frame, i, state.Channels[i].Notes[j], out var noteView))
                     {
                         break;
                     }
-                    viewId++;
+                    renderedNow[state.Channels[i].Notes[j].Id] = noteView;
                 }
             }
 
-            // if we rendered fewer notes this frame compared to last, set the entity to not active
-            for (int i = viewId; i < _activeNotes.Count; i++)
+            // for all notes not rendered now but in the active set, destroy
+            foreach ((var id, var obj) in _activeNotes)
             {
-                _activeNotes[i].SetActive(false);
+                if (!renderedNow.ContainsKey(id))
+                {
+                    Destroy(obj);
+                }
             }
+            _activeNotes = renderedNow;
         }
 
-        private bool RenderNote(Frame frame, int numChannels, int channel, int viewId, in ManiaNote note)
+        private bool RenderNote(Frame frame, int channel, in ManiaNote note, out GameObject noteView)
         {
-            // should only add a single new note to the view
-            while (_activeNotes.Count <= viewId)
-            {
-                GameObject noteView = new GameObject("Mania Note");
-                noteView.transform.SetParent(transform);
-                SpriteRenderer sp = noteView.AddComponent<SpriteRenderer>();
-                sp.sprite = _config.Note;
-                _activeNotes.Add(noteView);
-            }
-            GameObject view = _activeNotes[viewId];
-            view.SetActive(true);
-
-            float x = ChannelX(numChannels, channel);
-            float y = (note.Tick - frame) * _config.ScrollSpeed + _config.HitLine - _config.Height / 2;
-            if (y > _config.Height / 2 - _config.NoteHeight / 2)
+            noteView = null;
+            float x = Config.Anchors[channel].localPosition.x;
+            float y = (note.Tick - frame) * Config.ScrollSpeed + Config.Anchors[channel].localPosition.y;
+            // dont render nodes that are way too far outside
+            if (y > GetComponent<RectTransform>().rect.height / 2)
             {
                 return false;
             }
-            view.transform.SetLocalPositionAndRotation(new Vector3(x, y, -1), Quaternion.identity);
+
+            if (!_activeNotes.ContainsKey(note.Id))
+            {
+                noteView = Instantiate(Config.Notes[channel]);
+                noteView.transform.SetParent(transform);
+                _activeNotes[note.Id] = noteView;
+            }
+            else
+            {
+                noteView = _activeNotes[note.Id];
+            }
+
+            noteView.transform.SetLocalPositionAndRotation(new Vector3(x, y, -1), Quaternion.identity);
             return true;
         }
-
-        private float ChannelWidth(int numChannels) =>
-            (_config.Width - _config.Gap * (numChannels - 1) - 2 * _config.Border) / numChannels;
-
-        private float ChannelX(int numChannels, int channel) =>
-            _channelGapsToCenter[channel] * (ChannelWidth(numChannels) + _config.Gap);
     }
 }

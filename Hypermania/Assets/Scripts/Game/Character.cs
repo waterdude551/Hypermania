@@ -2,7 +2,7 @@ using System;
 
 namespace Game
 {
-    public enum CharacterAnimation
+    public enum CharacterState
     {
         Hit,
         Walk,
@@ -21,7 +21,10 @@ namespace Game
         SpecialAttack,
         SpecialAerial,
         SpecialCrouching,
+        ForwardDash,
+        BackDash,
         Ultimate,
+        Death,
     }
 
     [Serializable]

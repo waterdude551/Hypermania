@@ -3,20 +3,12 @@ using Design;
 using Design.Animation;
 using MemoryPack;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Utils;
 using Utils.SoftFloat;
 
 namespace Game.Sim
 {
-    public enum FighterMode
-    {
-        Neutral,
-        Attacking,
-        Hitstun,
-        Blockstun,
-        Knockdown,
-    }
-
     public enum FighterFacing
     {
         Left,
@@ -35,51 +27,39 @@ namespace Game.Sim
         public SVector2 Position;
         public SVector2 Velocity;
         public sfloat Health;
+        public InputHistory InputH;
+
+        public CharacterState State { get; private set; }
+        public Frame StateStart { get; private set; }
 
         /// <summary>
-        /// The animation state of the chararcter, indicates which animation is currently playing.
+        /// Set to a value that marks the first frame in which the character should return to neutral.
         /// </summary>
-        public CharacterAnimation AnimState { get; private set; }
-        public Frame AnimSt { get; private set; }
-
-        public FighterMode Mode { get; private set; }
-
-        /// <summary>
-        /// The number of ticks remaining for the current mode. If the mode is Neutral or another mode that should last
-        /// indefinitely, you can set this value to int.MaxValue.
-        /// <br/><br/>
-        /// Note that if you perform a transition in the middle of a frame, the value you set to ModeT will depend on
-        /// which part of the frame you set it on. In general, if the state transition happens before
-        /// physics/projectile/hurtbox calculations, ModeT should be set to the true value: i.e. a move lasting one
-        /// frame (which is applied right after inputs) should set ModeT to 1. If the state transition happens after
-        /// physics/projectile/hurtbox calculations, you should set ModeT to the true value + 1: i.e. a 1 frame HitStun
-        /// applied after physics calculations should set ModeT to 2.
-        /// </summary>
-        public int ModeT;
+        public Frame StateEnd { get; private set; }
 
         public FighterFacing FacingDir;
 
         public FighterLocation LastLocation;
         public Frame LocationSt { get; private set; }
 
-        /// <summary>
-        /// Whether or not the character is performing an aerial attack. Must be updated in the future to support moves
-        /// </summary>
-        [MemoryPackIgnore]
-        private bool IsAerial => AnimState == CharacterAnimation.LightAerial;
+        public bool IsAerial =>
+            State == CharacterState.LightAerial
+            || State == CharacterState.MediumAerial
+            || State == CharacterState.SuperAerial
+            || State == CharacterState.SpecialAerial;
 
-        public static FighterState Create(SVector2 position, FighterFacing facingDirection)
+        public static FighterState Create(SVector2 position, FighterFacing facingDirection, CharacterConfig config)
         {
             FighterState state = new FighterState();
             state.Position = position;
             state.Velocity = SVector2.zero;
-            state.Mode = FighterMode.Neutral;
+            state.State = CharacterState.Idle;
+            state.StateStart = Frame.FirstFrame;
+            state.StateEnd = Frame.Infinity;
+            state.InputH = new InputHistory();
             // TODO: character dependent?
-            state.Health = 100;
-            state.ModeT = int.MaxValue;
+            state.Health = (sfloat)config.Health;
             state.FacingDir = facingDirection;
-            state.AnimState = CharacterAnimation.Idle;
-            state.AnimSt = Frame.FirstFrame;
             return state;
         }
 
@@ -94,8 +74,8 @@ namespace Game.Sim
 
         public void FaceTowards(SVector2 location)
         {
-            // can only switch locations if in neutral
-            if (Mode != FighterMode.Neutral)
+            // can only switch locations if in idle/walking
+            if (State != CharacterState.Idle && State != CharacterState.Walk)
             {
                 return;
             }
@@ -109,84 +89,111 @@ namespace Game.Sim
             }
         }
 
-        public void ApplyMovementIntent(GameInput input, CharacterConfig characterConfig, GlobalConfig config)
+        public void TickStateMachine(Frame frame)
         {
-            if (Mode != FighterMode.Neutral)
+            // if animation ends, switch back to idle
+            if (frame >= StateEnd)
+            {
+                State = CharacterState.Idle;
+                StateStart = frame;
+                StateEnd = Frame.Infinity;
+            }
+        }
+
+        public void ApplyMovementIntent(Frame frame, CharacterConfig characterConfig, GlobalConfig config)
+        {
+            if (State != CharacterState.Idle && State != CharacterState.Walk && State != CharacterState.Jump)
             {
                 return;
             }
             if (Location(config) == FighterLocation.Grounded)
+            {
                 Velocity.x = 0;
-            if (input.Flags.HasFlag(InputFlags.Left) && Location(config) == FighterLocation.Grounded)
-                Velocity.x += (sfloat)(-characterConfig.Speed);
-            if (input.Flags.HasFlag(InputFlags.Right) && Location(config) == FighterLocation.Grounded)
-                Velocity.x += (sfloat)characterConfig.Speed;
-            if (input.Flags.HasFlag(InputFlags.Up) && Location(config) == FighterLocation.Grounded)
-                Velocity.y = (sfloat)characterConfig.JumpVelocity;
+                if (InputH.IsHeld(InputFlags.Left) && InputH.PressedAndReleasedRecently(InputFlags.Left, 12, 1))
+                {
+                    Velocity.x += 2 * (sfloat)(-characterConfig.Speed);
+                    State = FacingDir == FighterFacing.Left ? CharacterState.ForwardDash : CharacterState.BackDash;
+                    StateEnd = frame + 12;
+                    StateStart = frame;
+                    return;
+                }
+
+                if (InputH.IsHeld(InputFlags.Right) && InputH.PressedAndReleasedRecently(InputFlags.Right, 12, 1))
+                {
+                    Velocity.x += 2 * (sfloat)characterConfig.Speed;
+                    State = FacingDir == FighterFacing.Right ? CharacterState.ForwardDash : CharacterState.BackDash;
+                    StateEnd = frame + 12;
+                    StateStart = frame;
+                    return;
+                }
+
+                if (InputH.IsHeld(InputFlags.Left))
+                {
+                    Velocity.x += (sfloat)(-characterConfig.Speed);
+                }
+                if (InputH.IsHeld(InputFlags.Right))
+                {
+                    Velocity.x += (sfloat)characterConfig.Speed;
+                }
+
+                if (InputH.IsHeld(InputFlags.Up))
+                {
+                    if (InputH.PressedRecently(InputFlags.Down, 8))
+                    {
+                        Velocity.y = (sfloat)1.25 * (sfloat)characterConfig.JumpVelocity;
+                    }
+                    else
+                    {
+                        Velocity.y = (sfloat)characterConfig.JumpVelocity;
+                    }
+                }
+            }
         }
 
-        public void ApplyActiveState(Frame frame, GameInput input, CharacterConfig characterConfig, GlobalConfig config)
+        public void ApplyActiveState(Frame frame, CharacterConfig characterConfig, GlobalConfig config)
         {
-            if (Mode != FighterMode.Neutral)
+            if (State != CharacterState.Idle && State != CharacterState.Walk && State != CharacterState.Jump)
             {
                 return;
             }
-            if (input.Flags.HasFlag(InputFlags.LightAttack))
+            if (InputH.PressedRecently(InputFlags.LightAttack, 8))
             {
                 switch (Location(config))
                 {
                     case FighterLocation.Grounded:
                         {
                             Velocity = SVector2.zero;
-                            Mode = FighterMode.Attacking;
-                            ModeT = characterConfig.LightAttack.TotalTicks;
-                            AnimState = CharacterAnimation.LightAttack;
-                            AnimSt = frame;
+                            State = CharacterState.LightAttack;
+                            StateStart = frame;
+                            StateEnd = StateStart + characterConfig.GetHitboxData(State).TotalTicks;
                         }
                         break;
                     case FighterLocation.Airborne:
                         {
-                            Mode = FighterMode.Attacking;
-                            ModeT = characterConfig.LightAerial.TotalTicks;
-                            AnimState = CharacterAnimation.LightAerial;
-                            AnimSt = frame;
+                            State = CharacterState.LightAerial;
+                            StateStart = frame;
+                            StateEnd = StateStart + characterConfig.GetHitboxData(State).TotalTicks;
                         }
                         break;
                 }
             }
-            else if (input.Flags.HasFlag(InputFlags.SuperAttack))
+            else if (InputH.PressedRecently(InputFlags.SuperAttack, 8))
             {
                 switch (Location(config))
                 {
                     case FighterLocation.Grounded:
                         {
                             Velocity = SVector2.zero;
-                            Mode = FighterMode.Attacking;
-                            ModeT = characterConfig.SuperAttack.TotalTicks;
-                            AnimState = CharacterAnimation.SuperAttack;
-                            AnimSt = frame;
+                            State = CharacterState.SuperAttack;
+                            StateStart = frame;
+                            StateEnd = StateStart + characterConfig.GetHitboxData(State).TotalTicks;
                         }
                         break;
                 }
             }
         }
 
-        public void TickStateMachine(Frame frame, GlobalConfig config)
-        {
-            ModeT--;
-            if (ModeT <= 0)
-            {
-                Mode = FighterMode.Neutral;
-                ModeT = int.MaxValue;
-            }
-            if (LastLocation != Location(config))
-            {
-                LastLocation = Location(config);
-                LocationSt = frame;
-            }
-        }
-
-        public void UpdatePosition(Frame frame, GlobalConfig config)
+        public void UpdatePosition(GlobalConfig config)
         {
             // Apply gravity if not grounded
             if (Position.y > (sfloat)config.GroundY || Velocity.y > 0)
@@ -219,27 +226,25 @@ namespace Game.Sim
             }
         }
 
-        public void ApplyAerialCancel(Frame frame)
+        public void ApplyAerialCancel(Frame frame, GlobalConfig config)
         {
-            if (Mode != FighterMode.Attacking)
+            if (!IsAerial)
             {
                 return;
             }
             // TODO: apply some landing lag here
-            if (IsAerial)
+            if (Location(config) == FighterLocation.Grounded)
             {
-                Mode = FighterMode.Neutral;
-                ModeT = int.MaxValue;
-                AnimState = CharacterAnimation.Idle;
-                AnimSt = frame;
-                Velocity = SVector2.zero;
+                State = CharacterState.Idle;
+                StateStart = frame;
+                StateEnd = Frame.Infinity;
             }
         }
 
         public void AddBoxes(Frame frame, CharacterConfig config, Physics<BoxProps> physics, int handle)
         {
-            int tick = frame - AnimSt;
-            FrameData frameData = config.GetFrameData(AnimState, tick);
+            int tick = frame - StateStart;
+            FrameData frameData = config.GetFrameData(State, tick);
 
             foreach (var box in frameData.Boxes)
             {
@@ -259,64 +264,60 @@ namespace Game.Sim
             }
         }
 
-        public void ApplyHit(BoxProps props)
+        public void ApplyHit(Frame frame, BoxProps props)
         {
-            if (Mode == FighterMode.Hitstun)
-            {
-                throw new InvalidOperationException(
-                    "Should not be possible to apply hit to a character in hitstun: the animation has no hurtboxes"
-                );
-            }
-            Mode = FighterMode.Hitstun;
-            // We add + 1 here: ApplyHit is called after applying inputs but before ticking the state machine. If
-            // hitStun = 1, that means we would immediately make the player actionable next frame, so we additionally
-            // add 1. See the comments on ModeT for details.
-            ModeT = props.HitstunTicks + 1;
+            State = CharacterState.Hit;
+            StateStart = frame;
+            // Apply Hit/collision stuff is done after the player is actionable, so if the player needs to be
+            // inactionable for "one more frame"
+            StateEnd = frame + props.HitstunTicks + 1;
+            // TODO: if high enough, go knockdown
             Health -= props.Damage;
 
             Velocity = (SVector2)props.Knockback;
         }
 
-        public void ApplyClank(GlobalConfig config)
+        public void ApplyClank(Frame frame, GlobalConfig config)
         {
-            if (Mode == FighterMode.Hitstun)
-            {
-                return;
-            }
-            Mode = FighterMode.Hitstun;
-            ModeT = config.ClankTicks;
+            State = CharacterState.Hit;
+            StateStart = frame;
+            // Apply Hit/collision stuff is done after the player is actionable, so if the player needs to be
+            // inactionable for "one more frame"
+            StateEnd = frame + config.ClankTicks + 1;
             Velocity = SVector2.zero;
         }
 
-        public CharacterAnimation ApplyPassiveState(Frame frame, GlobalConfig config)
+        public void ApplyMovementState(Frame frame, GlobalConfig config)
         {
-            CharacterAnimation newAnim = CharacterAnimation.Idle;
-            if (Mode == FighterMode.Neutral)
+            if (
+                (State == CharacterState.Idle || State == CharacterState.Walk)
+                && Location(config) == FighterLocation.Airborne
+            )
             {
-                if (Location(config) == FighterLocation.Airborne)
-                {
-                    newAnim = CharacterAnimation.Jump;
-                }
-                else if (Velocity.magnitude > (sfloat)0.01f)
-                {
-                    newAnim = CharacterAnimation.Walk;
-                }
+                State = CharacterState.Jump;
+                StateStart = frame;
+                StateEnd = Frame.Infinity;
             }
-            else if (Mode == FighterMode.Hitstun)
+            else if (
+                (State == CharacterState.Idle || State == CharacterState.Jump)
+                && Velocity.magnitude > (sfloat)0.01f
+                && Location(config) == FighterLocation.Grounded
+            )
             {
-                newAnim = CharacterAnimation.Hit;
+                State = CharacterState.Walk;
+                StateStart = frame;
+                StateEnd = Frame.Infinity;
             }
-            else
+            else if (
+                (State == CharacterState.Walk || State == CharacterState.Jump)
+                && Velocity.magnitude < (sfloat)0.01f
+                && Location(config) == FighterLocation.Grounded
+            )
             {
-                return AnimState;
+                State = CharacterState.Idle;
+                StateStart = frame;
+                StateEnd = Frame.Infinity;
             }
-
-            if (newAnim != AnimState)
-            {
-                AnimState = newAnim;
-                AnimSt = frame;
-            }
-            return AnimState;
         }
     }
 }
