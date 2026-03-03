@@ -351,7 +351,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _view: {fileID: 2114326934}
-  _config: {fileID: 11400000, guid: 097b22ad0bf6d4d8fab37f2f2510eefb, type: 2}
+  _options:
+    Global: {fileID: 11400000, guid: 097b22ad0bf6d4d8fab37f2f2510eefb, type: 2}
+    Players:
+    - HealOnActionable: 1
+      Character: {fileID: 11400000, guid: b193994fbc9b652d2985b409cb9f63cf, type: 2}
+    - HealOnActionable: 1
+      Character: {fileID: 11400000, guid: b193994fbc9b652d2985b409cb9f63cf, type: 2}
   _drawHitboxes: 1
   _controlsConfig: {fileID: 0}
   _advanceKey: 62
@@ -508,7 +514,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _view: {fileID: 2114326934}
-  _config: {fileID: 11400000, guid: 097b22ad0bf6d4d8fab37f2f2510eefb, type: 2}
+  _options:
+    Global: {fileID: 11400000, guid: 097b22ad0bf6d4d8fab37f2f2510eefb, type: 2}
+    Players:
+    - HealOnActionable: 1
+      Character: {fileID: 11400000, guid: b193994fbc9b652d2985b409cb9f63cf, type: 2}
+    - HealOnActionable: 1
+      Character: {fileID: 11400000, guid: b193994fbc9b652d2985b409cb9f63cf, type: 2}
   _drawHitboxes: 1
   _controlsConfig: {fileID: 0}
 --- !u!4 &286925406
@@ -827,7 +839,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _view: {fileID: 2114326934}
-  _config: {fileID: 11400000, guid: 097b22ad0bf6d4d8fab37f2f2510eefb, type: 2}
+  _options:
+    Global: {fileID: 11400000, guid: 097b22ad0bf6d4d8fab37f2f2510eefb, type: 2}
+    Players:
+    - HealOnActionable: 0
+      Character: {fileID: 11400000, guid: b193994fbc9b652d2985b409cb9f63cf, type: 2}
+    - HealOnActionable: 0
+      Character: {fileID: 11400000, guid: b193994fbc9b652d2985b409cb9f63cf, type: 2}
   _drawHitboxes: 1
   _controlsConfig: {fileID: 0}
 --- !u!1001 &994059579
