@@ -531,7 +531,7 @@ SpriteRenderer:
   m_SortingLayerID: -1444139175
   m_SortingLayer: -2
   m_SortingOrder: 22
-  m_Sprite: {fileID: 4117054195890488481, guid: 14222601f6de24887b62d652b9754d37, type: 3}
+  m_Sprite: {fileID: -7335706615576534919, guid: 14222601f6de24887b62d652b9754d37, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -556,13 +556,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_RootBone: {fileID: 4217807302454724545}
   m_BoneTransforms:
+  - {fileID: 6970562883142234960}
+  - {fileID: 6112711685228377162}
   - {fileID: 3427910641350829734}
-  - {fileID: 2010231316017107237}
   - {fileID: 7722070822784974639}
   - {fileID: 6462066946638255643}
-  - {fileID: 6112711685228377162}
+  - {fileID: 2010231316017107237}
   - {fileID: 4091753112829229308}
-  - {fileID: 6970562883142234960}
   m_Bounds:
     m_Center: {x: 14.4536495, y: 21.988493, z: 0}
     m_Extent: {x: 2.7536511, y: 3.5757504, z: 0}
@@ -2482,9 +2482,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_RootBone: {fileID: 4217807302454724545}
-  m_BoneTransforms:
-  - {fileID: 5723221503183704470}
-  - {fileID: 4229723411060116953}
+  m_BoneTransforms: []
   m_Bounds:
     m_Center: {x: 28.079994, y: 23.761366, z: 0}
     m_Extent: {x: 0.9399996, y: 0.79273033, z: 0}
@@ -2740,7 +2738,7 @@ SpriteRenderer:
   m_SortingLayerID: -1444139175
   m_SortingLayer: -2
   m_SortingOrder: 8
-  m_Sprite: {fileID: 6594931840830794775, guid: 14222601f6de24887b62d652b9754d37, type: 3}
+  m_Sprite: {fileID: 2680338063311792851, guid: 14222601f6de24887b62d652b9754d37, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -3873,7 +3871,7 @@ SpriteRenderer:
   m_SortingLayerID: -1444139175
   m_SortingLayer: -2
   m_SortingOrder: 9
-  m_Sprite: {fileID: -3173419459271100997, guid: 14222601f6de24887b62d652b9754d37, type: 3}
+  m_Sprite: {fileID: 496760487275173898, guid: 14222601f6de24887b62d652b9754d37, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -7234,11 +7232,6 @@ GameObject:
 --- !u!4 &4954751025952636439 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -1628701486506475512, guid: 14222601f6de24887b62d652b9754d37, type: 3}
-  m_PrefabInstance: {fileID: 3289738163639631391}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &5723221503183704470 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7118934047017758601, guid: 14222601f6de24887b62d652b9754d37, type: 3}
   m_PrefabInstance: {fileID: 3289738163639631391}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &5730133993802600598 stripped
