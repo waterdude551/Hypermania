@@ -185,7 +185,7 @@ namespace Game.Sim
             // Tick the state machine, making the character idle if an animation/stun finishes
             for (int i = 0; i < Fighters.Length; i++)
             {
-                Fighters[i].TickStateMachine(SimFrame);
+                Fighters[i].TickStateMachine(SimFrame, options);
             }
 
             // This function internally appies changes to the fighter's velocity based on movement inputs
@@ -483,10 +483,8 @@ namespace Game.Sim
             }
             else if (c.BoxA.Data.Kind == HitboxKind.Hurtbox && c.BoxB.Data.Kind == HitboxKind.Hurtbox)
             {
-                sfloat aPushFactor =
-                    Fighters[c.BoxA.Owner].Location(options) == FighterLocation.Grounded ? (sfloat)1f : (sfloat)0.1f;
-                sfloat bPushFactor =
-                    Fighters[c.BoxB.Owner].Location(options) == FighterLocation.Grounded ? (sfloat)1f : (sfloat)0.1f;
+                sfloat aPushFactor = Fighters[c.BoxA.Owner].OnGround(options) ? (sfloat)1f : (sfloat)0.1f;
+                sfloat bPushFactor = Fighters[c.BoxB.Owner].OnGround(options) ? (sfloat)1f : (sfloat)0.1f;
 
                 sfloat aPush = aPushFactor / (aPushFactor + bPushFactor);
                 sfloat bPush = bPushFactor / (aPushFactor + bPushFactor);
