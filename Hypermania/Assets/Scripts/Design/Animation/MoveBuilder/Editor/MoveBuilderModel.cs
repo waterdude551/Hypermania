@@ -50,11 +50,11 @@ namespace Design.Animation.MoveBuilder.Editor
             if (!ReferenceEquals(state.Data, _lastData))
             {
                 _lastData = state.Data;
-                _savedValueHash = state.Data.GetHashCode();
+                _savedValueHash = state.Data.GetValueHash();
                 return false;
             }
 
-            return state.Data.GetHashCode() != _savedValueHash;
+            return state.Data.GetValueHash() != _savedValueHash;
         }
 
         public MoveBuilderModel()
@@ -87,7 +87,7 @@ namespace Design.Animation.MoveBuilder.Editor
             if (frame == null || frame.Boxes == null)
                 return;
 
-            int max = frame.Boxes == null ? frame.Boxes.Count - 1 : -1;
+            int max = frame.Boxes != null ? frame.Boxes.Count - 1 : -1;
             if (index > max || index < -1)
                 SelectedBoxIndex = -1;
             else
@@ -260,7 +260,7 @@ namespace Design.Animation.MoveBuilder.Editor
             AssetDatabase.SaveAssets();
 
             _lastData = state.Data;
-            _savedValueHash = state.Data.GetHashCode();
+            _savedValueHash = state.Data.GetValueHash();
         }
 
         private void MarkDirty(MoveBuilderAnimationState state)

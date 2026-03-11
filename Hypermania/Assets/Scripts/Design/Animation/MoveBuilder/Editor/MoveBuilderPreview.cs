@@ -70,8 +70,8 @@ namespace Design.Animation.MoveBuilder.Editor
                 return;
             }
 
-            // Duplicate Selected (Ctrl/Cmd + D)
-            if (e.keyCode == KeyCode.D && actionKey)
+            // Duplicate Selected (D)
+            if (e.keyCode == KeyCode.D && !actionKey)
             {
                 if (HasSelection())
                 {
@@ -83,7 +83,7 @@ namespace Design.Animation.MoveBuilder.Editor
             }
 
             // Delete Selected (Backspace/Delete)
-            if (e.keyCode == KeyCode.Backspace || e.keyCode == KeyCode.Delete)
+            if ((e.keyCode == KeyCode.Backspace || e.keyCode == KeyCode.Delete) && !actionKey)
             {
                 if (HasSelection())
                 {
@@ -94,8 +94,8 @@ namespace Design.Animation.MoveBuilder.Editor
                 return;
             }
 
-            // Copy Box Props (Ctrl/Cmd + C)
-            if (e.keyCode == KeyCode.C && actionKey && !shift)
+            // Copy Box Props (C)
+            if (e.keyCode == KeyCode.C && !actionKey && !shift)
             {
                 if (HasSelection())
                 {
@@ -106,8 +106,8 @@ namespace Design.Animation.MoveBuilder.Editor
                 return;
             }
 
-            // Paste Box Props (Ctrl/Cmd + V)
-            if (e.keyCode == KeyCode.V && actionKey && !shift)
+            // Paste Box Props (V)
+            if (e.keyCode == KeyCode.V && !actionKey && !shift)
             {
                 if (HasSelection() && m.HasCopiedBoxProps)
                 {
@@ -118,8 +118,8 @@ namespace Design.Animation.MoveBuilder.Editor
                 return;
             }
 
-            // Copy Frame (Ctrl/Cmd + Shift + C)
-            if (e.keyCode == KeyCode.C && actionKey && shift)
+            // Copy Frame (Shift + C)
+            if (e.keyCode == KeyCode.C && !actionKey && shift)
             {
                 m.CopyCurrentFrameData(state);
                 GUI.changed = true;
@@ -127,8 +127,8 @@ namespace Design.Animation.MoveBuilder.Editor
                 return;
             }
 
-            // Paste Frame (Ctrl/Cmd + Shift + V)
-            if (e.keyCode == KeyCode.V && actionKey && shift)
+            // Paste Frame (Shift + V)
+            if (e.keyCode == KeyCode.V && !actionKey && shift)
             {
                 if (m.HasCopiedFrame)
                 {

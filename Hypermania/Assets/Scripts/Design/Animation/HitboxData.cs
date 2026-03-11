@@ -41,6 +41,7 @@ namespace Design.Animation
         public int HitstunTicks;
         public int BlockstunTicks;
         public int HitstopTicks;
+        public int BlockstopTicks;
         public bool StartsRhythmCombo;
         public KnockdownKind KnockdownKind;
         public SVector2 Knockback;
@@ -54,7 +55,8 @@ namespace Design.Animation
             && Knockback == other.Knockback
             && KnockdownKind == other.KnockdownKind
             && StartsRhythmCombo == other.StartsRhythmCombo
-            && HitstopTicks == other.HitstopTicks;
+            && HitstopTicks == other.HitstopTicks
+            && BlockstopTicks == other.BlockstopTicks;
 
         public override bool Equals(object obj) => obj is BoxProps other && Equals(other);
 
@@ -70,7 +72,8 @@ namespace Design.Animation
                     KnockdownKind,
                     Knockback
                 ),
-                HitstopTicks
+                HitstopTicks,
+                BlockstopTicks
             );
 
         public static bool operator ==(BoxProps a, BoxProps b) => a.Equals(b);
@@ -134,22 +137,39 @@ namespace Design.Animation
 
         public void CopyFrom(FrameData other)
         {
+            if (other == null)
+                return;
             Boxes.Clear();
-            if (other?.Boxes != null)
-                Boxes.AddRange(other.Boxes);
+            Boxes.AddRange(other.Boxes);
             FrameType = other.FrameType;
         }
 
-        public override int GetHashCode()
+        public int GetValueHash()
         {
             var hc = new HashCode();
             hc.Add(Boxes != null ? Boxes.Count : 0);
-            for (int j = 0; j < Boxes.Count; j++)
+            if (Boxes != null)
             {
-                hc.Add(Boxes[j]);
+                for (int j = 0; j < Boxes.Count; j++)
+                {
+                    hc.Add(Boxes[j]);
+                }
             }
             hc.Add(FrameType);
             return hc.ToHashCode();
+        }
+
+        public bool HasHitbox()
+        {
+            foreach (BoxData box in Boxes)
+            {
+                if (box.Props.Kind == HitboxKind.Hitbox)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
@@ -187,6 +207,55 @@ namespace Design.Animation
             return changed;
         }
 
+        public bool HasHitbox()
+        {
+            foreach (FrameData frame in Frames)
+            {
+                if (frame.HasHitbox())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static readonly FrameType[] ATTACK_FRAME_TYPE_ORDER =
+        {
+            FrameType.Startup,
+            FrameType.Active,
+            FrameType.Recovery,
+        };
+
+        public bool IsValidAttack(int[] frameCount)
+        {
+            if (!HasHitbox())
+            {
+                return false;
+            }
+
+            int frameTypeIndex = 0;
+            foreach (FrameData data in Frames)
+            {
+                if (data.FrameType != ATTACK_FRAME_TYPE_ORDER[frameTypeIndex])
+                {
+                    if (frameTypeIndex + 1 >= ATTACK_FRAME_TYPE_ORDER.Length)
+                    {
+                        return false;
+                    }
+                    if (data.FrameType != ATTACK_FRAME_TYPE_ORDER[frameTypeIndex + 1])
+                    {
+                        return false;
+                    }
+                    frameTypeIndex++;
+                }
+
+                frameCount[frameTypeIndex]++;
+            }
+
+            return frameCount[frameTypeIndex] > 0;
+        }
+
         public FrameData GetFrame(int tick)
         {
             if (Frames == null || Frames.Count == 0)
@@ -195,7 +264,7 @@ namespace Design.Animation
             return Frames[tick];
         }
 
-        public override int GetHashCode()
+        public int GetValueHash()
         {
             var hc = new HashCode();
 
@@ -206,7 +275,7 @@ namespace Design.Animation
             {
                 for (int i = 0; i < Frames.Count; i++)
                 {
-                    hc.Add(Frames[i]);
+                    hc.Add(Frames[i].GetValueHash());
                 }
             }
 
