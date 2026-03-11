@@ -93,6 +93,20 @@ namespace Game.View.Fighters
                 );
             }
             if (
+                (state.State == CharacterState.Hit || state.State == CharacterState.Knockdown)
+                && frame == state.StateStart
+            )
+            {
+                vfxManager.AddDesired(
+                    new ViewEvent<VfxEvent>()
+                    {
+                        Event = new VfxEvent { Kind = VfxKind.SmallHit, Position = (Vector2)state.HitLocation },
+                        StartFrame = frame,
+                        Hash = 0,
+                    }
+                );
+            }
+            if (
                 (state.State == CharacterState.BackDash || state.State == CharacterState.ForwardDash)
                 && frame == state.StateStart
             )

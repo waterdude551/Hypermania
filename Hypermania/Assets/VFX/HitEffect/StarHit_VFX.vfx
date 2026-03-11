@@ -103,9 +103,6 @@ MonoBehaviour:
     - model: {fileID: 8926484042661614551}
       id: 0
       isStickyNote: 0
-    - model: {fileID: 8926484042661614548}
-      id: 0
-      isStickyNote: 0
   - title: Floor Effect
     position:
       serializedVersion: 2
@@ -3227,7 +3224,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEditor.VFX.TArcCircle, Unity.VisualEffectGraph.Editor,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"circle":{"transform":{"position":{"x":0.0,"y":-0.6000000238418579,"z":0.0},"angles":{"x":0.0,"y":0.0,"z":20.0},"scale":{"x":1.0,"y":1.0,"z":1.0}},"radius":0.26160335540771487},"arc":0.7680000066757202}'
+      m_SerializableObject: '{"circle":{"transform":{"position":{"x":0.0,"y":-0.20000000298023225,"z":0.0},"angles":{"x":0.0,"y":0.0,"z":20.0},"scale":{"x":1.0,"y":1.0,"z":1.0}},"radius":0.26160335540771487},"arc":0.7680000066757202}'
     m_Space: 0
   m_Property:
     name: arcCircle

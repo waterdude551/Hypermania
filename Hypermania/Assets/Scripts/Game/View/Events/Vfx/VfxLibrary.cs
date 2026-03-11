@@ -9,6 +9,7 @@ namespace Game.View.Events.Vfx
     {
         Block,
         DashDust,
+        SmallHit,
     }
 
     [Serializable]
