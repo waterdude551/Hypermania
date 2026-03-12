@@ -67,7 +67,7 @@ namespace Game.View.Fighters
         }
 
         public virtual void RollbackRender(
-            Frame frame,
+            Frame simFrame,
             in FighterState state,
             VfxManager vfxManager,
             SfxManager sfxManager
@@ -75,7 +75,7 @@ namespace Game.View.Fighters
         {
             if (
                 state.State == CharacterState.BlockCrouch
-                || state.State == CharacterState.BlockStand && frame == state.StateStart
+                || state.State == CharacterState.BlockStand && simFrame == state.StateStart
             )
             {
                 vfxManager.AddDesired(
@@ -87,28 +87,32 @@ namespace Game.View.Fighters
                             Direction = (Vector2)state.HitProps.Knockback,
                             Position = (Vector2)state.HitLocation,
                         },
-                        StartFrame = frame,
+                        StartFrame = simFrame,
                         Hash = 0, // can't be more than one block per character on a frame?
                     }
                 );
             }
             if (
-                (state.State == CharacterState.Hit || state.State == CharacterState.Knockdown)
-                && frame == state.StateStart
+                (
+                    state.State == CharacterState.Hit
+                    || state.State == CharacterState.Knockdown
+                    || state.State == CharacterState.Death
+                )
+                && simFrame == state.StateStart
             )
             {
                 vfxManager.AddDesired(
                     new ViewEvent<VfxEvent>()
                     {
                         Event = new VfxEvent { Kind = VfxKind.SmallHit, Position = (Vector2)state.HitLocation },
-                        StartFrame = frame,
+                        StartFrame = simFrame,
                         Hash = 0,
                     }
                 );
             }
             if (
                 (state.State == CharacterState.BackDash || state.State == CharacterState.ForwardDash)
-                && frame == state.StateStart
+                && simFrame == state.StateStart
             )
             {
                 Vector2 dir = (Vector2)(
@@ -124,7 +128,7 @@ namespace Game.View.Fighters
                             Direction = dir,
                             Position = (Vector2)state.Position + dir * _dustEmitterLocation.localPosition.x,
                         },
-                        StartFrame = frame,
+                        StartFrame = simFrame,
                         Hash = 0,
                     }
                 );

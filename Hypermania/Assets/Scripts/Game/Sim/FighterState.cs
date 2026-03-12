@@ -412,16 +412,19 @@ namespace Game.Sim
             }
 
             Frame startFrame = frame;
+            int bufferWindow = options.Global.Input.InputBufferWindow;
             if (!Actionable && beatCancelEligible)
             {
                 int frameDiff =
                     options.Global.Audio.ClosestBeat(frame, AudioConfig.BeatSubdivision.QuarterNote) - realFrame;
                 startFrame += frameDiff;
+                // beat cancel inputs must be on the beat
+                bufferWindow = 1;
             }
 
             foreach (((var loc, var input), var state) in _attackDictionary)
             {
-                if (InputH.PressedRecently(input, options.Global.Input.InputBufferWindow) && AttackLocation == loc)
+                if (InputH.PressedRecently(input, bufferWindow) && AttackLocation == loc)
                 {
                     if (
                         AttackLocation == FighterAttackLocation.Standing

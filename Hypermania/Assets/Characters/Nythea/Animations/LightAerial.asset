@@ -189,10 +189,10 @@ MonoBehaviour:
         Kind: 1
         AttackKind: 0
         Damage: 6
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 14
+        BlockstunTicks: 10
         HitstopTicks: 7
-        BlockstopTicks: 0
+        BlockstopTicks: 5
         StartsRhythmCombo: 0
         KnockdownKind: 0
         Knockback:
@@ -241,10 +241,10 @@ MonoBehaviour:
         Kind: 1
         AttackKind: 0
         Damage: 6
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 14
+        BlockstunTicks: 10
         HitstopTicks: 7
-        BlockstopTicks: 0
+        BlockstopTicks: 5
         StartsRhythmCombo: 0
         KnockdownKind: 0
         Knockback:
@@ -293,10 +293,10 @@ MonoBehaviour:
         Kind: 1
         AttackKind: 0
         Damage: 6
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 14
+        BlockstunTicks: 10
         HitstopTicks: 7
-        BlockstopTicks: 0
+        BlockstopTicks: 5
         StartsRhythmCombo: 0
         KnockdownKind: 0
         Knockback:
@@ -345,10 +345,10 @@ MonoBehaviour:
         Kind: 1
         AttackKind: 0
         Damage: 6
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 14
+        BlockstunTicks: 10
         HitstopTicks: 7
-        BlockstopTicks: 0
+        BlockstopTicks: 5
         StartsRhythmCombo: 0
         KnockdownKind: 0
         Knockback:

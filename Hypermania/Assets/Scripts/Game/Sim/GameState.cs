@@ -1,12 +1,13 @@
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Linq;
 using Design.Animation;
 using Design.Configs;
 using Game.View.Overlay;
 using MemoryPack;
 using Netcode.Rollback;
+using UnityEngine;
+using UnityEngine.InputSystem;
 using Utils;
 using Utils.SoftFloat;
 
@@ -18,6 +19,7 @@ namespace Game.Sim
         Mania,
         RoundEnd, // Used to be roundStart, indicates the end of a round
         Countdown, // Countdown to round.
+        End, // after game is done
     }
 
     [Serializable]
@@ -29,10 +31,18 @@ namespace Game.Sim
     }
 
     [Serializable]
+    public class LocalPlayerOptions
+    {
+        public InputDevice InputDevice;
+        public ControlsConfig Controls;
+    }
+
+    [Serializable]
     public class GameOptions
     {
         public GlobalConfig Global;
         public PlayerOptions[] Players;
+        public LocalPlayerOptions[] LocalPlayers;
     }
 
     [MemoryPackable]
@@ -56,6 +66,7 @@ namespace Game.Sim
         [MemoryPackIgnore]
         public const int MAX_COLLIDERS = 100;
 
+        public int PartialSimFrameCount; // to accumulate frames when speedRatio is < 1
         public Frame RealFrame; // network/music frame
         public Frame SimFrame; // Game sim frame
         public Frame RoundStart; // Added to indicate when a round starts.
@@ -65,6 +76,9 @@ namespace Game.Sim
         public sfloat HypeMeter;
         public GameMode GameMode;
         public int HitstopFramesRemaining;
+
+        public sfloat SpeedRatio;
+        public Frame RoundEndStart;
 
         /// <summary>
         /// Use this static builder instead of the constructor for creating new GameStates. This is because MemoryPack,
@@ -86,6 +100,7 @@ namespace Game.Sim
                 HitstopFramesRemaining = 0,
                 HypeMeter = (sfloat)0f,
                 GameMode = GameMode.Countdown,
+                SpeedRatio = 1,
             };
             for (int i = 0; i < options.Players.Length; i++)
             {
@@ -106,6 +121,19 @@ namespace Game.Sim
 
         private void DoRoundEnd(GameOptions options, Span<GameInput> outInputs)
         {
+            SpeedRatio =
+                1
+                - (sfloat)(RealFrame - RoundEndStart) / (options.Global.RoundEndTicks) * (sfloat)0.25f
+                - (sfloat)0.50f;
+            if (RealFrame - RoundEndStart < options.Global.RoundEndTicks)
+            {
+                return;
+            }
+            if (FightersDead())
+            {
+                GameMode = GameMode.End;
+                return;
+            }
             for (int i = 0; i < Fighters.Length; i++)
             {
                 Fighters[i].Health = options.Players[i].Character.Health;
@@ -113,33 +141,53 @@ namespace Game.Sim
                 FighterFacing facing = xPos > 0 ? FighterFacing.Left : FighterFacing.Right;
                 Fighters[i].RoundReset(options.Players[i].Character, new SVector2(xPos, sfloat.Zero), facing);
                 outInputs[i] = GameInput.None;
+                Manias[i].ManiaEvents.Clear();
             }
+
+            RoundEndStart = Frame.NullFrame;
             HypeMeter = (sfloat)0.0f;
             RoundStart = SimFrame;
+            SpeedRatio = 1;
             GameMode = GameMode.Countdown;
         }
 
         private void DoCountdown(GameOptions options, Span<GameInput> outInputs)
         {
+            for (int i = 0; i < Fighters.Length; i++)
+            {
+                outInputs[i] = GameInput.None;
+                Fighters[i].SetState(CharacterState.Idle, SimFrame, Frame.Infinity);
+            }
             if (SimFrame - RoundStart >= options.Global.RoundCountdownTicks) // Added an attribute to config for countdown.
             {
                 GameMode = GameMode.Fighting;
                 RoundEnd = SimFrame + options.Global.RoundTimeTicks;
             }
-            for (int i = 0; i < Fighters.Length; i++)
-            {
-                outInputs[i] = GameInput.None;
-            }
         }
 
         public void Advance(GameOptions options, (GameInput input, InputStatus status)[] inputs)
         {
-            RealFrame += 1;
             if (inputs.Length != options.Players.Length || options.Players.Length != Fighters.Length)
             {
                 throw new InvalidOperationException("invalid inputs and characters to advance game state with");
             }
+            RealFrame += 1;
+            for (int i = 0; i < Fighters.Length; i++)
+            {
+                Manias[i].ManiaEvents.Clear();
+            }
 
+            if (GameMode == GameMode.End)
+            {
+                return;
+            }
+
+            PartialSimFrameCount++;
+            if (PartialSimFrameCount < 1 / SpeedRatio)
+            {
+                return;
+            }
+            PartialSimFrameCount = 0;
             Span<GameInput> remapInputs = stackalloc GameInput[Fighters.Length];
             if (GameMode == GameMode.RoundEnd)
             {
@@ -213,34 +261,35 @@ namespace Game.Sim
                 }
             }
 
-            for (int i = 0; i < Fighters.Length; i++)
+            if (GameMode == GameMode.Mania || GameMode == GameMode.Fighting)
             {
-                if (Fighters[i].Health <= 0)
+                for (int i = 0; i < Fighters.Length; i++)
                 {
-                    Fighters[i].Lives--;
-                    if (Fighters[i].Lives <= 0)
+                    if (Fighters[i].Health <= 0)
                     {
+                        Fighters[i].Lives--;
+
+                        // Decide what victory indicator to give.
+                        if (Fighters[1 - i].Health == options.Players[1 - i].Character.Health)
+                        {
+                            Fighters[1 - i].Victories[Fighters[1 - i].NumVictories] = VictoryKind.Perfect;
+                        }
+                        else
+                        {
+                            Fighters[1 - i].Victories[Fighters[1 - i].NumVictories] = VictoryKind.Normal;
+                        }
+                        Fighters[1 - i].NumVictories++;
+
+                        GameMode = GameMode.RoundEnd;
+                        Fighters[i].SetState(CharacterState.Death, SimFrame, Frame.Infinity);
+                        RoundEndStart = RealFrame;
+                        // Ensure that if the player died to a mania attack it ends immediately
+                        for (int j = 0; j < Manias.Length; j++)
+                        {
+                            Manias[j].End();
+                        }
                         return;
                     }
-
-                    // Decide what victory indicator to give.
-                    if (Fighters[1 - i].Health == options.Players[1 - i].Character.Health)
-                    {
-                        Fighters[1 - i].Victories[Fighters[1 - i].NumVictories] = VictoryKind.Perfect;
-                    }
-                    else
-                    {
-                        Fighters[1 - i].Victories[Fighters[1 - i].NumVictories] = VictoryKind.Normal;
-                    }
-
-                    Fighters[1 - i].NumVictories++;
-                    GameMode = GameMode.RoundEnd;
-                    // Ensure that if the player died to a mania attack it ends immediately
-                    for (int j = 0; j < Manias.Length; j++)
-                    {
-                        Manias[j].End();
-                    }
-                    return;
                 }
             }
 
@@ -287,10 +336,9 @@ namespace Game.Sim
         {
             for (int i = 0; i < Manias.Length; i++)
             {
-                List<ManiaEvent> maniaEvents = new List<ManiaEvent>();
-                Manias[i].Tick(RealFrame, inputs[i].input, maniaEvents);
+                Manias[i].Tick(RealFrame, inputs[i].input);
 
-                foreach (ManiaEvent ev in maniaEvents)
+                foreach (ManiaEvent ev in Manias[i].ManiaEvents)
                 {
                     switch (ev.Kind)
                     {
@@ -299,6 +347,10 @@ namespace Game.Sim
                             break;
                         case ManiaEventKind.Hit:
                             outInputs[i].Flags |= ev.Note.HitInput;
+                            break;
+                        case ManiaEventKind.Missed:
+                            GameMode = GameMode.Fighting;
+                            Manias[i].End();
                             break;
                     }
                 }

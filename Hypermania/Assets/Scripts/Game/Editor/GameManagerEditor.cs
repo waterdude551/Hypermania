@@ -19,7 +19,7 @@ namespace Game.Editor
                 return;
 
             bool inPlayMode = Application.isPlaying;
-            bool isSinglePlayer = gm.Runner is SingleplayerRunner;
+            bool isSinglePlayer = gm.Runner is LocalRunner;
 
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Online Controls", EditorStyles.boldLabel);

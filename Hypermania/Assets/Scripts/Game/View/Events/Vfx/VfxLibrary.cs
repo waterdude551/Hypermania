@@ -9,6 +9,8 @@ namespace Game.View.Events.Vfx
     {
         Block,
         DashDust,
+        NoteHit,
+        NoteMiss,
         SmallHit,
     }
 

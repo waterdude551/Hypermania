@@ -12,37 +12,199 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c40c74260407c44937a7a045857c43, type: 3}
   m_Name: ControlsConfig
   m_EditorClassIdentifier: 
-  controlScheme:
+  _controlSchemeP1:
     values:
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
-    - primaryKey: 0
-      altKey: 0
+    - _keyboardBindings:
+        _primaryKey: 0
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 34
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 37
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 0
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 33
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 1
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 15
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 2
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 18
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 3
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 24
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 7
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 25
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 4
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 26
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 6
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 23
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 5
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 29
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 11
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 18
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 3
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 24
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 7
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 33
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 1
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 25
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 4
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 15
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 2
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 26
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 6
+        _altButton: 34
+  _controlSchemeP2:
+    values:
+    - _keyboardBindings:
+        _primaryKey: 0
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 34
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 37
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 0
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 33
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 1
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 15
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 2
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 18
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 3
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 24
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 7
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 25
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 4
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 26
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 6
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 23
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 5
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 29
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 11
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 18
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 3
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 24
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 7
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 33
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 1
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 25
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 4
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 15
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 2
+        _altButton: 34
+    - _keyboardBindings:
+        _primaryKey: 26
+        _altKey: 0
+      _gamepadBindings:
+        _primaryButton: 6
+        _altButton: 34

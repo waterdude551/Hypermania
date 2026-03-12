@@ -42,6 +42,7 @@ namespace Game.View
             public FrameDataOverlay FrameDataOverlay;
             public RoundCountdownView RoundCountdownView;
             public HypeBarView HypeBarView;
+            public KOScreenView KOScreenView;
         }
 
         public FighterView[] Fighters => _fighters;
@@ -133,6 +134,7 @@ namespace Game.View
             _params.InfoOverlayView.Render(overlayDetails);
             _params.RoundCountdownView.DisplayRoundCD(state.SimFrame, state.RoundStart, options);
             _params.RoundTimerView.DisplayRoundTimer(state.SimFrame, state.RoundEnd, state.GameMode, options);
+            _params.KOScreenView.Render(state);
 
             if (_rollbackStart != Frame.NullFrame)
             {
@@ -161,10 +163,13 @@ namespace Game.View
             for (int i = 0; i < _options.Players.Length; i++)
             {
                 _fighters[i].RollbackRender(state.SimFrame, state.Fighters[i], _params.VfxManager, _params.SfxManager);
+                _playerParams[i]
+                    .ManiaView.RollbackRender(state.SimFrame, state.Manias[i], _params.VfxManager, _params.SfxManager);
                 if (
                     (
                         state.Fighters[i].State == CharacterState.Hit
                         || state.Fighters[i].State == CharacterState.Knockdown
+                        || state.Fighters[i].State == CharacterState.Death
                     )
                     && state.SimFrame == state.Fighters[i].StateStart
                 )

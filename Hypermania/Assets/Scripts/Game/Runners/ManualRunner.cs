@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 namespace Game.Runners
 {
-    public class ManualRunner : SingleplayerRunner
+    public class ManualRunner : LocalRunner
     {
         [SerializeField]
         private Key _advanceKey;
@@ -19,11 +19,19 @@ namespace Game.Runners
             {
                 return;
             }
-            _inputBuffer.Saturate();
+
+            for (int i = 0; i < _inputBuffers.Length; i++)
+            {
+                _inputBuffers[i].Saturate();
+            }
+
             if (Keyboard.current[Key.RightArrow].wasPressedThisFrame)
             {
                 GameLoop();
-                _inputBuffer.Clear();
+                for (int i = 0; i < _inputBuffers.Length; i++)
+                {
+                    _inputBuffers[i].Clear();
+                }
             }
             if (Keyboard.current[Key.RightArrow].isPressed)
             {
@@ -31,7 +39,10 @@ namespace Game.Runners
                 if (_curHoldS >= _holdS)
                 {
                     GameLoop();
-                    _inputBuffer.Clear();
+                    for (int i = 0; i < _inputBuffers.Length; i++)
+                    {
+                        _inputBuffers[i].Clear();
+                    }
                 }
             }
             else

@@ -113,7 +113,7 @@ namespace Game.Sim
 
         public bool HasInputSeqeunce(ReadOnlySpan<InputHistoryEntry> sequence, int withinFrames, int beforeFrames = 0)
         {
-            if (withinFrames < 0 || withinFrames >= _count)
+            if (withinFrames <= 0 || withinFrames >= _count)
             {
                 return false;
             }

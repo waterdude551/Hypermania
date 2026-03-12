@@ -958,7 +958,7 @@ SpriteRenderer:
   m_SortingLayerID: -1444139175
   m_SortingLayer: -2
   m_SortingOrder: 35
-  m_Sprite: {fileID: 4428129581964747000, guid: 5191505ea43786cde9d3772de12b2e4f, type: 3}
+  m_Sprite: {fileID: 8382018092879034074, guid: 5191505ea43786cde9d3772de12b2e4f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1004,7 +1004,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_CategoryHash: 3.4790622e-31
-  m_labelHash: 6.1185534e-38
+  m_labelHash: 5.025184e-13
   m_SpriteKey: 0
   m_SpriteHash: 587447468
 --- !u!114 &801792398473297204
@@ -1438,8 +1438,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed8b1ae4e4e52b34ea557c1c11e076fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_CategoryHash: 0.000019219313
-  m_labelHash: 0.000019219313
+  m_CategoryHash: 0
+  m_labelHash: 0
   m_SpriteKey: 0
   m_SpriteHash: 1001150989
 --- !u!1 &3162663264144715615
@@ -2757,7 +2757,7 @@ SpriteRenderer:
   m_SortingLayerID: -1444139175
   m_SortingLayer: -2
   m_SortingOrder: 8
-  m_Sprite: {fileID: -4415070000976152424, guid: 5191505ea43786cde9d3772de12b2e4f, type: 3}
+  m_Sprite: {fileID: -5182700591338537239, guid: 5191505ea43786cde9d3772de12b2e4f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -2801,7 +2801,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_CategoryHash: 2.089648e-20
-  m_labelHash: 3.4244967e-20
+  m_labelHash: 0.0000010688196
   m_SpriteKey: 0
   m_SpriteHash: 1030341286
 --- !u!114 &6591620730313607070
@@ -3096,8 +3096,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed8b1ae4e4e52b34ea557c1c11e076fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_CategoryHash: 1.9640691
-  m_labelHash: 1.9640691
+  m_CategoryHash: 0
+  m_labelHash: 0
   m_SpriteKey: 0
   m_SpriteHash: 697001314
 --- !u!1 &6220982565613952585
@@ -4748,7 +4748,7 @@ SpriteRenderer:
   m_SortingLayerID: -1444139175
   m_SortingLayer: -2
   m_SortingOrder: 28
-  m_Sprite: {fileID: 997352983224904118, guid: 5191505ea43786cde9d3772de12b2e4f, type: 3}
+  m_Sprite: {fileID: 9189316053482504771, guid: 5191505ea43786cde9d3772de12b2e4f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4793,7 +4793,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_CategoryHash: 0.00000070661537
-  m_labelHash: 2.4103536e-38
+  m_labelHash: 0.000000062380415
   m_SpriteKey: 0
   m_SpriteHash: 967572400
 --- !u!114 &1871604986726785324

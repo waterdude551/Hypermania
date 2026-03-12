@@ -37,7 +37,7 @@ namespace Design.Configs
             }
             // By default loop the animation, but this should never happen because we would have switched to a different
             // state in the fighter state for ones that should not loop
-            tick = ((tick % data.TotalTicks) + data.TotalTicks) % data.TotalTicks;
+            tick = (tick + data.TotalTicks) % data.TotalTicks;
             return data.Frames[tick];
         }
 

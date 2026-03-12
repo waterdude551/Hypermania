@@ -9,7 +9,7 @@ using Steamworks;
 
 namespace Game.Runners
 {
-    public class SingleplayerRunner : GameRunner
+    public class LocalRunner : GameRunner
     {
         protected SyncTestSession<GameState, GameInput> _session;
 
@@ -19,11 +19,13 @@ namespace Game.Runners
         )
         {
             base.Init(players, client);
+
             SessionBuilder<GameInput, SteamNetworkingIdentity> builder = new SessionBuilder<
                 GameInput,
                 SteamNetworkingIdentity
             >()
                 .WithNumPlayers(players.Count)
+                .WithMaxPredictionWindow(GameManager.ROLLBACK_FRAMES)
                 .WithFps(GameManager.TPS);
             foreach ((PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address) in players)
             {
@@ -52,8 +54,11 @@ namespace Game.Runners
                 return;
             }
 
-            _inputBuffer.Clear();
-            _inputBuffer.Saturate();
+            for (int i = 0; i < _inputBuffers.Length; i++)
+            {
+                _inputBuffers[i].Clear();
+                _inputBuffers[i].Saturate();
+            }
 
             float fpsDelta = 1.0f / GameManager.TPS;
             _time += deltaTime;
@@ -72,8 +77,11 @@ namespace Game.Runners
                 return;
             }
 
-            _session.AddLocalInput(new PlayerHandle(0), _inputBuffer.Poll());
-            _session.AddLocalInput(new PlayerHandle(1), GameInput.None);
+            for (int i = 0; i < 2; i++)
+            {
+                GameInput input = i < _inputBuffers.Length ? _inputBuffers[i].Poll() : GameInput.None;
+                _session.AddLocalInput(new PlayerHandle(i), input);
+            }
 
             List<RollbackRequest<GameState, GameInput>> requests = _session.AdvanceFrame();
             foreach (RollbackRequest<GameState, GameInput> request in requests)
@@ -96,7 +104,7 @@ namespace Game.Runners
                 }
             }
 
-            if (_curState.FightersDead())
+            if (_curState.GameMode == GameMode.End)
             {
                 DeInit();
                 return;
