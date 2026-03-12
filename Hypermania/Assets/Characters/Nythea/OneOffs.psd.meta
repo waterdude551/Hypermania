@@ -100,6 +100,72 @@ ScriptedImporter:
     spritePosition: {x: 0, y: 0}
   multiSpriteImportData: []
   layeredSpriteImportData:
+  - name: special3
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    customData: 
+    rect:
+      serializedVersion: 2
+      x: 3270
+      y: 6533
+      width: 547
+      height: 1474
+    spriteID: 30ced06a046a75d429fcb40cecca4410
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 3270, y: 6533}
+    spritePosition: {x: 2853, y: 1074}
+  - name: special2
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    customData: 
+    rect:
+      serializedVersion: 2
+      x: 2713
+      y: 6533
+      width: 549
+      height: 1636
+    spriteID: 71833951f2fd3c141a3e415d1a0a2eeb
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 2713, y: 6533}
+    spritePosition: {x: 2804, y: 1053}
+  - name: special1
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    customData: 
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 5635
+      width: 634
+      height: 1956
+    spriteID: d6a3594c0507ff045ae0bc1ccd7879b7
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 5635}
+    spritePosition: {x: 2767, y: 736}
   - name: channel4
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -361,6 +427,36 @@ ScriptedImporter:
   resliceFromLayer: 0
   pSDLayerImportSetting: []
   psdLayers:
+  - name: special3
+    spriteName: special3
+    isGroup: 0
+    parentIndex: -1
+    spriteID: 30ced06a046a75d429fcb40cecca4410
+    layerID: 21
+    mosaicPosition: {x: 3270, y: 6533}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: special2
+    spriteName: special2
+    isGroup: 0
+    parentIndex: -1
+    spriteID: 71833951f2fd3c141a3e415d1a0a2eeb
+    layerID: 20
+    mosaicPosition: {x: 2713, y: 6533}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: special1
+    spriteName: special1
+    isGroup: 0
+    parentIndex: -1
+    spriteID: d6a3594c0507ff045ae0bc1ccd7879b7
+    layerID: 19
+    mosaicPosition: {x: 4, y: 5635}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
   - name: channel4
     spriteName: channel4
     isGroup: 0
