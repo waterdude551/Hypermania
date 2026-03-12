@@ -100,7 +100,51 @@ ScriptedImporter:
     spritePosition: {x: 0, y: 0}
   multiSpriteImportData: []
   layeredSpriteImportData:
-  - name: 5M smear4
+  - name: channel4
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    customData: 
+    rect:
+      serializedVersion: 2
+      x: 1329
+      y: 6533
+      width: 1376
+      height: 1095
+    spriteID: b7cc53fd7508efb43bd7bca973610460
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 1329, y: 6533}
+    spritePosition: {x: 849, y: 1397}
+  - name: channel3
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    customData: 
+    rect:
+      serializedVersion: 2
+      x: 1893
+      y: 1224
+      width: 1764
+      height: 1547
+    spriteID: da4b3628b2d76da47b0f8e80eb7b4efe
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 1893, y: 1224}
+    spritePosition: {x: 593, y: 1117}
+  - name: channel2
     originalName: 
     pivot: {x: 0.5, y: 0.5}
     alignment: 0
@@ -109,7 +153,51 @@ ScriptedImporter:
     rect:
       serializedVersion: 2
       x: 4
-      y: 3370
+      y: 1224
+      width: 1881
+      height: 1888
+    spriteID: de530f4f4455e1148b4320c454657d01
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 1224}
+    spritePosition: {x: 637, y: 961}
+  - name: channel1
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    customData: 
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 4166
+      width: 1317
+      height: 1461
+    spriteID: cee8b7ecf40cc7942a829c69bb48159b
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 4166}
+    spritePosition: {x: 974, y: 1175}
+  - name: 5M smear4
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    customData: 
+    rect:
+      serializedVersion: 2
+      x: 2651
+      y: 3120
       width: 1433
       height: 669
     spriteID: 9069e2b2c339e9143987cab7dc4c5ff8
@@ -120,7 +208,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 4, y: 3370}
+    uvTransform: {x: 2651, y: 3120}
     spritePosition: {x: 2449, y: 1699}
   - name: 5M smear3
     originalName: 
@@ -130,8 +218,8 @@ ScriptedImporter:
     customData: 
     rect:
       serializedVersion: 2
-      x: 1756
-      y: 2270
+      x: 1329
+      y: 5266
       width: 1458
       height: 1259
     spriteID: 05990b247f053824fa794bfef8bae292
@@ -142,7 +230,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 1756, y: 2270}
+    uvTransform: {x: 1329, y: 5266}
     spritePosition: {x: 2449, y: 1109}
   - name: 5M smear2
     originalName: 
@@ -174,8 +262,8 @@ ScriptedImporter:
     customData: 
     rect:
       serializedVersion: 2
-      x: 4
-      y: 2270
+      x: 1329
+      y: 4166
       width: 1744
       height: 1092
     spriteID: 891563d1af640dc40851eb753187b847
@@ -186,7 +274,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 4, y: 2270}
+    uvTransform: {x: 1329, y: 4166}
     spritePosition: {x: 2121, y: 980}
   - name: 5M smear1
     originalName: 
@@ -197,7 +285,7 @@ ScriptedImporter:
     rect:
       serializedVersion: 2
       x: 4
-      y: 1224
+      y: 3120
       width: 2639
       height: 1038
     spriteID: 54478ab93fe5a6543a321d70f94dd124
@@ -208,7 +296,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 4, y: 1224}
+    uvTransform: {x: 4, y: 3120}
     spritePosition: {x: 1226, y: 1034}
   spriteImportData: []
   rigSpriteImportData: []
@@ -273,13 +361,53 @@ ScriptedImporter:
   resliceFromLayer: 0
   pSDLayerImportSetting: []
   psdLayers:
+  - name: channel4
+    spriteName: channel4
+    isGroup: 0
+    parentIndex: -1
+    spriteID: b7cc53fd7508efb43bd7bca973610460
+    layerID: 16
+    mosaicPosition: {x: 1329, y: 6533}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: channel3
+    spriteName: channel3
+    isGroup: 0
+    parentIndex: -1
+    spriteID: da4b3628b2d76da47b0f8e80eb7b4efe
+    layerID: 14
+    mosaicPosition: {x: 1893, y: 1224}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: channel2
+    spriteName: channel2
+    isGroup: 0
+    parentIndex: -1
+    spriteID: de530f4f4455e1148b4320c454657d01
+    layerID: 12
+    mosaicPosition: {x: 4, y: 1224}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: channel1
+    spriteName: channel1
+    isGroup: 0
+    parentIndex: -1
+    spriteID: cee8b7ecf40cc7942a829c69bb48159b
+    layerID: 11
+    mosaicPosition: {x: 4, y: 4166}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
   - name: 5M smear4
     spriteName: 5M smear4
     isGroup: 0
     parentIndex: -1
     spriteID: 9069e2b2c339e9143987cab7dc4c5ff8
     layerID: 8
-    mosaicPosition: {x: 4, y: 3370}
+    mosaicPosition: {x: 2651, y: 3120}
     flatten: 0
     isImported: 1
     isVisible: 1
@@ -289,7 +417,7 @@ ScriptedImporter:
     parentIndex: -1
     spriteID: 05990b247f053824fa794bfef8bae292
     layerID: 7
-    mosaicPosition: {x: 1756, y: 2270}
+    mosaicPosition: {x: 1329, y: 5266}
     flatten: 0
     isImported: 1
     isVisible: 1
@@ -309,7 +437,7 @@ ScriptedImporter:
     parentIndex: -1
     spriteID: 891563d1af640dc40851eb753187b847
     layerID: 9
-    mosaicPosition: {x: 4, y: 2270}
+    mosaicPosition: {x: 1329, y: 4166}
     flatten: 0
     isImported: 1
     isVisible: 1
@@ -319,7 +447,7 @@ ScriptedImporter:
     parentIndex: -1
     spriteID: 54478ab93fe5a6543a321d70f94dd124
     layerID: 3
-    mosaicPosition: {x: 4, y: 1224}
+    mosaicPosition: {x: 4, y: 3120}
     flatten: 0
     isImported: 1
     isVisible: 1
