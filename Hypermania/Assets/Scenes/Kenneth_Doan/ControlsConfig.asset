@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c40c74260407c44937a7a045857c43, type: 3}
   m_Name: ControlsConfig
   m_EditorClassIdentifier: 
-  _playerInputPrefab: {fileID: 7934384987876558455, guid: d823eafb61b33a74f9b1c0cb8b8e7219, type: 3}
   _controlSchemeP1:
     values:
     - _keyboardBindings:
@@ -209,4 +208,3 @@ MonoBehaviour:
       _gamepadBindings:
         _primaryButton: 6
         _altButton: 34
-  _isControllerInput: 0
