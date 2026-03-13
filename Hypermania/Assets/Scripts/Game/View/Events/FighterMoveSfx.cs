@@ -10,7 +10,7 @@ namespace Game.View.Events
     {
         public List<SfxKind> Kinds;
     }
-    
+
     // TODO: will fix this later, should be able to be spawned on a specific frame
     [CreateAssetMenu(menuName = "Hypermania/Fighter Move Sfx")]
     public class FighterMoveSfx : ScriptableObject

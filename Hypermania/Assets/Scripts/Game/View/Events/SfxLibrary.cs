@@ -16,7 +16,6 @@ namespace Game.View.Events
         Woosh,
         ScytheSwing,
         Sweep,
-        
     }
 
     [Serializable]
