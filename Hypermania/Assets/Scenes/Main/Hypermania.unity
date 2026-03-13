@@ -602,6 +602,7 @@ MonoBehaviour:
       SkinIndex: 1
     LocalPlayers:
     - Controls: {fileID: 0}
+    - Controls: {fileID: 0}
   _drawHitboxes: 1
 --- !u!4 &286925406
 Transform:
@@ -2304,7 +2305,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 593b24fc0b39d1082a5b28d0cdfdd4db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _zoom: 2
   _playerParams:
   - BurstBarView: {fileID: 3996422961981561594}
     HealthBarView: {fileID: 3996422961981561593}
@@ -2328,6 +2328,7 @@ MonoBehaviour:
     RoundCountdownView: {fileID: 1350160259}
     HypeBarView: {fileID: 2901949813414236108}
     KOScreenView: {fileID: 5203012344204750237}
+  _conductorLerpSpeed: 5
   _disableCameraShake: 0
 --- !u!4 &2114326935
 Transform:
@@ -2457,7 +2458,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94c83657c37afca7690865fe49821381, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxQueuedSlices: 32
+  t: 0
+  _maxQueuedSeconds: 1
+  _loopSong: 1
 --- !u!1 &562816628700700719
 GameObject:
   m_ObjectHideFlags: 0

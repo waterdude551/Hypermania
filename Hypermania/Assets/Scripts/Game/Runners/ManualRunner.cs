@@ -27,7 +27,7 @@ namespace Game.Runners
 
             if (Keyboard.current[Key.RightArrow].wasPressedThisFrame)
             {
-                GameLoop();
+                GameLoop(deltaTime);
                 for (int i = 0; i < _inputBuffers.Length; i++)
                 {
                     _inputBuffers[i].Clear();
@@ -38,7 +38,7 @@ namespace Game.Runners
                 _curHoldS += deltaTime;
                 if (_curHoldS >= _holdS)
                 {
-                    GameLoop();
+                    GameLoop(deltaTime);
                     for (int i = 0; i < _inputBuffers.Length; i++)
                     {
                         _inputBuffers[i].Clear();

@@ -66,11 +66,11 @@ namespace Game.Runners
             while (_time > fpsDelta)
             {
                 _time -= fpsDelta;
-                GameLoop();
+                GameLoop(fpsDelta);
             }
         }
 
-        protected void GameLoop()
+        protected void GameLoop(float deltaTime)
         {
             if (_session == null)
             {
@@ -110,7 +110,7 @@ namespace Game.Runners
                 return;
             }
             InfoOverlayDetails details = new InfoOverlayDetails { HasPing = false, Ping = 0 };
-            _view.Render(_curState, _options, details);
+            _view.Render(deltaTime, _curState, _options, details);
         }
     }
 }

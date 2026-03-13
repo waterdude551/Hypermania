@@ -2,6 +2,7 @@ using Game;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Utils;
+using Utils.EnumArray;
 using Utils.SoftFloat;
 
 namespace Design.Configs
@@ -14,6 +15,8 @@ namespace Design.Configs
         [FormerlySerializedAs("BPM")]
         public sfloat Bpm = 60;
         public AudioClip AudioClip;
+        public EnumArray<Character, AudioClip> CharacterThemes;
+        public int LoopBeat = 0;
 
         //Convert BPM to seconds per frame, then seconds to frames
         public int FramesPerBeat => Mathsf.RoundToInt((sfloat)60f / Bpm * GameManager.TPS);

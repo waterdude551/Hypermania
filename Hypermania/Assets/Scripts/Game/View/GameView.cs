@@ -7,6 +7,7 @@ using Game.View.Events.Vfx;
 using Game.View.Fighters;
 using Game.View.Mania;
 using Game.View.Overlay;
+using Steamworks;
 using UnityEngine;
 using Utils;
 
@@ -50,8 +51,6 @@ namespace Game.View
 
         private GameOptions _options;
 
-        [SerializeField]
-        private float _zoom = 1.6f;
 
         [SerializeField]
         private PlayerParams[] _playerParams;
@@ -59,6 +58,7 @@ namespace Game.View
         [SerializeField]
         private Params _params;
 
+        [SerializeField] private float _conductorLerpSpeed;
         [SerializeField]
         private bool _disableCameraShake;
 
@@ -94,19 +94,24 @@ namespace Game.View
             }
 
             _params.HypeBarView.SetMaxHype((float)options.Global.MaxHype);
-            _conductor.Init(options.Global.Audio);
+            _conductor.Init(options);
             _rollbackStart = Frame.NullFrame;
         }
 
-        public void Render(in GameState state, GameOptions options, InfoOverlayDetails overlayDetails)
+        public void Render(float deltaTime, in GameState state, GameOptions options, InfoOverlayDetails overlayDetails)
         {
+            bool maniasEnabled = false;
             for (int i = 0; i < _options.Players.Length; i++)
             {
                 _fighters[i].Render(state.SimFrame, state.Fighters[i]);
                 _playerParams[i].ManiaView.Render(state.RealFrame, state.Manias[i]);
+                
+                maniasEnabled |= state.Manias[i].Enabled(state.RealFrame);
+                if (maniasEnabled)
+                    _conductor.t = Mathf.Lerp(_conductor.t, i * 2 - 1, deltaTime * _conductorLerpSpeed);
             }
 
-            _conductor.RequestSlice(state.RealFrame);
+            _conductor.PublishTick(state.RealFrame, deltaTime);
 
             List<Vector2> interestPoints = new List<Vector2>();
             for (int i = 0; i < _options.Players.Length; i++)
@@ -133,7 +138,7 @@ namespace Game.View
                 _playerParams[i].VictoryMarkView.SetVictories(state.Fighters[i].Victories, (i == 0 ? -1 : 1));
             }
 
-            _params.CameraControl.UpdateCamera(interestPoints, _zoom);
+            _params.CameraControl.UpdateCamera(interestPoints);
             _params.FighterIndicatorManager.Track(state.Fighters);
 
             for (int i = 0; i < _options.Players.Length; i++)
@@ -156,6 +161,10 @@ namespace Game.View
                 _rollbackStart = Frame.NullFrame;
             }
 
+            if (!maniasEnabled)
+            {
+                _conductor.t = Mathf.Lerp(_conductor.t, (float)(state.HypeMeter / options.Global.MaxHype), deltaTime * _conductorLerpSpeed);
+            }
             _params.HypeBarView.SetHype((float)state.HypeMeter);
             _params.FrameDataOverlay.AddFrameData(state, options);
         }
