@@ -32,13 +32,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -57,13 +60,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -82,13 +88,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -107,13 +116,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -132,13 +144,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -157,13 +172,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -182,13 +200,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -207,13 +228,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -232,13 +256,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -257,13 +284,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -282,7 +312,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -305,7 +337,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -323,18 +357,21 @@ MonoBehaviour:
           rawValue: 1045552972
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 2
         Damage: 5
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 18
+        BlockstunTicks: 10
         HitstopTicks: 8
+        BlockstopTicks: 6
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1067953566
           y:
             rawValue: 1030059728
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -353,7 +390,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -376,7 +415,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -394,18 +435,21 @@ MonoBehaviour:
           rawValue: 1045552972
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 2
         Damage: 5
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 18
+        BlockstunTicks: 10
         HitstopTicks: 8
+        BlockstopTicks: 6
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1067953566
           y:
             rawValue: 1030059728
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -424,7 +468,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -447,7 +493,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -465,18 +513,21 @@ MonoBehaviour:
           rawValue: 1045552972
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 2
         Damage: 5
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 18
+        BlockstunTicks: 10
         HitstopTicks: 8
+        BlockstopTicks: 6
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1067953566
           y:
             rawValue: 1030059728
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -495,7 +546,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -518,7 +571,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -536,18 +591,21 @@ MonoBehaviour:
           rawValue: 1045552972
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 2
         Damage: 5
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 18
+        BlockstunTicks: 10
         HitstopTicks: 8
+        BlockstopTicks: 6
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1067953566
           y:
             rawValue: 1030059728
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -566,7 +624,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -589,7 +649,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -607,18 +669,21 @@ MonoBehaviour:
           rawValue: 1045552972
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 2
         Damage: 5
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 18
+        BlockstunTicks: 10
         HitstopTicks: 8
+        BlockstopTicks: 6
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1067953566
           y:
             rawValue: 1030059728
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -637,7 +702,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -660,7 +727,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -678,18 +747,21 @@ MonoBehaviour:
           rawValue: 1045552972
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 2
         Damage: 5
-        HitstunTicks: 12
-        BlockstunTicks: 8
+        HitstunTicks: 18
+        BlockstunTicks: 10
         HitstopTicks: 8
+        BlockstopTicks: 6
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1067953566
           y:
             rawValue: 1030059728
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -708,7 +780,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -731,13 +805,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -756,7 +833,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -779,13 +858,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -804,7 +886,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -827,13 +911,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -852,7 +939,9 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
@@ -875,13 +964,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -900,13 +992,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -925,13 +1020,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -950,10 +1048,13 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0

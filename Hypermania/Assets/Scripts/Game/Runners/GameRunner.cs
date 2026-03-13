@@ -8,9 +8,11 @@ using Netcode.P2P;
 using Netcode.Rollback;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.Runners
 {
+    [RequireComponent(typeof(JoinOnInput))]
     public abstract class GameRunner : MonoBehaviour
     {
         [SerializeField]
@@ -23,21 +25,21 @@ namespace Game.Runners
         [SerializeField]
         protected bool _drawHitboxes;
 
-        [SerializeField]
-        protected ControlsConfig _controlsConfig;
-
         /// <summary>
         /// The current state of the runner. If you derive from this class, it must be initialized on Init();
         /// </summary>
         protected GameState _curState;
 
-        /// <summary>
-        /// The characters of each player. _characters[i] should represent the chararcter being played by handle i. If
-        /// you derive from this class, it must be initialized on Init();
-        /// </summary>
-        protected InputBuffer _inputBuffer;
+        protected InputBuffer[] _inputBuffers;
         protected bool _initialized;
         protected float _time;
+
+        protected JoinOnInput _joinOnInput;
+
+        public void Awake()
+        {
+            _joinOnInput = GetComponent<JoinOnInput>();
+        }
 
         public virtual void Init(
             List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players,
@@ -48,11 +50,17 @@ namespace Game.Runners
             {
                 throw new InvalidOperationException("must get 2 players");
             }
+
+            _inputBuffers = new InputBuffer[_options.LocalPlayers.Length];
+            for (int i = 0; i < _inputBuffers.Length; i++)
+            {
+                _inputBuffers[i] = new InputBuffer(
+                    _options.LocalPlayers[i].InputDevice ?? _joinOnInput.GetPlayerInputDevice(i) ?? Keyboard.current,
+                    _options.LocalPlayers[i].Controls?.ControlScheme ?? ControlsConfig.DefaultBindings
+                );
+            }
             _curState = GameState.Create(_options);
             _view.Init(_options);
-            if (_controlsConfig == null)
-                _controlsConfig = ScriptableObject.CreateInstance<ControlsConfig>();
-            _inputBuffer = new InputBuffer(_controlsConfig);
             _time = 0;
             _initialized = true;
         }
@@ -62,8 +70,8 @@ namespace Game.Runners
         public virtual void DeInit()
         {
             _initialized = false;
+            _inputBuffers = null;
             _time = 0;
-            _inputBuffer = null;
             _view.DeInit();
             _curState = null;
         }

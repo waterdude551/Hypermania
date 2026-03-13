@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Game.Sim;
+using Game.View.Events;
+using Game.View.Events.Vfx;
+using Steamworks;
+using Unity.VisualScripting;
 using UnityEngine;
 using Utils;
 
@@ -34,6 +38,7 @@ namespace Game.View.Mania
     {
         [SerializeField]
         public ManiaViewConfig Config;
+
         private Dictionary<int, GameObject> _activeNotes;
 
         public void Init()
@@ -54,6 +59,54 @@ namespace Game.View.Mania
         public void OnValidate()
         {
             Config.Validate();
+        }
+
+        public void RollbackRender(Frame realFrame, in ManiaState maniaState, VfxManager vfx, SfxManager sfx)
+        {
+            Vector3 world = GetComponent<RectTransform>().position;
+            for (int i = 0; i < maniaState.ManiaEvents.Count; i++)
+            {
+                if (maniaState.ManiaEvents[i].Kind == ManiaEventKind.Hit)
+                {
+                    sfx.AddDesired(
+                        new ViewEvent<SfxEvent>
+                        {
+                            Event = new SfxEvent { Kind = SfxKind.ComboGood },
+                            StartFrame = realFrame,
+                            Hash = i,
+                        }
+                    );
+
+                    vfx.AddDesired(
+                        new ViewEvent<VfxEvent>
+                        {
+                            Event = new VfxEvent { Kind = VfxKind.NoteHit, Position = world },
+                            StartFrame = realFrame,
+                            Hash = i,
+                        }
+                    );
+                }
+                else if (maniaState.ManiaEvents[i].Kind == ManiaEventKind.Missed)
+                {
+                    sfx.AddDesired(
+                        new ViewEvent<SfxEvent>
+                        {
+                            Event = new SfxEvent { Kind = SfxKind.ComboMiss },
+                            StartFrame = realFrame,
+                            Hash = i,
+                        }
+                    );
+
+                    vfx.AddDesired(
+                        new ViewEvent<VfxEvent>
+                        {
+                            Event = new VfxEvent { Kind = VfxKind.NoteMiss, Position = world },
+                            StartFrame = realFrame,
+                            Hash = i,
+                        }
+                    );
+                }
+            }
         }
 
         public void Render(Frame frame, in ManiaState state)

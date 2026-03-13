@@ -2,6 +2,7 @@ using Design.Animation;
 using Design.Configs;
 using Game.Sim;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 using Utils;
 using Utils.EnumArray;

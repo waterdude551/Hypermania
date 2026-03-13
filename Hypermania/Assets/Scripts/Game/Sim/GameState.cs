@@ -1,6 +1,5 @@
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Linq;
 using Design.Animation;
 using Design.Configs;
@@ -16,9 +15,11 @@ namespace Game.Sim
     public enum GameMode
     {
         Fighting,
+        ManiaStart,
         Mania,
         RoundEnd, // Used to be roundStart, indicates the end of a round
         Countdown, // Countdown to round.
+        End, // after game is done
     }
 
     [Serializable]
@@ -31,10 +32,18 @@ namespace Game.Sim
     }
 
     [Serializable]
+    public class LocalPlayerOptions
+    {
+        public InputDevice InputDevice;
+        public ControlsConfig Controls;
+    }
+
+    [Serializable]
     public class GameOptions
     {
         public GlobalConfig Global;
         public PlayerOptions[] Players;
+        public LocalPlayerOptions[] LocalPlayers;
     }
 
     [MemoryPackable]
@@ -45,6 +54,7 @@ namespace Game.Sim
         /// </summary>
         [ThreadStatic]
         private static PhysicsContext<BoxProps> _physicsCtx;
+
         private static PhysicsContext<BoxProps> PhysicsCtx
         {
             get
@@ -58,6 +68,7 @@ namespace Game.Sim
         [MemoryPackIgnore]
         public const int MAX_COLLIDERS = 100;
 
+        public int PartialSimFrameCount; // to accumulate frames when speedRatio is < 1
         public Frame RealFrame; // network/music frame
         public Frame SimFrame; // Game sim frame
         public Frame RoundStart; // Added to indicate when a round starts.
@@ -67,6 +78,9 @@ namespace Game.Sim
         public sfloat HypeMeter;
         public GameMode GameMode;
         public int HitstopFramesRemaining;
+
+        public sfloat SpeedRatio;
+        public Frame ModeStart;
 
         /// <summary>
         /// Use this static builder instead of the constructor for creating new GameStates. This is because MemoryPack,
@@ -88,6 +102,7 @@ namespace Game.Sim
                 HitstopFramesRemaining = 0,
                 HypeMeter = (sfloat)0f,
                 GameMode = GameMode.Countdown,
+                SpeedRatio = 1,
             };
             for (int i = 0; i < options.Players.Length; i++)
             {
@@ -103,11 +118,26 @@ namespace Game.Sim
                     }
                 );
             }
+
             return state;
         }
 
         private void DoRoundEnd(GameOptions options, Span<GameInput> outInputs)
         {
+            SpeedRatio =
+                1 - (sfloat)(RealFrame - ModeStart) / (options.Global.RoundEndTicks) * (sfloat)0.25f - (sfloat)0.50f;
+            if (RealFrame - ModeStart < options.Global.RoundEndTicks)
+            {
+                return;
+            }
+
+            if (FightersDead())
+            {
+                ModeStart = RealFrame;
+                GameMode = GameMode.End;
+                return;
+            }
+
             for (int i = 0; i < Fighters.Length; i++)
             {
                 Fighters[i].Health = options.Players[i].Character.Health;
@@ -115,52 +145,102 @@ namespace Game.Sim
                 FighterFacing facing = xPos > 0 ? FighterFacing.Left : FighterFacing.Right;
                 Fighters[i].RoundReset(options.Players[i].Character, new SVector2(xPos, sfloat.Zero), facing);
                 outInputs[i] = GameInput.None;
+                Manias[i].ManiaEvents.Clear();
             }
+
+            ModeStart = Frame.NullFrame;
             HypeMeter = (sfloat)0.0f;
             RoundStart = SimFrame;
+            SpeedRatio = 1;
             GameMode = GameMode.Countdown;
         }
 
         private void DoCountdown(GameOptions options, Span<GameInput> outInputs)
         {
+            for (int i = 0; i < Fighters.Length; i++)
+            {
+                outInputs[i] = GameInput.None;
+                Fighters[i].SetState(CharacterState.Idle, SimFrame, Frame.Infinity);
+            }
+
             if (SimFrame - RoundStart >= options.Global.RoundCountdownTicks) // Added an attribute to config for countdown.
             {
                 GameMode = GameMode.Fighting;
                 RoundEnd = SimFrame + options.Global.RoundTimeTicks;
             }
+        }
+
+        private void DoManiaStart(GameOptions options, Span<GameInput> outInputs)
+        {
             for (int i = 0; i < Fighters.Length; i++)
             {
                 outInputs[i] = GameInput.None;
+            }
+
+            if (RealFrame - ModeStart <= options.Global.ManiaSlowTicks / 2)
+            {
+                SpeedRatio = (sfloat)0.25f;
+            }
+            else if (RealFrame - ModeStart <= options.Global.ManiaSlowTicks)
+            {
+                SpeedRatio = (sfloat)0.5f;
+            }
+            else
+            {
+                SpeedRatio = 1;
+                GameMode = GameMode.Mania;
+                ModeStart = Frame.NullFrame;
             }
         }
 
         public void Advance(GameOptions options, (GameInput input, InputStatus status)[] inputs)
         {
-            RealFrame += 1;
             if (inputs.Length != options.Players.Length || options.Players.Length != Fighters.Length)
             {
                 throw new InvalidOperationException("invalid inputs and characters to advance game state with");
             }
 
+            RealFrame += 1;
+            for (int i = 0; i < Fighters.Length; i++)
+            {
+                Manias[i].ManiaEvents.Clear();
+                Fighters[i].ClearViewNotifiers();
+            }
+
+            if (GameMode == GameMode.End)
+            {
+                return;
+            }
+
+            PartialSimFrameCount++;
+            if (PartialSimFrameCount < 1 / SpeedRatio)
+            {
+                return;
+            }
+
+            PartialSimFrameCount = 0;
             Span<GameInput> remapInputs = stackalloc GameInput[Fighters.Length];
-            if (GameMode == GameMode.RoundEnd)
+            switch (GameMode)
             {
-                DoRoundEnd(options, remapInputs);
-            }
-            else if (GameMode == GameMode.Countdown)
-            {
-                DoCountdown(options, remapInputs);
-            }
-            else if (GameMode == GameMode.Mania)
-            {
-                DoManiaStep(inputs, remapInputs);
-            }
-            else if (GameMode == GameMode.Fighting)
-            {
-                for (int i = 0; i < Fighters.Length; i++)
-                {
-                    remapInputs[i] = inputs[i].input;
-                }
+                case GameMode.RoundEnd:
+                    DoRoundEnd(options, remapInputs);
+                    break;
+                case GameMode.Countdown:
+                    DoCountdown(options, remapInputs);
+                    break;
+                case GameMode.Fighting:
+                    for (int i = 0; i < Fighters.Length; i++)
+                    {
+                        remapInputs[i] = inputs[i].input;
+                    }
+
+                    break;
+                case GameMode.Mania:
+                    DoManiaStep(inputs, remapInputs);
+                    break;
+                case GameMode.ManiaStart:
+                    DoManiaStart(options, remapInputs);
+                    break;
             }
 
             // Push the current input into the input history, to read for buffering.
@@ -168,12 +248,14 @@ namespace Game.Sim
             {
                 Fighters[i].InputH.PushInput(remapInputs[i]);
             }
+
             // if hitstop, only grab inputs and return
             if (HitstopFramesRemaining > 0)
             {
                 HitstopFramesRemaining--;
                 return;
             }
+
             SimFrame += 1;
 
             for (int i = 0; i < Fighters.Length; i++)
@@ -220,41 +302,44 @@ namespace Game.Sim
                 }
             }
 
-            for (int i = 0; i < Fighters.Length; i++)
+            if (GameMode == GameMode.Mania || GameMode == GameMode.Fighting)
             {
-                if (Fighters[i].Health <= 0)
+                for (int i = 0; i < Fighters.Length; i++)
                 {
-                    Fighters[i].Lives--;
-                    if (Fighters[i].Lives <= 0)
+                    if (Fighters[i].Health <= 0)
                     {
+                        Fighters[i].Lives--;
+
+                        // Decide what victory indicator to give.
+                        if (Fighters[1 - i].Health == options.Players[1 - i].Character.Health)
+                        {
+                            Fighters[1 - i].Victories[Fighters[1 - i].NumVictories] = VictoryKind.Perfect;
+                        }
+                        else
+                        {
+                            Fighters[1 - i].Victories[Fighters[1 - i].NumVictories] = VictoryKind.Normal;
+                        }
+
+                        Fighters[1 - i].NumVictories++;
+
+                        GameMode = GameMode.RoundEnd;
+                        Fighters[i].SetState(CharacterState.Death, SimFrame, Frame.Infinity);
+                        ModeStart = RealFrame;
+                        // Ensure that if the player died to a mania attack it ends immediately
+                        for (int j = 0; j < Manias.Length; j++)
+                        {
+                            Manias[j].End();
+                        }
+
                         return;
                     }
-
-                    // Decide what victory indicator to give.
-                    if (Fighters[1 - i].Health == options.Players[1 - i].Character.Health)
-                    {
-                        Fighters[1 - i].Victories[Fighters[1 - i].NumVictories] = VictoryKind.Perfect;
-                    }
-                    else
-                    {
-                        Fighters[1 - i].Victories[Fighters[1 - i].NumVictories] = VictoryKind.Normal;
-                    }
-
-                    Fighters[1 - i].NumVictories++;
-                    GameMode = GameMode.RoundEnd;
-                    // Ensure that if the player died to a mania attack it ends immediately
-                    for (int j = 0; j < Manias.Length; j++)
-                    {
-                        Manias[j].End();
-                    }
-                    return;
                 }
             }
 
             // Apply any velocities set during movement or through knockback.
             for (int i = 0; i < Fighters.Length; i++)
             {
-                Fighters[i].UpdatePosition(options, Fighters[i ^ 1].Position);
+                Fighters[i].UpdatePosition(SimFrame, options, Fighters[i ^ 1].Position);
             }
 
             // Update hype if they are holding forward
@@ -282,6 +367,7 @@ namespace Game.Sim
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -289,10 +375,9 @@ namespace Game.Sim
         {
             for (int i = 0; i < Manias.Length; i++)
             {
-                List<ManiaEvent> maniaEvents = new List<ManiaEvent>();
-                Manias[i].Tick(RealFrame, inputs[i].input, maniaEvents);
+                Manias[i].Tick(RealFrame, inputs[i].input);
 
-                foreach (ManiaEvent ev in maniaEvents)
+                foreach (ManiaEvent ev in Manias[i].ManiaEvents)
                 {
                     switch (ev.Kind)
                     {
@@ -301,6 +386,10 @@ namespace Game.Sim
                             break;
                         case ManiaEventKind.Hit:
                             outInputs[i].Flags |= ev.Note.HitInput;
+                            break;
+                        case ManiaEventKind.Missed:
+                            GameMode = GameMode.Fighting;
+                            Manias[i].End();
                             break;
                     }
                 }
@@ -351,6 +440,7 @@ namespace Game.Sim
                 {
                     collide = c;
                 }
+
                 // TODO: sort by priority or something
                 if (hitPair != (-1, -1))
                 {
@@ -395,14 +485,16 @@ namespace Game.Sim
                     )
                     {
                         // set hitstop to the next beat
-                        Frame nextBeat = options.Global.Audio.NextBeat(
-                            RealFrame,
-                            AudioConfig.BeatSubdivision.QuarterNote
-                        );
-                        HitstopFramesRemaining = nextBeat - RealFrame;
-                        // set the notes to start at the beat after that
-                        nextBeat = options.Global.Audio.NextBeat(nextBeat + 1, AudioConfig.BeatSubdivision.QuarterNote);
+                        Frame nextBeat = RealFrame;
+                        while (nextBeat - RealFrame < options.Global.ManiaSlowTicks)
+                        {
+                            nextBeat = options.Global.Audio.NextBeat(
+                                nextBeat + 1,
+                                AudioConfig.BeatSubdivision.QuarterNote
+                            );
+                        }
 
+                        HitstopFramesRemaining = nextBeat - (RealFrame + options.Global.ManiaSlowTicks);
                         for (int i = 0; i < 16; i++)
                         {
                             Manias[owners.Item1]
@@ -420,8 +512,10 @@ namespace Game.Sim
                                 AudioConfig.BeatSubdivision.QuarterNote
                             );
                         }
+
                         Manias[owners.Item1].Enable(nextBeat);
-                        GameMode = GameMode.Mania;
+                        GameMode = GameMode.ManiaStart;
+                        ModeStart = RealFrame;
                         // TODO: show mania screen only after the maximum rollback frames to ensure no visual artifacting
                     }
                 }
@@ -449,6 +543,7 @@ namespace Game.Sim
             {
                 HypeMeter -= damage;
             }
+
             HypeMeter = Mathsf.Clamp(HypeMeter, -options.Global.MaxHype, options.Global.MaxHype);
         }
 
@@ -456,22 +551,26 @@ namespace Game.Sim
         {
             if (c.BoxA.Data.Kind == HitboxKind.Hitbox && c.BoxB.Data.Kind == HitboxKind.Hurtbox)
             {
+                sfloat mult = 1 + (sfloat)0.2f * (HypeMeter / options.Global.MaxHype) * (c.BoxA.Owner * -2 + 1);
                 return Fighters[c.BoxB.Owner]
                     .ApplyHit(
                         SimFrame,
                         options.Players[c.BoxB.Owner].Character,
                         c.BoxA.Data,
-                        c.BoxB.Box.ClosestPointToCenter(c.BoxA.Box)
+                        c.BoxB.Box.ClosestPointToCenter(c.BoxA.Box),
+                        mult
                     );
             }
             else if (c.BoxA.Data.Kind == HitboxKind.Hurtbox && c.BoxB.Data.Kind == HitboxKind.Hitbox)
             {
+                sfloat mult = 1 + (sfloat)0.2f * (HypeMeter / options.Global.MaxHype) * (c.BoxB.Owner * -2 + 1);
                 return Fighters[c.BoxA.Owner]
                     .ApplyHit(
                         SimFrame,
                         options.Players[c.BoxA.Owner].Character,
                         c.BoxB.Data,
-                        c.BoxA.Box.ClosestPointToCenter(c.BoxB.Box)
+                        c.BoxA.Box.ClosestPointToCenter(c.BoxB.Box),
+                        mult
                     );
             }
             else if (c.BoxA.Data.Kind == HitboxKind.Hitbox && c.BoxB.Data.Kind == HitboxKind.Hitbox)
@@ -498,11 +597,13 @@ namespace Game.Sim
                     Fighters[c.BoxB.Owner].Position.x -= c.OverlapX * bPush;
                 }
             }
+
             return new HitOutcome { Kind = HitKind.None };
         }
 
         [ThreadStatic]
         private static ArrayBufferWriter<byte> _writer;
+
         private static ArrayBufferWriter<byte> Writer
         {
             get
@@ -529,6 +630,7 @@ namespace Game.Sim
                 hash ^= bytes[i];
                 hash *= PRIME;
             }
+
             return hash;
         }
     }

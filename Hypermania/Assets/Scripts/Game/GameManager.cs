@@ -19,6 +19,7 @@ namespace Game
         private List<(PlayerHandle handle, PlayerKind playerKind, SteamNetworkingIdentity netId)> _players;
 
         public const int TPS = 60;
+        public const int ROLLBACK_FRAMES = 8;
 
         private bool _started;
         public bool Started => _started;

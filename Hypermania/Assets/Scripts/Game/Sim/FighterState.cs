@@ -55,8 +55,22 @@ namespace Game.Sim
 
         public Frame LocationSt { get; private set; }
 
-        public BoxProps HitProps { get; private set; }
-        public SVector2 HitLocation { get; private set; }
+        public BoxProps? HitProps { get; private set; }
+        public SVector2? HitLocation { get; private set; }
+        public bool StateChangedThisRealFrame { get; private set; }
+
+        public bool HitLastRealFrame =>
+            HitProps.HasValue
+            && HitLocation.HasValue
+            && (State == CharacterState.Death || State == CharacterState.Knockdown || State == CharacterState.Hit);
+
+        public bool BlockedLastRealFrame =>
+            HitProps.HasValue
+            && HitLocation.HasValue
+            && (State == CharacterState.BlockCrouch || State == CharacterState.BlockStand);
+
+        public bool DashedLastRealFrame =>
+            StateChangedThisRealFrame && (State == CharacterState.BackDash || State == CharacterState.ForwardDash);
 
         public SVector2 StoredJumpVelocity;
 
@@ -150,8 +164,6 @@ namespace Game.Sim
                     Health = options.Players[Index].Character.Health;
                 }
             }
-            HitLocation = SVector2.zero;
-            HitProps = new BoxProps();
             if (Location == FighterLocation.Grounded)
             {
                 AirDashCount = 0;
@@ -177,6 +189,13 @@ namespace Game.Sim
             }
         }
 
+        public void ClearViewNotifiers()
+        {
+            HitProps = null;
+            HitLocation = null;
+            StateChangedThisRealFrame = false;
+        }
+
         public void SetState(CharacterState nextState, Frame start, Frame end, bool forceChange = false)
         {
             if (State != nextState || forceChange)
@@ -184,6 +203,7 @@ namespace Game.Sim
                 State = nextState;
                 StateStart = start;
                 StateEnd = end;
+                StateChangedThisRealFrame = true;
             }
         }
 
@@ -369,6 +389,7 @@ namespace Game.Sim
                 { (FighterAttackLocation.Crouching, InputFlags.LightAttack), CharacterState.LightCrouching },
                 { (FighterAttackLocation.Crouching, InputFlags.MediumAttack), CharacterState.MediumCrouching },
                 { (FighterAttackLocation.Crouching, InputFlags.HeavyAttack), CharacterState.SuperCrouching },
+                { (FighterAttackLocation.Crouching, InputFlags.SpecialAttack), CharacterState.SpecialCrouching },
                 { (FighterAttackLocation.Aerial, InputFlags.LightAttack), CharacterState.LightAerial },
                 { (FighterAttackLocation.Aerial, InputFlags.MediumAttack), CharacterState.MediumAerial },
                 { (FighterAttackLocation.Aerial, InputFlags.HeavyAttack), CharacterState.SuperAerial },
@@ -412,16 +433,19 @@ namespace Game.Sim
             }
 
             Frame startFrame = frame;
+            int bufferWindow = options.Global.Input.InputBufferWindow;
             if (!Actionable && beatCancelEligible)
             {
                 int frameDiff =
                     options.Global.Audio.ClosestBeat(frame, AudioConfig.BeatSubdivision.QuarterNote) - realFrame;
                 startFrame += frameDiff;
+                // beat cancel inputs must be on the beat
+                bufferWindow = 2;
             }
 
             foreach (((var loc, var input), var state) in _attackDictionary)
             {
-                if (InputH.PressedRecently(input, options.Global.Input.InputBufferWindow) && AttackLocation == loc)
+                if (InputH.PressedRecently(input, bufferWindow) && AttackLocation == loc)
                 {
                     if (
                         AttackLocation == FighterAttackLocation.Standing
@@ -441,10 +465,14 @@ namespace Game.Sim
             }
         }
 
-        public void UpdatePosition(GameOptions options, SVector2 otherFighterPos)
+        public void UpdatePosition(Frame frame, GameOptions options, SVector2 otherFighterPos)
         {
             // Apply gravity if not grounded and not in airdash
-            if (
+            if (options.Players[Index].Character.GetFrameData(State, frame - StateStart).Floating)
+            {
+                Velocity /= options.Global.FloatingFactor;
+            }
+            else if (
                 State != CharacterState.BackAirDash
                 && State != CharacterState.ForwardAirDash
                 && Position.y > options.Global.GroundY
@@ -541,7 +569,13 @@ namespace Game.Sim
             }
         }
 
-        public HitOutcome ApplyHit(Frame frame, CharacterConfig characterConfig, BoxProps props, SVector2 location)
+        public HitOutcome ApplyHit(
+            Frame frame,
+            CharacterConfig characterConfig,
+            BoxProps props,
+            SVector2 location,
+            sfloat damageMult
+        )
         {
             if (ImmunityEnd > frame)
             {
@@ -585,9 +619,9 @@ namespace Game.Sim
             // TODO: fixme, just to prevent multi hit
             ImmunityEnd = frame + 7;
             // TODO: if high enough, go knockdown
-            Health -= props.Damage;
+            Health -= props.Damage * damageMult;
 
-            Burst += props.Damage;
+            Burst += props.Damage * damageMult;
             Burst = Mathsf.Clamp(Burst, sfloat.Zero, characterConfig.BurstMax);
 
             Velocity = props.Knockback;

@@ -136,6 +136,7 @@ namespace Design.Animation.MoveBuilder.Editor
             EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Frame Data", EditorStyles.boldLabel);
             frame.FrameType = (FrameType)EditorGUILayout.EnumPopup("Frame Type", frame.FrameType);
+            frame.Floating = EditorGUILayout.Toggle("Floating", frame.Floating);
         }
 
         private void DrawBoxList(MoveBuilderModel m, MoveBuilderAnimationState state)
@@ -185,6 +186,7 @@ namespace Design.Animation.MoveBuilder.Editor
 
             using (new EditorGUI.DisabledScope(p.Kind != HitboxKind.Hitbox))
             {
+                p.AttackKind = (AttackKind)EditorGUILayout.EnumPopup("Attack Kind", p.AttackKind);
                 p.KnockdownKind = (KnockdownKind)EditorGUILayout.EnumPopup("Knockdown Kind", p.KnockdownKind);
                 p.Damage = EditorGUILayout.IntField("Damage", p.Damage);
                 using (new EditorGUI.DisabledScope(p.KnockdownKind != KnockdownKind.None))

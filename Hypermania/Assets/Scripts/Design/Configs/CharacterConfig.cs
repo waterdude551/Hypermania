@@ -1,5 +1,7 @@
 using Design.Animation;
 using Game;
+using Game.View.Events;
+using Game.View.Events.Vfx;
 using Game.View.Fighters;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
@@ -13,6 +15,7 @@ namespace Design.Configs
     {
         public Character Character;
         public FighterView Prefab;
+        public FighterMoveSfx MoveSfx;
         public SpriteLibraryAsset[] Skins;
         public AnimatorOverrideController AnimationController;
         public sfloat CharacterHeight;
@@ -37,7 +40,7 @@ namespace Design.Configs
             }
             // By default loop the animation, but this should never happen because we would have switched to a different
             // state in the fighter state for ones that should not loop
-            tick = ((tick % data.TotalTicks) + data.TotalTicks) % data.TotalTicks;
+            tick = (tick + data.TotalTicks) % data.TotalTicks;
             return data.Frames[tick];
         }
 
