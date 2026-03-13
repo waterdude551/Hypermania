@@ -996,9 +996,14 @@ MonoBehaviour:
   - m_Name: rift4
     m_Hash: 631440366
     m_CategoryList: []
-    m_OverrideEntries: []
+    m_OverrideEntries:
+    - m_Name: rift4
+      m_Hash: 631440366
+      m_Sprite: {fileID: -331069986942030104, guid: cd84fab8f1173834cb6d501312d8ad87, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -331069986942030104, guid: cd84fab8f1173834cb6d501312d8ad87, type: 3}
     m_FromMain: 0
-    m_EntryOverrideCount: 0
+    m_EntryOverrideCount: 1
   - m_Name: rift3
     m_Hash: 1002935885
     m_CategoryList: []
@@ -1033,5 +1038,5 @@ MonoBehaviour:
     m_FromMain: 0
     m_EntryOverrideCount: 1
   m_PrimaryLibraryGUID: 
-  m_ModificationHash: 639090112542166970
+  m_ModificationHash: 639090159307943740
   m_Version: 1
