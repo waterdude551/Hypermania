@@ -57,7 +57,7 @@ namespace Game.Sim
 
         public BoxProps? HitProps { get; private set; }
         public SVector2? HitLocation { get; private set; }
-        public bool Dashed { get; private set; }
+        public bool StateChangedThisRealFrame { get; private set; }
 
         public bool HitLastRealFrame =>
             HitProps.HasValue
@@ -70,7 +70,7 @@ namespace Game.Sim
             && (State == CharacterState.BlockCrouch || State == CharacterState.BlockStand);
 
         public bool DashedLastRealFrame =>
-            Dashed && (State == CharacterState.BackDash || State == CharacterState.ForwardDash);
+            StateChangedThisRealFrame && (State == CharacterState.BackDash || State == CharacterState.ForwardDash);
 
         public SVector2 StoredJumpVelocity;
 
@@ -193,7 +193,7 @@ namespace Game.Sim
         {
             HitProps = null;
             HitLocation = null;
-            Dashed = false;
+            StateChangedThisRealFrame = false;
         }
 
         public void SetState(CharacterState nextState, Frame start, Frame end, bool forceChange = false)
@@ -203,6 +203,7 @@ namespace Game.Sim
                 State = nextState;
                 StateStart = start;
                 StateEnd = end;
+                StateChangedThisRealFrame = true;
             }
         }
 
@@ -330,7 +331,6 @@ namespace Game.Sim
                     Velocity.x = ForwardVector.x * (config.ForwardDashDistance / options.Global.ForwardDashTicks);
 
                     SetState(CharacterState.ForwardDash, frame, frame + options.Global.ForwardDashTicks);
-                    Dashed = true;
                     return;
                 }
                 if (
@@ -341,7 +341,6 @@ namespace Game.Sim
                     Velocity.x = BackwardVector.x * config.BackDashDistance / options.Global.BackDashTicks;
 
                     SetState(CharacterState.BackDash, frame, frame + options.Global.BackDashTicks);
-                    Dashed = true;
                     return;
                 }
             }

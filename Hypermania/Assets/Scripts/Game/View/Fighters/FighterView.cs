@@ -74,6 +74,20 @@ namespace Game.View.Fighters
             SfxManager sfxManager
         )
         {
+            if (state.StateChangedThisRealFrame)
+            {
+                foreach (SfxKind sfxKind in _characterConfig.MoveSfx.Sfx[state.State].Kinds)
+                {
+                    sfxManager.AddDesired(
+                        new ViewEvent<SfxEvent>
+                        {
+                            Event = new SfxEvent { Kind = sfxKind },
+                            StartFrame = realFrame,
+                            Hash = 0,
+                        }
+                    );
+                }
+            }
             if (state.BlockedLastRealFrame)
             {
                 vfxManager.AddDesired(
@@ -89,8 +103,15 @@ namespace Game.View.Fighters
                         Hash = 0,
                     }
                 );
+                sfxManager.AddDesired(
+                    new ViewEvent<SfxEvent>
+                    {
+                        Event = new SfxEvent { Kind = SfxKind.Block },
+                        StartFrame = realFrame,
+                        Hash = 0,
+                    }
+                );
             }
-
             if (state.HitLastRealFrame)
             {
                 vfxManager.AddDesired(
@@ -102,7 +123,6 @@ namespace Game.View.Fighters
                     }
                 );
             }
-
             if (state.DashedLastRealFrame)
             {
                 Vector2 dir = (Vector2)(

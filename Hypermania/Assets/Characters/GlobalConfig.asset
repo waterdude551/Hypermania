@@ -42,6 +42,7 @@ MonoBehaviour:
   RoundEndTicks: 160
   FloatingFactor:
     rawValue: 1066192077
+  ManiaSlowTicks: 45
   _inputConfig:
     DashWindow: 12
     SuperJumpWindow: 8

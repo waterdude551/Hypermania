@@ -2,6 +2,7 @@ using System;
 
 namespace Game
 {
+    [Serializable]
     public enum CharacterState
     {
         Hit = 0,

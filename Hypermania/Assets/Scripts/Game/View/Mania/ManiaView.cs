@@ -39,12 +39,6 @@ namespace Game.View.Mania
         [SerializeField]
         public ManiaViewConfig Config;
 
-        [SerializeField]
-        private RectTransform _canvasRect;
-
-        [SerializeField]
-        private Camera _camera;
-
         private Dictionary<int, GameObject> _activeNotes;
 
         public void Init()

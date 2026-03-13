@@ -142,6 +142,7 @@ namespace Game.Sim
             EndFrame = Frame.NullFrame;
             for (int i = 0; i < Channels.Length; i++)
             {
+                Channels[i].Pressed = false;
                 Channels[i].Notes.Clear();
             }
             TotalNoteCount = 0;
