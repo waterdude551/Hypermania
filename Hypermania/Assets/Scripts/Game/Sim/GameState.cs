@@ -16,6 +16,7 @@ namespace Game.Sim
     public enum GameMode
     {
         Fighting,
+        ManiaStart,
         Mania,
         RoundEnd, // Used to be roundStart, indicates the end of a round
         Countdown, // Countdown to round.
@@ -78,7 +79,7 @@ namespace Game.Sim
         public int HitstopFramesRemaining;
 
         public sfloat SpeedRatio;
-        public Frame RoundEndStart;
+        public Frame ModeStart;
 
         /// <summary>
         /// Use this static builder instead of the constructor for creating new GameStates. This is because MemoryPack,
@@ -123,14 +124,15 @@ namespace Game.Sim
         {
             SpeedRatio =
                 1
-                - (sfloat)(RealFrame - RoundEndStart) / (options.Global.RoundEndTicks) * (sfloat)0.25f
+                - (sfloat)(RealFrame - ModeStart) / (options.Global.RoundEndTicks) * (sfloat)0.25f
                 - (sfloat)0.50f;
-            if (RealFrame - RoundEndStart < options.Global.RoundEndTicks)
+            if (RealFrame - ModeStart < options.Global.RoundEndTicks)
             {
                 return;
             }
             if (FightersDead())
             {
+                ModeStart = RealFrame;
                 GameMode = GameMode.End;
                 return;
             }
@@ -144,7 +146,7 @@ namespace Game.Sim
                 Manias[i].ManiaEvents.Clear();
             }
 
-            RoundEndStart = Frame.NullFrame;
+            ModeStart = Frame.NullFrame;
             HypeMeter = (sfloat)0.0f;
             RoundStart = SimFrame;
             SpeedRatio = 1;
@@ -165,6 +167,28 @@ namespace Game.Sim
             }
         }
 
+        private void DoManiaStart(GameOptions options, Span<GameInput> outInputs)
+        {
+            for (int i = 0; i < Fighters.Length; i++)
+            {
+                outInputs[i] = GameInput.None;
+            }
+            if (RealFrame - ModeStart <= options.Global.ManiaSlowTicks / 2)
+            {
+                SpeedRatio = (sfloat)0.25f;
+            }
+            else if (RealFrame - ModeStart <= options.Global.ManiaSlowTicks)
+            {
+                SpeedRatio = (sfloat)0.5f;
+            }
+            else
+            {
+                SpeedRatio = 1;
+                GameMode = GameMode.Mania;
+                ModeStart = Frame.NullFrame;
+            }
+        }
+
         public void Advance(GameOptions options, (GameInput input, InputStatus status)[] inputs)
         {
             if (inputs.Length != options.Players.Length || options.Players.Length != Fighters.Length)
@@ -175,6 +199,7 @@ namespace Game.Sim
             for (int i = 0; i < Fighters.Length; i++)
             {
                 Manias[i].ManiaEvents.Clear();
+                Fighters[i].ClearViewNotifiers();
             }
 
             if (GameMode == GameMode.End)
@@ -189,24 +214,27 @@ namespace Game.Sim
             }
             PartialSimFrameCount = 0;
             Span<GameInput> remapInputs = stackalloc GameInput[Fighters.Length];
-            if (GameMode == GameMode.RoundEnd)
+            switch (GameMode)
             {
-                DoRoundEnd(options, remapInputs);
-            }
-            else if (GameMode == GameMode.Countdown)
-            {
-                DoCountdown(options, remapInputs);
-            }
-            else if (GameMode == GameMode.Mania)
-            {
-                DoManiaStep(inputs, remapInputs);
-            }
-            else if (GameMode == GameMode.Fighting)
-            {
-                for (int i = 0; i < Fighters.Length; i++)
-                {
-                    remapInputs[i] = inputs[i].input;
-                }
+                case GameMode.RoundEnd:
+                    DoRoundEnd(options, remapInputs);
+                    break;
+                case GameMode.Countdown:
+                    DoCountdown(options, remapInputs);
+                    break;
+                case GameMode.Fighting:
+                    for (int i = 0; i < Fighters.Length; i++)
+                    {
+                        remapInputs[i] = inputs[i].input;
+                    }
+                    break;
+                case GameMode.Mania:
+                    DoManiaStep(inputs, remapInputs);
+                    break;
+                case GameMode.ManiaStart:
+                    DoManiaStart(options, remapInputs);
+                    break;
+                
             }
 
             // Push the current input into the input history, to read for buffering.
@@ -282,7 +310,7 @@ namespace Game.Sim
 
                         GameMode = GameMode.RoundEnd;
                         Fighters[i].SetState(CharacterState.Death, SimFrame, Frame.Infinity);
-                        RoundEndStart = RealFrame;
+                        ModeStart = RealFrame;
                         // Ensure that if the player died to a mania attack it ends immediately
                         for (int j = 0; j < Manias.Length; j++)
                         {
@@ -445,14 +473,12 @@ namespace Game.Sim
                     )
                     {
                         // set hitstop to the next beat
-                        Frame nextBeat = options.Global.Audio.NextBeat(
-                            RealFrame,
-                            AudioConfig.BeatSubdivision.QuarterNote
-                        );
-                        HitstopFramesRemaining = nextBeat - RealFrame;
-                        // set the notes to start at the beat after that
-                        nextBeat = options.Global.Audio.NextBeat(nextBeat + 1, AudioConfig.BeatSubdivision.QuarterNote);
-
+                        Frame nextBeat = RealFrame;
+                        while (nextBeat - RealFrame < options.Global.ManiaSlowTicks)
+                        {
+                            nextBeat = options.Global.Audio.NextBeat(nextBeat + 1, AudioConfig.BeatSubdivision.QuarterNote);
+                        }
+                        HitstopFramesRemaining = nextBeat - (RealFrame + options.Global.ManiaSlowTicks);
                         for (int i = 0; i < 16; i++)
                         {
                             Manias[owners.Item1]
@@ -471,7 +497,8 @@ namespace Game.Sim
                             );
                         }
                         Manias[owners.Item1].Enable(nextBeat);
-                        GameMode = GameMode.Mania;
+                        GameMode = GameMode.ManiaStart;
+                        ModeStart = RealFrame;
                         // TODO: show mania screen only after the maximum rollback frames to ensure no visual artifacting
                     }
                 }

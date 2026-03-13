@@ -50,17 +50,13 @@ namespace Game.View
 
         private GameOptions _options;
 
-        [SerializeField]
-        private float _zoom = 1.6f;
+        [SerializeField] private float _zoom = 1.6f;
 
-        [SerializeField]
-        private PlayerParams[] _playerParams;
+        [SerializeField] private PlayerParams[] _playerParams;
 
-        [SerializeField]
-        private Params _params;
+        [SerializeField] private Params _params;
 
-        [SerializeField]
-        private bool _disableCameraShake;
+        [SerializeField] private bool _disableCameraShake;
 
         public void Init(GameOptions options)
         {
@@ -68,6 +64,7 @@ namespace Game.View
             {
                 throw new InvalidOperationException("num characters in GameView must be 2");
             }
+
             _options = options;
             _conductor = GetComponent<Conductor>();
             if (_conductor == null)
@@ -76,6 +73,7 @@ namespace Game.View
                     "Conductor was null. Did you forget to assign a conductor component to the GameView?"
                 );
             }
+
             _fighters = new FighterView[options.Players.Length];
 
             for (int i = 0; i < options.Players.Length; i++)
@@ -90,6 +88,7 @@ namespace Game.View
                 _playerParams[i].HealthBarView.SetMaxHealth((float)config.Health);
                 _playerParams[i].BurstBarView.SetMaxBurst((float)config.BurstMax);
             }
+
             _params.HypeBarView.SetMaxHype((float)options.Global.MaxHype);
             _conductor.Init(options.Global.Audio);
             _rollbackStart = Frame.NullFrame;
@@ -102,6 +101,7 @@ namespace Game.View
                 _fighters[i].Render(state.SimFrame, state.Fighters[i]);
                 _playerParams[i].ManiaView.Render(state.RealFrame, state.Manias[i]);
             }
+
             _conductor.RequestSlice(state.RealFrame);
 
             List<Vector2> interestPoints = new List<Vector2>();
@@ -111,8 +111,13 @@ namespace Game.View
                 // ensure that fighter heads are included
                 interestPoints.Add(
                     (Vector2)state.Fighters[i].Position
-                        + new Vector2(0, (float)_options.Players[i].Character.CharacterHeight)
+                    + new Vector2(0, (float)_options.Players[i].Character.CharacterHeight)
                 );
+                if ((state.GameMode == GameMode.Mania || state.GameMode == GameMode.ManiaStart) &&
+                    state.Manias[i].Enabled(state.RealFrame))
+                {
+                    interestPoints.Add(_playerParams[i].ManiaView.transform.position);
+                }
             }
 
             for (int i = 0; i < _options.Players.Length; i++)
@@ -131,6 +136,7 @@ namespace Game.View
                 _playerParams[i].ComboCountView.SetComboCount(combo);
                 _playerParams[i ^ 1].HealthBarView.SetCombo(combo, (int)state.Fighters[i ^ 1].Health);
             }
+
             _params.InfoOverlayView.Render(overlayDetails);
             _params.RoundCountdownView.DisplayRoundCD(state.SimFrame, state.RoundStart, options);
             _params.RoundTimerView.DisplayRoundTimer(state.SimFrame, state.RoundEnd, state.GameMode, options);
@@ -138,11 +144,12 @@ namespace Game.View
 
             if (_rollbackStart != Frame.NullFrame)
             {
-                _params.SfxManager.InvalidateAndConsume(_rollbackStart, state.SimFrame);
-                _params.CameraShakeManager.InvalidateAndConsume(_rollbackStart, state.SimFrame);
-                _params.VfxManager.InvalidateAndConsume(_rollbackStart, state.SimFrame);
+                _params.SfxManager.InvalidateAndConsume(_rollbackStart, state.RealFrame);
+                _params.CameraShakeManager.InvalidateAndConsume(_rollbackStart, state.RealFrame);
+                _params.VfxManager.InvalidateAndConsume(_rollbackStart, state.RealFrame);
                 _rollbackStart = Frame.NullFrame;
             }
+
             _params.HypeBarView.SetHype((float)state.HypeMeter);
             _params.FrameDataOverlay.AddFrameData(state, options);
         }
@@ -152,8 +159,9 @@ namespace Game.View
             // gather all sfx from states in the current rollback process
             if (_rollbackStart == Frame.NullFrame)
             {
-                _rollbackStart = state.SimFrame;
+                _rollbackStart = state.RealFrame;
             }
+
             DoViewEvents(state);
         }
 
@@ -162,23 +170,16 @@ namespace Game.View
             // TODO: refactor me, im thinking some listener pattern
             for (int i = 0; i < _options.Players.Length; i++)
             {
-                _fighters[i].RollbackRender(state.SimFrame, state.Fighters[i], _params.VfxManager, _params.SfxManager);
+                _fighters[i].RollbackRender(state.RealFrame, state.Fighters[i], _params.VfxManager, _params.SfxManager);
                 _playerParams[i]
-                    .ManiaView.RollbackRender(state.SimFrame, state.Manias[i], _params.VfxManager, _params.SfxManager);
-                if (
-                    (
-                        state.Fighters[i].State == CharacterState.Hit
-                        || state.Fighters[i].State == CharacterState.Knockdown
-                        || state.Fighters[i].State == CharacterState.Death
-                    )
-                    && state.SimFrame == state.Fighters[i].StateStart
-                )
+                    .ManiaView.RollbackRender(state.RealFrame, state.Manias[i], _params.VfxManager, _params.SfxManager);
+                if (state.Fighters[i].HitLastRealFrame)
                 {
                     _params.SfxManager.AddDesired(
                         new ViewEvent<SfxEvent>
                         {
                             Event = new SfxEvent { Kind = SfxKind.MediumPunch },
-                            StartFrame = state.SimFrame,
+                            StartFrame = state.RealFrame,
                             Hash = i,
                         }
                     );
@@ -194,7 +195,7 @@ namespace Game.View
                                     NumBounces = 10,
                                     KnockbackVector = (Vector2)state.Fighters[i].Velocity,
                                 },
-                                StartFrame = state.SimFrame,
+                                StartFrame = state.RealFrame,
                                 Hash = i,
                             }
                         );
@@ -211,6 +212,7 @@ namespace Game.View
                 Destroy(_fighters[i].gameObject);
                 _playerParams[i].ManiaView.DeInit();
             }
+
             _fighters = null;
             _options = null;
         }

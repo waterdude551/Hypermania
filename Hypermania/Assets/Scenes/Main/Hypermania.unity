@@ -640,7 +640,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3703435296943762372, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
       propertyPath: m_Pivot.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3703435296943762372, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
       propertyPath: m_Pivot.y
@@ -700,7 +700,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3703435296943762372, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 100
+      value: 370
       objectReference: {fileID: 0}
     - target: {fileID: 3703435296943762372, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -722,14 +722,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: ManiaViewL
       objectReference: {fileID: 0}
-    - target: {fileID: 6827977680985341710, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
-      propertyPath: _camera
-      value: 
-      objectReference: {fileID: 562816628700700724}
-    - target: {fileID: 6827977680985341710, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
-      propertyPath: _canvasRect
-      value: 
-      objectReference: {fileID: 128986391}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1122,7 +1114,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3703435296943762372, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
       propertyPath: m_Pivot.x
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3703435296943762372, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
       propertyPath: m_Pivot.y
@@ -1182,7 +1174,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3703435296943762372, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -100
+      value: -369.99994
       objectReference: {fileID: 0}
     - target: {fileID: 3703435296943762372, guid: 7f1d3c7b497ebed36b715e8d6303c082, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1653,7 +1645,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 229592284259376917, guid: 21febfc11dc4f39459ea82755895ba72, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 250
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 229592284259376917, guid: 21febfc11dc4f39459ea82755895ba72, type: 3}
       propertyPath: m_SizeDelta.y

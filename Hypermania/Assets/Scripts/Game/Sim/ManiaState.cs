@@ -104,6 +104,7 @@ namespace Game.Sim
         public ManiaNoteChannel[] Channels;
         public Frame EndFrame;
         public List<ManiaEvent> ManiaEvents;
+        public bool Enabled(Frame frame) => frame <= EndFrame;
         private static readonly InputFlags[] CHANNEL_INPUT =
         {
             InputFlags.Mania1,

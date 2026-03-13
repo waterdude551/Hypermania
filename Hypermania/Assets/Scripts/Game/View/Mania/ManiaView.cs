@@ -67,7 +67,7 @@ namespace Game.View.Mania
             Config.Validate();
         }
 
-        public void RollbackRender(Frame simFrame, in ManiaState maniaState, VfxManager vfx, SfxManager sfx)
+        public void RollbackRender(Frame realFrame, in ManiaState maniaState, VfxManager vfx, SfxManager sfx)
         {
             Vector3 world = GetComponent<RectTransform>().position;
             for (int i = 0; i < maniaState.ManiaEvents.Count; i++)
@@ -78,7 +78,7 @@ namespace Game.View.Mania
                         new ViewEvent<SfxEvent>
                         {
                             Event = new SfxEvent { Kind = SfxKind.ComboGood },
-                            StartFrame = simFrame,
+                            StartFrame = realFrame,
                             Hash = i,
                         }
                     );
@@ -87,28 +87,18 @@ namespace Game.View.Mania
                         new ViewEvent<VfxEvent>
                         {
                             Event = new VfxEvent { Kind = VfxKind.NoteHit, Position = world },
-                            StartFrame = simFrame,
+                            StartFrame = realFrame,
                             Hash = i,
                         }
                     );
                 }
                 else if (maniaState.ManiaEvents[i].Kind == ManiaEventKind.Missed)
                 {
-                    // if (maniaEvents[i].Offset > 50) { // test value change later
-                    //     sfx.AddDesired(
-                    //     new ViewEvent<SfxEvent>
-                    //     {
-                    //         Event = new SfxEvent { Kind = SfxKind.comboOk },
-                    //         StartFrame = state.RealFrame,
-                    //         Hash = i,
-                    //     }
-                    // );
-                    // } else {
                     sfx.AddDesired(
                         new ViewEvent<SfxEvent>
                         {
                             Event = new SfxEvent { Kind = SfxKind.ComboMiss },
-                            StartFrame = simFrame,
+                            StartFrame = realFrame,
                             Hash = i,
                         }
                     );
@@ -117,7 +107,7 @@ namespace Game.View.Mania
                         new ViewEvent<VfxEvent>
                         {
                             Event = new VfxEvent { Kind = VfxKind.NoteMiss, Position = world },
-                            StartFrame = simFrame,
+                            StartFrame = realFrame,
                             Hash = i,
                         }
                     );

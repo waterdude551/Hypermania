@@ -18,7 +18,7 @@ namespace Game.View.Overlay
         {
             if (
                 state.GameMode == GameMode.RoundEnd
-                && state.RealFrame - state.RoundEndStart > GameManager.ROLLBACK_FRAMES
+                && state.RealFrame - state.ModeStart > GameManager.ROLLBACK_FRAMES
             )
             {
                 _text.SetText("KO");
