@@ -21,10 +21,11 @@ namespace Game.Runners
 
         public override void Init(
             List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players,
-            P2PClient client
+            P2PClient client,
+            GameOptions overrideOptions
         )
         {
-            base.Init(players, client);
+            base.Init(players, client, overrideOptions);
 
             SessionBuilder<GameInput, SteamNetworkingIdentity> builder = new SessionBuilder<
                 GameInput,

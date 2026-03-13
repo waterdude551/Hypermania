@@ -66,7 +66,7 @@ namespace Game.Editor
                 {
                     if (GUILayout.Button("Start Local Game"))
                     {
-                        gm.StartLocalGame();
+                        gm.StartLocalGame(null);
                     }
                 }
                 using (new EditorGUI.DisabledScope(!gm.Started))

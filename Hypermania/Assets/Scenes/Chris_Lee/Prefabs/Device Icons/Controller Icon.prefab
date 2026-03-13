@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7128858990553997556}
+  - component: {fileID: 4242886850010011702}
   m_Layer: 0
   m_Name: Controller Icon
   m_TagString: Untagged
@@ -25,7 +26,7 @@ RectTransform:
   m_GameObject: {fileID: 1369553489080521514}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8523014803974426482}
@@ -37,6 +38,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &4242886850010011702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369553489080521514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfc217a661a74f29afed42198a66ce59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _deviceName: {fileID: 3938626956171020236}
 --- !u!1 &1957891369692293448
 GameObject:
   m_ObjectHideFlags: 0
@@ -104,15 +118,15 @@ MonoBehaviour:
       m_Calls: []
   m_text: DEFAULT
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c6afedc3fbdc96843a0c5f55e8b2e982, type: 2}
-  m_sharedMaterial: {fileID: -5389053273788344447, guid: c6afedc3fbdc96843a0c5f55e8b2e982, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e0a9e7eda34b7c15ab239c93851a9d74, type: 2}
+  m_sharedMaterial: {fileID: -5102226589941242260, guid: e0a9e7eda34b7c15ab239c93851a9d74, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294836359
-  m_fontColor: {r: 0.5294118, g: 0, b: 0.9960785, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -239,7 +253,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: 3607fbd268fe8594fa678247c963c254, type: 3}
+  m_Texture: {fileID: 2800000, guid: b8df2c78385085460a717a66b3072173, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0

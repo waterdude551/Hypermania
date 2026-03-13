@@ -1,3 +1,4 @@
+/*
 using System;
 using System.Collections;
 using Game;
@@ -65,23 +66,23 @@ public class DeviceDataInjector : MonoBehaviour
             switch (_gameMode) {
                 case GameRunnerMode.Local:
                     //if (_player1Device == null || _player2Device == null) yield break;
-                    runner = gameManager.GetComponentInChildren<SingleplayerRunner>();
-                    runner._options.Players[0].InputDevice = _player1Device;
-                    runner._options.Players[1].InputDevice = _player2Device;
+                    runner = gameManager.GetComponentInChildren<LocalRunner>();
+                    runner._options.LocalPlayers[0].InputDevice = _player1Device;
+                    runner._options.LocalPlayers[1].InputDevice = _player2Device;
                     runner._options.Players[0].HealOnActionable = false;
                     runner._options.Players[1].HealOnActionable = false;
                     break;
                 case GameRunnerMode.Training:
                     //if (_player1Device == null) yield break;
-                    runner = gameManager.GetComponentInChildren<SingleplayerRunner>();
-                    runner._options.Players[0].InputDevice = _player1Device;
-                    runner._options.Players[1].InputDevice = _player2Device;
+                    runner = gameManager.GetComponentInChildren<LocalRunner>();
+                    runner._options.LocalPlayers[0].InputDevice = _player1Device;
+                    runner._options.LocalPlayers[1].InputDevice = _player2Device;
                     runner._options.Players[0].HealOnActionable = true;
                     runner._options.Players[1].HealOnActionable = true;
                     break;
                 /*case GameMode.Online:
                     runner = gameManager.GetComponentInChildren<MultiplayerRunner>();
-                    break;*/
+                    break;#1#
             }
             
             if (gameManager != null && runner != null) {
@@ -91,3 +92,4 @@ public class DeviceDataInjector : MonoBehaviour
         }
     }
 }
+*/

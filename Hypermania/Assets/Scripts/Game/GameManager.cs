@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Game.Runners;
+using Game.Sim;
 using Netcode.P2P;
 using Netcode.Rollback;
 using Steamworks;
@@ -116,14 +117,14 @@ namespace Game
             }
         }
 
-        public void StartLocalGame()
+        public void StartLocalGame(GameOptions overrideOptions)
         {
             if (_started || _matchmakingClient.CurrentLobby.IsValid())
                 return;
             _players.Clear();
             _players.Add((new PlayerHandle(0), PlayerKind.Local, default));
             _players.Add((new PlayerHandle(1), PlayerKind.Local, default));
-            OnAllPeersConnected();
+            StartRunner(overrideOptions);
         }
 
         public void DeInit()
@@ -170,11 +171,16 @@ namespace Game
 
         void OnAllPeersConnected()
         {
+            StartRunner(null);
+        }
+
+        void StartRunner(GameOptions overrideOptions)
+        {
             if (_players == null)
             {
                 throw new InvalidOperationException("players should be initialized if peers are connected");
             }
-            Runner.Init(_players, _p2pClient);
+            Runner.Init(_players, _p2pClient, overrideOptions);
             _started = true;
         }
 
