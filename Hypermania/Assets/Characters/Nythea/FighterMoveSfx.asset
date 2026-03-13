@@ -12,3 +12,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f693158abbe477b8cdff31563943890, type: 3}
   m_Name: FighterMoveSfx
   m_EditorClassIdentifier: 
+  Sfx:
+    values:
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 08000000
+    - Kinds: 08000000
+    - Kinds: 08000000
+    - Kinds: 06000000
+    - Kinds: 06000000
+    - Kinds: 08000000
+    - Kinds: 06000000
+    - Kinds: 06000000
+    - Kinds: 06000000
+    - Kinds: 06000000
+    - Kinds: 06000000
+    - Kinds: 06000000
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
+    - Kinds: 
