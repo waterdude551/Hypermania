@@ -108,7 +108,7 @@ namespace Game.View
                 _playerParams[i].ManiaView.Render(state.RealFrame, state.Manias[i]);
 
                 maniasEnabled |= state.Manias[i].Enabled(state.RealFrame);
-                if (maniasEnabled)
+                if (state.Manias[i].Enabled(state.RealFrame))
                     _conductor.t = Mathf.Lerp(_conductor.t, i * 2 - 1, deltaTime * _conductorLerpSpeed);
             }
 
