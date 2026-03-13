@@ -59,10 +59,15 @@ namespace Game.Sim
         public SVector2? HitLocation { get; private set; }
         public bool Dashed { get; private set; }
 
-        public bool HitLastRealFrame => HitProps.HasValue && HitLocation.HasValue && (State == CharacterState.Death || State == CharacterState.Knockdown || State == CharacterState.Hit);
+        public bool HitLastRealFrame =>
+            HitProps.HasValue
+            && HitLocation.HasValue
+            && (State == CharacterState.Death || State == CharacterState.Knockdown || State == CharacterState.Hit);
 
-        public bool BlockedLastRealFrame => HitProps.HasValue && HitLocation.HasValue &&
-                                            (State == CharacterState.BlockCrouch || State == CharacterState.BlockStand);
+        public bool BlockedLastRealFrame =>
+            HitProps.HasValue
+            && HitLocation.HasValue
+            && (State == CharacterState.BlockCrouch || State == CharacterState.BlockStand);
 
         public bool DashedLastRealFrame =>
             Dashed && (State == CharacterState.BackDash || State == CharacterState.ForwardDash);

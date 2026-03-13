@@ -50,13 +50,17 @@ namespace Game.View
 
         private GameOptions _options;
 
-        [SerializeField] private float _zoom = 1.6f;
+        [SerializeField]
+        private float _zoom = 1.6f;
 
-        [SerializeField] private PlayerParams[] _playerParams;
+        [SerializeField]
+        private PlayerParams[] _playerParams;
 
-        [SerializeField] private Params _params;
+        [SerializeField]
+        private Params _params;
 
-        [SerializeField] private bool _disableCameraShake;
+        [SerializeField]
+        private bool _disableCameraShake;
 
         public void Init(GameOptions options)
         {
@@ -111,10 +115,12 @@ namespace Game.View
                 // ensure that fighter heads are included
                 interestPoints.Add(
                     (Vector2)state.Fighters[i].Position
-                    + new Vector2(0, (float)_options.Players[i].Character.CharacterHeight)
+                        + new Vector2(0, (float)_options.Players[i].Character.CharacterHeight)
                 );
-                if ((state.GameMode == GameMode.Mania || state.GameMode == GameMode.ManiaStart) &&
-                    state.Manias[i].Enabled(state.RealFrame))
+                if (
+                    (state.GameMode == GameMode.Mania || state.GameMode == GameMode.ManiaStart)
+                    && state.Manias[i].Enabled(state.RealFrame)
+                )
                 {
                     interestPoints.Add(_playerParams[i].ManiaView.transform.position);
                 }

@@ -18,7 +18,8 @@ namespace Game.View.Fighters
         private CharacterConfig _characterConfig;
         private RuntimeAnimatorController _oldController;
 
-        [SerializeField] private Transform _dustEmitterLocation;
+        [SerializeField]
+        private Transform _dustEmitterLocation;
 
         public virtual void Awake()
         {
@@ -85,7 +86,7 @@ namespace Game.View.Fighters
                             Position = (Vector2)state.HitLocation.Value,
                         },
                         StartFrame = realFrame,
-                        Hash = 0 
+                        Hash = 0,
                     }
                 );
             }
@@ -102,9 +103,7 @@ namespace Game.View.Fighters
                 );
             }
 
-            if (
-                state.DashedLastRealFrame
-            )
+            if (state.DashedLastRealFrame)
             {
                 Vector2 dir = (Vector2)(
                     state.State == CharacterState.ForwardDash ? state.ForwardVector : state.BackwardVector

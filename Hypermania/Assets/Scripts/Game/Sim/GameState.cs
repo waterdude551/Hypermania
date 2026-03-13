@@ -54,6 +54,7 @@ namespace Game.Sim
         /// </summary>
         [ThreadStatic]
         private static PhysicsContext<BoxProps> _physicsCtx;
+
         private static PhysicsContext<BoxProps> PhysicsCtx
         {
             get
@@ -117,25 +118,26 @@ namespace Game.Sim
                     }
                 );
             }
+
             return state;
         }
 
         private void DoRoundEnd(GameOptions options, Span<GameInput> outInputs)
         {
             SpeedRatio =
-                1
-                - (sfloat)(RealFrame - ModeStart) / (options.Global.RoundEndTicks) * (sfloat)0.25f
-                - (sfloat)0.50f;
+                1 - (sfloat)(RealFrame - ModeStart) / (options.Global.RoundEndTicks) * (sfloat)0.25f - (sfloat)0.50f;
             if (RealFrame - ModeStart < options.Global.RoundEndTicks)
             {
                 return;
             }
+
             if (FightersDead())
             {
                 ModeStart = RealFrame;
                 GameMode = GameMode.End;
                 return;
             }
+
             for (int i = 0; i < Fighters.Length; i++)
             {
                 Fighters[i].Health = options.Players[i].Character.Health;
@@ -160,6 +162,7 @@ namespace Game.Sim
                 outInputs[i] = GameInput.None;
                 Fighters[i].SetState(CharacterState.Idle, SimFrame, Frame.Infinity);
             }
+
             if (SimFrame - RoundStart >= options.Global.RoundCountdownTicks) // Added an attribute to config for countdown.
             {
                 GameMode = GameMode.Fighting;
@@ -173,6 +176,7 @@ namespace Game.Sim
             {
                 outInputs[i] = GameInput.None;
             }
+
             if (RealFrame - ModeStart <= options.Global.ManiaSlowTicks / 2)
             {
                 SpeedRatio = (sfloat)0.25f;
@@ -195,6 +199,7 @@ namespace Game.Sim
             {
                 throw new InvalidOperationException("invalid inputs and characters to advance game state with");
             }
+
             RealFrame += 1;
             for (int i = 0; i < Fighters.Length; i++)
             {
@@ -212,6 +217,7 @@ namespace Game.Sim
             {
                 return;
             }
+
             PartialSimFrameCount = 0;
             Span<GameInput> remapInputs = stackalloc GameInput[Fighters.Length];
             switch (GameMode)
@@ -227,6 +233,7 @@ namespace Game.Sim
                     {
                         remapInputs[i] = inputs[i].input;
                     }
+
                     break;
                 case GameMode.Mania:
                     DoManiaStep(inputs, remapInputs);
@@ -234,7 +241,6 @@ namespace Game.Sim
                 case GameMode.ManiaStart:
                     DoManiaStart(options, remapInputs);
                     break;
-                
             }
 
             // Push the current input into the input history, to read for buffering.
@@ -242,12 +248,14 @@ namespace Game.Sim
             {
                 Fighters[i].InputH.PushInput(remapInputs[i]);
             }
+
             // if hitstop, only grab inputs and return
             if (HitstopFramesRemaining > 0)
             {
                 HitstopFramesRemaining--;
                 return;
             }
+
             SimFrame += 1;
 
             for (int i = 0; i < Fighters.Length; i++)
@@ -306,6 +314,7 @@ namespace Game.Sim
                         {
                             Fighters[1 - i].Victories[Fighters[1 - i].NumVictories] = VictoryKind.Normal;
                         }
+
                         Fighters[1 - i].NumVictories++;
 
                         GameMode = GameMode.RoundEnd;
@@ -316,6 +325,7 @@ namespace Game.Sim
                         {
                             Manias[j].End();
                         }
+
                         return;
                     }
                 }
@@ -357,6 +367,7 @@ namespace Game.Sim
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -429,6 +440,7 @@ namespace Game.Sim
                 {
                     collide = c;
                 }
+
                 // TODO: sort by priority or something
                 if (hitPair != (-1, -1))
                 {
@@ -476,8 +488,12 @@ namespace Game.Sim
                         Frame nextBeat = RealFrame;
                         while (nextBeat - RealFrame < options.Global.ManiaSlowTicks)
                         {
-                            nextBeat = options.Global.Audio.NextBeat(nextBeat + 1, AudioConfig.BeatSubdivision.QuarterNote);
+                            nextBeat = options.Global.Audio.NextBeat(
+                                nextBeat + 1,
+                                AudioConfig.BeatSubdivision.QuarterNote
+                            );
                         }
+
                         HitstopFramesRemaining = nextBeat - (RealFrame + options.Global.ManiaSlowTicks);
                         for (int i = 0; i < 16; i++)
                         {
@@ -496,6 +512,7 @@ namespace Game.Sim
                                 AudioConfig.BeatSubdivision.QuarterNote
                             );
                         }
+
                         Manias[owners.Item1].Enable(nextBeat);
                         GameMode = GameMode.ManiaStart;
                         ModeStart = RealFrame;
@@ -526,6 +543,7 @@ namespace Game.Sim
             {
                 HypeMeter -= damage;
             }
+
             HypeMeter = Mathsf.Clamp(HypeMeter, -options.Global.MaxHype, options.Global.MaxHype);
         }
 
@@ -575,11 +593,13 @@ namespace Game.Sim
                     Fighters[c.BoxB.Owner].Position.x -= c.OverlapX * bPush;
                 }
             }
+
             return new HitOutcome { Kind = HitKind.None };
         }
 
         [ThreadStatic]
         private static ArrayBufferWriter<byte> _writer;
+
         private static ArrayBufferWriter<byte> Writer
         {
             get
@@ -606,6 +626,7 @@ namespace Game.Sim
                 hash ^= bytes[i];
                 hash *= PRIME;
             }
+
             return hash;
         }
     }
