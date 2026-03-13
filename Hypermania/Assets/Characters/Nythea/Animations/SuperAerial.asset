@@ -528,7 +528,7 @@ MonoBehaviour:
           rawValue: 1064042352
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 1
         Damage: 14
         HitstunTicks: 22
         BlockstunTicks: 17
@@ -581,7 +581,7 @@ MonoBehaviour:
           rawValue: 1064042352
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 1
         Damage: 14
         HitstunTicks: 22
         BlockstunTicks: 17
@@ -634,7 +634,7 @@ MonoBehaviour:
           rawValue: 1064042352
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 1
         Damage: 14
         HitstunTicks: 22
         BlockstunTicks: 17
@@ -687,7 +687,7 @@ MonoBehaviour:
           rawValue: 1064042352
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 1
         Damage: 14
         HitstunTicks: 22
         BlockstunTicks: 17
