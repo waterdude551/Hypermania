@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 namespace Game.View.Mania
 {
+    [RequireComponent(typeof(Image))]
     public class ManiaSpriteSwitcher : MonoBehaviour
     {
         [FormerlySerializedAs("spriteDefault")]

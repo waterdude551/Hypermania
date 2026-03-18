@@ -29,11 +29,6 @@ namespace Game
             }
         }
 
-        void OnDisable()
-        {
-            Runner.DeInit();
-        }
-
         public void StartGame(
             List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players,
             P2PClient p2pClient,

@@ -66,6 +66,7 @@ namespace Scenes.Battle
 
         public void OnGameFinished()
         {
+            _gameManager.DeInit();
             SceneLoader
                 .Instance.LoadNewScene()
                 .Load(SceneID.BattleEnd, SceneDatabase.BATTLE_END)
@@ -77,7 +78,6 @@ namespace Scenes.Battle
         public void OnDisable()
         {
             _gameManager.OnGameFinished -= OnGameFinished;
-            _gameManager.DeInit();
         }
     }
 }
