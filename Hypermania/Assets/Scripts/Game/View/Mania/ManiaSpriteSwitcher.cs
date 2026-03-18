@@ -26,6 +26,10 @@ namespace Game.View.Mania
 
         public void ChangeSprite(bool pressed)
         {
+            if (_imageComponent == null)
+            {
+                return;
+            }
             if (pressed)
             {
                 _imageComponent.sprite = SpritePressed;
