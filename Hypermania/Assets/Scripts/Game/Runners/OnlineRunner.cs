@@ -21,10 +21,11 @@ namespace Game.Runners
 
         public override void Init(
             List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players,
-            P2PClient client
+            P2PClient client,
+            GameOptions options
         )
         {
-            base.Init(players, client);
+            base.Init(players, client, options);
 
             SessionBuilder<GameInput, SteamNetworkingIdentity> builder = new SessionBuilder<
                 GameInput,
@@ -68,14 +69,15 @@ namespace Game.Runners
             _waitRemaining = 0;
             _session = null;
             _myHandle = new PlayerHandle(-1);
+            _remoteHandle = new PlayerHandle(-1);
             base.DeInit();
         }
 
-        public override void Poll(float deltaTime)
+        public override bool Poll(float deltaTime)
         {
             if (!_initialized)
             {
-                return;
+                return false;
             }
 
             _inputBuffers[0].Clear();
@@ -106,22 +108,29 @@ namespace Game.Runners
             while (_time > fpsDelta)
             {
                 _time -= fpsDelta;
-                GameLoop();
+                bool finished = GameLoop(fpsDelta);
+                if (finished)
+                    return true;
             }
+
+            return false;
         }
 
-        void GameLoop()
+        bool GameLoop(float deltaTime)
         {
             if (_session.CurrentState != SessionState.Running)
             {
-                return;
+                return false;
             }
-
+            if (_session.ConfirmedFrame() != Frame.NullFrame && _session.ConfirmedState().GameMode == GameMode.End)
+            {
+                return true;
+            }
             if (_waitRemaining > 0)
             {
                 Debug.Log("[Game] Skipping frame due to wait recommendation");
                 _waitRemaining--;
-                return;
+                return false;
             }
 
             _session.AddLocalInput(_myHandle, _inputBuffers[0].Poll());
@@ -147,17 +156,13 @@ namespace Game.Runners
                 }
             }
 
-            if (_session.ConfirmedFrame() != Frame.NullFrame && _session.ConfirmedState().GameMode == GameMode.End)
-            {
-                DeInit();
-                return;
-            }
             InfoOverlayDetails details = new InfoOverlayDetails
             {
                 HasPing = true,
                 Ping = _session.NetworkStats(_remoteHandle).Ping,
             };
-            _view.Render(_curState, _options, details);
+            _view.Render(deltaTime, _curState, _options, details);
+            return _session.ConfirmedFrame() != Frame.NullFrame && _session.ConfirmedState().GameMode == GameMode.End;
         }
     }
 }

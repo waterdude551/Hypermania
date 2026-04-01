@@ -32,13 +32,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 0
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -57,13 +60,16 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 0
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -82,85 +88,13 @@ MonoBehaviour:
         HitstunTicks: 0
         BlockstunTicks: 0
         HitstopTicks: 0
+        BlockstopTicks: 0
         StartsRhythmCombo: 0
+        KnockdownKind: 0
         Knockback:
           x:
             rawValue: 1065353216
           y:
             rawValue: 0
     FrameType: 0
-  - Boxes:
-    - CenterLocal:
-        x:
-          rawValue: 3170717632
-        y:
-          rawValue: 1059355159
-      SizeLocal:
-        x:
-          rawValue: 1065424460
-        y:
-          rawValue: 1067787807
-      Props:
-        Kind: 0
-        AttackKind: 0
-        Damage: 0
-        HitstunTicks: 0
-        BlockstunTicks: 0
-        HitstopTicks: 0
-        StartsRhythmCombo: 0
-        Knockback:
-          x:
-            rawValue: 1065353216
-          y:
-            rawValue: 0
-    FrameType: 0
-  - Boxes:
-    - CenterLocal:
-        x:
-          rawValue: 3170717632
-        y:
-          rawValue: 1059355159
-      SizeLocal:
-        x:
-          rawValue: 1065424460
-        y:
-          rawValue: 1067787807
-      Props:
-        Kind: 0
-        AttackKind: 0
-        Damage: 0
-        HitstunTicks: 0
-        BlockstunTicks: 0
-        HitstopTicks: 0
-        StartsRhythmCombo: 0
-        Knockback:
-          x:
-            rawValue: 1065353216
-          y:
-            rawValue: 0
-    FrameType: 0
-  - Boxes:
-    - CenterLocal:
-        x:
-          rawValue: 3170717632
-        y:
-          rawValue: 1059355159
-      SizeLocal:
-        x:
-          rawValue: 1065424460
-        y:
-          rawValue: 1067787807
-      Props:
-        Kind: 0
-        AttackKind: 0
-        Damage: 0
-        HitstunTicks: 0
-        BlockstunTicks: 0
-        HitstopTicks: 0
-        StartsRhythmCombo: 0
-        Knockback:
-          x:
-            rawValue: 1065353216
-          y:
-            rawValue: 0
-    FrameType: 0
+    Floating: 0

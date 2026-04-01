@@ -15,10 +15,11 @@ namespace Game.Runners
 
         public override void Init(
             List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players,
-            P2PClient client
+            P2PClient client,
+            GameOptions options
         )
         {
-            base.Init(players, client);
+            base.Init(players, client, options);
 
             SessionBuilder<GameInput, SteamNetworkingIdentity> builder = new SessionBuilder<
                 GameInput,
@@ -47,11 +48,11 @@ namespace Game.Runners
             base.DeInit();
         }
 
-        public override void Poll(float deltaTime)
+        public override bool Poll(float deltaTime)
         {
             if (!_initialized)
             {
-                return;
+                return false;
             }
 
             for (int i = 0; i < _inputBuffers.Length; i++)
@@ -66,15 +67,23 @@ namespace Game.Runners
             while (_time > fpsDelta)
             {
                 _time -= fpsDelta;
-                GameLoop();
+                bool finished = GameLoop(fpsDelta);
+                if (finished)
+                    return true;
             }
+
+            return false;
         }
 
-        protected void GameLoop()
+        protected bool GameLoop(float deltaTime)
         {
             if (_session == null)
             {
-                return;
+                return false;
+            }
+            if (_curState.GameMode == GameMode.End)
+            {
+                return true;
             }
 
             for (int i = 0; i < 2; i++)
@@ -103,14 +112,9 @@ namespace Game.Runners
                         break;
                 }
             }
-
-            if (_curState.GameMode == GameMode.End)
-            {
-                DeInit();
-                return;
-            }
             InfoOverlayDetails details = new InfoOverlayDetails { HasPing = false, Ping = 0 };
-            _view.Render(_curState, _options, details);
+            _view.Render(deltaTime, _curState, _options, details);
+            return _curState.GameMode == GameMode.End;
         }
     }
 }

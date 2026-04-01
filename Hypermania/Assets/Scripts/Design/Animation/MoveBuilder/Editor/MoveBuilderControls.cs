@@ -136,6 +136,13 @@ namespace Design.Animation.MoveBuilder.Editor
             EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Frame Data", EditorStyles.boldLabel);
             frame.FrameType = (FrameType)EditorGUILayout.EnumPopup("Frame Type", frame.FrameType);
+            frame.Floating = EditorGUILayout.Toggle("Floating", frame.Floating);
+            frame.ShouldApplyVel = EditorGUILayout.Toggle("Should Apply Velocity", frame.ShouldApplyVel);
+            using (new EditorGUI.DisabledScope(!frame.ShouldApplyVel))
+            {
+                frame.ApplyVelocity = SFloatGUI.Field("Apply Velocity", frame.ApplyVelocity);
+            }
+            frame.GravityEnabled = EditorGUILayout.Toggle("Gravity Enabled", frame.GravityEnabled);
         }
 
         private void DrawBoxList(MoveBuilderModel m, MoveBuilderAnimationState state)
@@ -185,6 +192,7 @@ namespace Design.Animation.MoveBuilder.Editor
 
             using (new EditorGUI.DisabledScope(p.Kind != HitboxKind.Hitbox))
             {
+                p.AttackKind = (AttackKind)EditorGUILayout.EnumPopup("Attack Kind", p.AttackKind);
                 p.KnockdownKind = (KnockdownKind)EditorGUILayout.EnumPopup("Knockdown Kind", p.KnockdownKind);
                 p.Damage = EditorGUILayout.IntField("Damage", p.Damage);
                 using (new EditorGUI.DisabledScope(p.KnockdownKind != KnockdownKind.None))

@@ -19,12 +19,12 @@ MonoBehaviour:
   WallsX:
     rawValue: 1088421888
   ClankTicks: 30
-  ForwardDashCancelAfterTicks: 2
-  ForwardDashTicks: 5
-  ForwardAirDashTicks: 5
-  BackDashCancelAfterTicks: 6
-  BackDashTicks: 15
-  BackAirDashTicks: 15
+  ForwardDashCancelAfterTicks: 5
+  ForwardDashTicks: 8
+  ForwardAirDashTicks: 8
+  BackDashCancelAfterTicks: 9
+  BackDashTicks: 12
+  BackAirDashTicks: 12
   RunningSpeedMultiplier:
     rawValue: 1073741824
   SuperJumpMultiplier:
@@ -40,6 +40,9 @@ MonoBehaviour:
   CameraPadding:
     rawValue: 1050253722
   RoundEndTicks: 160
+  FloatingFactor:
+    rawValue: 1066192077
+  ManiaSlowTicks: 45
   _inputConfig:
     DashWindow: 12
     SuperJumpWindow: 8

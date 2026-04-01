@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Character: 1
   Prefab: {fileID: 5766376669795590084, guid: 692614c6f0138c5709de58dbca0159e4, type: 3}
+  MoveSfx: {fileID: 11400000, guid: 4e16a963506edac26ae5b3acd6883da1, type: 2}
   Skins:
   - {fileID: 7108339969198208228, guid: 7bce4506c706589b0ba441fd802927e8, type: 3}
   - {fileID: 7108339969198208228, guid: f6fdaaf67e68349c7961174219f92281, type: 3}
@@ -25,20 +26,20 @@ MonoBehaviour:
   BackSpeed:
     rawValue: 1069547520
   JumpVelocity:
-    rawValue: 1088421888
+    rawValue: 1089470464
   Health:
     rawValue: 1120403456
   BurstMax:
     rawValue: 1112014848
   ForwardDashDistance:
-    rawValue: 1110704128
+    rawValue: 1113325568
   BackDashDistance:
-    rawValue: 1109393408
+    rawValue: 1112014848
   NumAirDashes: 2
   ForwardAirDashDistance:
-    rawValue: 1110704128
+    rawValue: 1114636288
   BackAirDashDistance:
-    rawValue: 1109393408
+    rawValue: 1113325568
   Hitboxes:
     values:
     - {fileID: 11400000, guid: b3afc991f416967e5b3e636cd58f772a, type: 2}
