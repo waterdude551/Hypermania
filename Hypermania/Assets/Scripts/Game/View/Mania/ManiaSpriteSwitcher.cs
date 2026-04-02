@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 namespace Game.View.Mania
 {
+    [RequireComponent(typeof(Image))]
     public class ManiaSpriteSwitcher : MonoBehaviour
     {
         [FormerlySerializedAs("spriteDefault")]
@@ -14,7 +15,7 @@ namespace Game.View.Mania
 
         private Image _imageComponent;
 
-        void Start()
+        void Awake()
         {
             _imageComponent = GetComponent<Image>();
             if (_imageComponent != null)
@@ -25,6 +26,10 @@ namespace Game.View.Mania
 
         public void ChangeSprite(bool pressed)
         {
+            if (_imageComponent == null)
+            {
+                return;
+            }
             if (pressed)
             {
                 _imageComponent.sprite = SpritePressed;

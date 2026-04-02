@@ -12,6 +12,7 @@ namespace Game
     {
         private EnumArray<InputFlags, Binding> _controlScheme;
         private InputDevice _inputDevice;
+        private float _joystickDeadzone;
 
         /**
          * Base InputBuffer Constructor
@@ -22,10 +23,15 @@ namespace Game
          * @param inputDevice - The InputDevice to read inputs from
          *
          */
-        public InputBuffer(InputDevice inputDevice, EnumArray<InputFlags, Binding> controlScheme)
+        public InputBuffer(
+            InputDevice inputDevice,
+            EnumArray<InputFlags, Binding> controlScheme,
+            float joystickDeadzone = 0.25f
+        )
         {
             _controlScheme = controlScheme;
             _inputDevice = inputDevice;
+            _joystickDeadzone = joystickDeadzone;
         }
 
         private InputFlags _input = InputFlags.None;
@@ -40,14 +46,15 @@ namespace Game
             if (_inputDevice == null)
                 return;
 
-            foreach (InputFlags flag in Enum.GetValues(typeof(InputFlags)))
+            if (_inputDevice is Keyboard keyboard)
             {
-                if (flag == InputFlags.None)
+                foreach (InputFlags flag in Enum.GetValues(typeof(InputFlags)))
                 {
-                    continue; // Skips the None InputFlag (Does Not Have a Key Press)
-                }
-                if (_inputDevice is Keyboard keyboard)
-                {
+                    if (flag == InputFlags.None)
+                    {
+                        continue; // Skips the None InputFlag (Does Not Have a Key Press)
+                    }
+
                     if (
                         (
                             _controlScheme[flag].GetPrimaryKey() != Key.None
@@ -62,8 +69,16 @@ namespace Game
                         _input |= flag;
                     }
                 }
-                else if (_inputDevice is Gamepad gamePad)
+            }
+            else if (_inputDevice is Gamepad gamePad)
+            {
+                foreach (InputFlags flag in Enum.GetValues(typeof(InputFlags)))
                 {
+                    if (flag == InputFlags.None)
+                    {
+                        continue; // Skips the None InputFlag (Does Not Have a Key Press)
+                    }
+
                     // Checks if either the primary or alt button set in config is pressed
                     // Ignores keys set to none
                     if (
@@ -79,6 +94,24 @@ namespace Game
                     {
                         _input |= flag;
                     }
+                }
+
+                // TODO: fixme hardcode
+                if (gamePad.leftStick.x.value < -_joystickDeadzone)
+                {
+                    _input |= InputFlags.Left;
+                }
+                if (gamePad.leftStick.x.value > _joystickDeadzone)
+                {
+                    _input |= InputFlags.Right;
+                }
+                if (gamePad.leftStick.y.value < -_joystickDeadzone)
+                {
+                    _input |= InputFlags.Down;
+                }
+                if (gamePad.leftStick.y.value > _joystickDeadzone)
+                {
+                    _input |= InputFlags.Up;
                 }
             }
 

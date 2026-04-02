@@ -15,6 +15,12 @@ namespace Design.Configs
         public int BeatCancelWindow;
     }
 
+    [Serializable]
+    public struct InfoConfig
+    {
+        public bool ShowFrameMeter;
+    }
+
     [CreateAssetMenu(menuName = "Hypermania/Global Config")]
     public class GlobalConfig : ScriptableObject
     {
@@ -37,6 +43,8 @@ namespace Design.Configs
         public sfloat CameraHalfHeight = (sfloat)1.5f;
         public sfloat CameraPadding = (sfloat)0.3f;
         public int RoundEndTicks = 120;
+        public sfloat FloatingFactor = (sfloat)1.3f;
+        public int ManiaSlowTicks = 60;
         public sfloat CameraHalfWidth => CameraHalfHeight * (sfloat)1.7777777f;
 
         [SerializeField]

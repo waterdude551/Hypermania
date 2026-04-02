@@ -43,7 +43,7 @@ namespace Game.View
             }
         }
 
-        public void UpdateCamera(List<Vector2> interestPoints, float zoom)
+        public void UpdateCamera(List<Vector2> interestPoints)
         {
             _interestPoints = interestPoints;
         }

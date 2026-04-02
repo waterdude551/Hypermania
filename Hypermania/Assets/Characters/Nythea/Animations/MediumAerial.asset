@@ -41,6 +41,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -68,6 +69,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -95,6 +97,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -122,6 +125,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -149,6 +153,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -176,6 +181,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -203,6 +209,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -230,6 +237,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -257,6 +265,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -284,6 +293,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -311,6 +321,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -338,6 +349,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -365,6 +377,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -392,6 +405,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -419,6 +433,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -446,6 +461,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -473,6 +489,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 1
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -511,7 +528,7 @@ MonoBehaviour:
           rawValue: 1067025282
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 1
         Damage: 10
         HitstunTicks: 15
         BlockstunTicks: 12
@@ -525,6 +542,7 @@ MonoBehaviour:
           y:
             rawValue: 3189146900
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -563,7 +581,7 @@ MonoBehaviour:
           rawValue: 1067025282
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 1
         Damage: 10
         HitstunTicks: 15
         BlockstunTicks: 12
@@ -577,6 +595,7 @@ MonoBehaviour:
           y:
             rawValue: 3189146900
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -615,7 +634,7 @@ MonoBehaviour:
           rawValue: 1067025282
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 1
         Damage: 10
         HitstunTicks: 15
         BlockstunTicks: 12
@@ -629,6 +648,7 @@ MonoBehaviour:
           y:
             rawValue: 3189146900
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -667,7 +687,7 @@ MonoBehaviour:
           rawValue: 1067025282
       Props:
         Kind: 1
-        AttackKind: 0
+        AttackKind: 1
         Damage: 10
         HitstunTicks: 15
         BlockstunTicks: 12
@@ -681,6 +701,7 @@ MonoBehaviour:
           y:
             rawValue: 3189146900
     FrameType: 2
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -708,6 +729,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -735,6 +757,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -762,6 +785,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -789,6 +813,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -816,6 +841,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -843,6 +869,7 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0
   - Boxes:
     - CenterLocal:
         x:
@@ -870,3 +897,4 @@ MonoBehaviour:
           y:
             rawValue: 0
     FrameType: 3
+    Floating: 0

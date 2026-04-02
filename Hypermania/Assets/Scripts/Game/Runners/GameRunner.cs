@@ -8,54 +8,51 @@ using Netcode.P2P;
 using Netcode.Rollback;
 using Steamworks;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Game.Runners
 {
-    [RequireComponent(typeof(JoinOnInput))]
     public abstract class GameRunner : MonoBehaviour
     {
         [SerializeField]
         protected GameView _view;
 
-        [SerializeField]
-        protected GameOptions _options;
-
-        [SerializeField]
-        protected bool _drawHitboxes;
-
         /// <summary>
         /// The current state of the runner. If you derive from this class, it must be initialized on Init();
         /// </summary>
         protected GameState _curState;
+        protected GameOptions _options;
 
         protected InputBuffer[] _inputBuffers;
         protected bool _initialized;
+        public bool Initialized => _initialized;
         protected float _time;
-
-        protected JoinOnInput _joinOnInput;
-
-        public void Awake()
-        {
-            _joinOnInput = GetComponent<JoinOnInput>();
-        }
 
         public virtual void Init(
             List<(PlayerHandle playerHandle, PlayerKind playerKind, SteamNetworkingIdentity address)> players,
-            P2PClient client
+            P2PClient client,
+            GameOptions options
         )
         {
+            if (_initialized)
+            {
+                throw new InvalidOperationException("double initialization");
+            }
+
+            if (options == null)
+            {
+                throw new InvalidOperationException("No options");
+            }
             if (players.Count != 2)
             {
                 throw new InvalidOperationException("must get 2 players");
             }
-
+            _options = options;
             _inputBuffers = new InputBuffer[_options.LocalPlayers.Length];
             for (int i = 0; i < _inputBuffers.Length; i++)
             {
                 _inputBuffers[i] = new InputBuffer(
-                    _options.LocalPlayers[i].InputDevice ?? _joinOnInput.GetPlayerInputDevice(i) ?? Keyboard.current,
-                    _options.LocalPlayers[i].Controls?.ControlScheme ?? ControlsConfig.DefaultBindings
+                    _options.LocalPlayers[i]?.InputDevice,
+                    _options.LocalPlayers[i]?.Controls?.ControlScheme ?? ControlsConfig.DefaultBindings
                 );
             }
             _curState = GameState.Create(_options);
@@ -64,7 +61,7 @@ namespace Game.Runners
             _initialized = true;
         }
 
-        public abstract void Poll(float deltaTime);
+        public abstract bool Poll(float deltaTime);
 
         public virtual void DeInit()
         {
@@ -77,8 +74,6 @@ namespace Game.Runners
 
         public void OnDrawGizmos()
         {
-            if (!_drawHitboxes)
-                return;
             if (_curState == null || _view == null || _view.Fighters == null || _curState.Fighters == null)
                 return;
 

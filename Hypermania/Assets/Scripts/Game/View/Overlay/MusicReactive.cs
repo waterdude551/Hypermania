@@ -50,7 +50,14 @@ namespace Game.View.Overlay
 
         public float GetMusicValue()
         {
-            _audioSource.GetSpectrumData(_spectrum, 0, _fftWindow);
+            if (_audioSource != null)
+            {
+                _audioSource.GetSpectrumData(_spectrum, 0, _fftWindow);
+            }
+            else
+            {
+                AudioListener.GetSpectrumData(_spectrum, 0, _fftWindow);
+            }
 
             float bandEnergy = ComputeBandEnergy(_spectrum, _bassLowHz, _bassHighHz, AudioSettings.outputSampleRate);
 
