@@ -12,7 +12,12 @@ namespace Design.Configs
         public int DashWindow;
         public int SuperJumpWindow;
         public int InputBufferWindow;
-        public int BeatCancelWindow;
+
+        /// <summary>
+        /// Number of frames into a heavy attack after which, if the heavy
+        /// attack button is still held, the move upgrades to a super.
+        /// </summary>
+        public int SuperDelayWindow;
     }
 
     [Serializable]
@@ -37,14 +42,28 @@ namespace Design.Configs
         public sfloat RunningSpeedMultiplier = 2;
         public sfloat SuperJumpMultiplier = (sfloat)1.25f;
         public int RoundTimeTicks = 10800;
-        public int RoundCountdownTicks = 180;
+        public int RoundCountdownTicks => Audio.BeatsToFrame(8);
         public sfloat MaxHype = 100;
         public sfloat HypeMovementFactor = (sfloat)0.3f;
+        public sfloat PassiveSuperGain = (sfloat)5f;
+        public sfloat SuperMax = (sfloat)400f;
+        public sfloat SuperCost = (sfloat)100f;
+        public int SuperTier1Beats = 8;
+        public int SuperTier2Beats = 16;
         public sfloat CameraHalfHeight = (sfloat)1.5f;
         public sfloat CameraPadding = (sfloat)0.3f;
         public int RoundEndTicks = 120;
+        public int SuperDisplayHitstopTicks = 60;
+        public int SuperPostDisplayHitstopTicks = 0;
+        public int SuperRecoveryFrames = 0;
         public sfloat FloatingFactor = (sfloat)1.3f;
         public int ManiaSlowTicks = 60;
+        public int ManiaFailStunTicks = 30;
+        public sfloat ManiaFailKnockbackMagnitude = (sfloat)1.5f;
+        public int StalingBufferSize = 8;
+        public sfloat RhythmComboFinisherDamageMult = (sfloat)2f;
+        public sfloat FreestyleDamageMultiplier = (sfloat)1.5f;
+        public sfloat FreestyleHitstunMultiplier = (sfloat)1.25f;
         public sfloat CameraHalfWidth => CameraHalfHeight * (sfloat)1.7777777f;
 
         [SerializeField]

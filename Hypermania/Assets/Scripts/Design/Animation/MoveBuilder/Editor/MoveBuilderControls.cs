@@ -1,3 +1,6 @@
+using Game;
+using Game.Sim;
+using Game.View;
 using Game.View.Fighters;
 using UnityEditor;
 using UnityEngine;
@@ -5,7 +8,7 @@ using Utils.SoftFloat;
 
 namespace Design.Animation.MoveBuilder.Editor
 {
-    [CustomEditor(typeof(FighterView), true)]
+    [CustomEditor(typeof(EntityView), true)]
     public sealed class MoveBuilderControls : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
@@ -15,7 +18,7 @@ namespace Design.Animation.MoveBuilder.Editor
             EditorGUILayout.Space(8);
             EditorGUILayout.LabelField("MoveBuilder Controls", EditorStyles.boldLabel);
 
-            var fighter = (FighterView)target;
+            var fighter = (EntityView)target;
             var m = MoveBuilderModelStore.Get(fighter);
             var animState = MoveBuilderAnimationState.GetAnimState();
 
@@ -42,8 +45,15 @@ namespace Design.Animation.MoveBuilder.Editor
             }
 
             EditorGUILayout.Space(8);
+            m.RootMotionSource = (Transform)
+                EditorGUILayout.ObjectField(
+                    "Root Motion Source (optional)",
+                    m.RootMotionSource,
+                    typeof(Transform),
+                    true
+                );
             if (GUILayout.Button("Bind Data to Clip"))
-                m.BindDataToClip(state);
+                m.BindDataToClip(state, fighter);
             EditorGUILayout.Space(8);
             DrawControls(m, state);
             EditorGUILayout.Space(8);
@@ -80,6 +90,8 @@ namespace Design.Animation.MoveBuilder.Editor
                 m.AddBox(state, HitboxKind.Hurtbox);
             if (GUILayout.Button("Add Hitbox (A)"))
                 m.AddBox(state, HitboxKind.Hitbox);
+            if (GUILayout.Button("Add Grabbox (G)"))
+                m.AddBox(state, HitboxKind.Grabbox);
 
             using (new EditorGUI.DisabledScope(m.SelectedBoxIndex < 0 || m.SelectedBoxIndex >= frame.Boxes.Count))
             {
@@ -133,6 +145,12 @@ namespace Design.Animation.MoveBuilder.Editor
                     );
                 }
             }
+
+            state.Data.ComboEligible = EditorGUILayout.Toggle("Combo Eligible", state.Data.ComboEligible);
+            state.Data.Followup = (CharacterState)EditorGUILayout.EnumPopup("Followup", state.Data.Followup);
+            state.Data.FollowupInput = (InputFlags)
+                EditorGUILayout.EnumFlagsField("Followup Input", state.Data.FollowupInput);
+            state.Data.ApplyRootMotion = EditorGUILayout.Toggle("Apply Root Motion", state.Data.ApplyRootMotion);
             EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Frame Data", EditorStyles.boldLabel);
             frame.FrameType = (FrameType)EditorGUILayout.EnumPopup("Frame Type", frame.FrameType);
@@ -141,6 +159,11 @@ namespace Design.Animation.MoveBuilder.Editor
             using (new EditorGUI.DisabledScope(!frame.ShouldApplyVel))
             {
                 frame.ApplyVelocity = SFloatGUI.Field("Apply Velocity", frame.ApplyVelocity);
+            }
+            frame.ShouldTeleport = EditorGUILayout.Toggle("Should Teleport", frame.ShouldTeleport);
+            using (new EditorGUI.DisabledScope(!frame.ShouldTeleport))
+            {
+                frame.TeleportLocation = SFloatGUI.Field("Teleport Location", frame.TeleportLocation);
             }
             frame.GravityEnabled = EditorGUILayout.Toggle("Gravity Enabled", frame.GravityEnabled);
         }
@@ -203,7 +226,21 @@ namespace Design.Animation.MoveBuilder.Editor
                 p.HitstopTicks = EditorGUILayout.IntField("Hitstop Ticks", p.HitstopTicks);
                 p.BlockstopTicks = EditorGUILayout.IntField("Blockstop Ticks", p.BlockstopTicks);
                 p.Knockback = SFloatGUI.Field("Knockback", p.Knockback);
-                p.StartsRhythmCombo = EditorGUILayout.Toggle("Starts rhythm combo", p.StartsRhythmCombo);
+            }
+
+            using (new EditorGUI.DisabledScope(p.Kind != HitboxKind.Grabbox))
+            {
+                p.GrabPosition = SFloatGUI.Field("Grab Position", p.GrabPosition);
+            }
+
+            using (new EditorGUI.DisabledScope(p.Kind != HitboxKind.Hitbox && p.Kind != HitboxKind.Grabbox))
+            {
+                p.HasTransition = EditorGUILayout.Toggle("Has Transition", p.HasTransition);
+                using (new EditorGUI.DisabledScope(!p.HasTransition))
+                {
+                    p.OnHitTransition = (CharacterState)
+                        EditorGUILayout.EnumPopup("On Hit Transition", p.OnHitTransition);
+                }
             }
 
             if (p.Kind == HitboxKind.Hitbox)

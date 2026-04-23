@@ -4,6 +4,7 @@ using Design.Animation;
 using Design.Configs;
 using Game.View.Overlay;
 using MemoryPack;
+using UnityEngine;
 using Utils;
 using Utils.SoftFloat;
 
@@ -35,12 +36,50 @@ namespace Game.Sim
         public SVector2 Velocity;
         public sfloat Health;
         public int ComboedCount;
+        public CharacterState[] StalingBuffer;
+        public int StalingBufferIndex;
         public InputHistory InputH;
         public int Lives;
+        public sfloat Super;
         public sfloat Burst;
         public int AirDashCount;
         public VictoryKind[] Victories;
         public int NumVictories;
+        public bool AttackConnected;
+        public bool IsSuperAttack;
+        public int SuperComboBeats;
+
+        /// <summary>
+        /// Set when this fighter is in hitstun while a mania is active. Keeps
+        /// the fighter treated as non-actionable (and prevents the combo count
+        /// from resetting) even after <see cref="TickStateMachine"/> returns
+        /// them to <see cref="CharacterState.Idle"/>, until the mania ends.
+        /// Cleared when the mania ends or the round resets.
+        /// </summary>
+        public bool LockedHitstun;
+
+        public bool RhythmComboFinisherActive;
+        public bool RhythmComboTier2;
+
+        public bool FreestyleActive;
+
+        /// <summary>
+        /// Multiplier the next damage calculation will apply and then
+        /// consume. Accumulated from rhythm no-op beats during a mania:
+        /// each no-op takes half of <see cref="NoOpBonusRemaining"/> and
+        /// adds it here, so after n consecutive no-ops the value equals
+        /// <c>1 + 0.25 * (1 - 0.5^n)</c> — approaching 1.25. Reset to 1
+        /// on hit consumption, mania end, mania miss, and round reset.
+        /// </summary>
+        public sfloat NoOpBonus;
+
+        /// <summary>
+        /// Remaining budget for future no-op bonus accrual. Starts at
+        /// 0.25 and halves on each no-op so the sum of all future
+        /// contributions stays bounded by 0.25 (closed-form geometric
+        /// series <c>1/2 + 1/4 + ... = 1</c>, scaled by 0.25).
+        /// </summary>
+        public sfloat NoOpBonusRemaining;
 
         public int Index { get; private set; }
         public CharacterState State { get; private set; }
@@ -50,6 +89,7 @@ namespace Game.Sim
         /// Set to a value that marks the first frame in which the character should return to neutral.
         /// </summary>
         public Frame StateEnd { get; private set; }
+
         public int ImmunityHash { get; private set; }
 
         public FighterFacing FacingDir;
@@ -58,12 +98,33 @@ namespace Game.Sim
 
         public BoxProps? HitProps { get; private set; }
         public SVector2? HitLocation { get; private set; }
+        public SVector2? ClankLocation { get; private set; }
         public bool StateChangedThisRealFrame { get; private set; }
+        public bool SuperMaxedThisRealFrame { get; private set; }
+        public CharacterState? PostActionState { get; private set; }
+        public Frame? PostActionStateStart { get; private set; }
+
+        /// <summary>
+        /// Attacker-side OnHitTransition enqueued by <see cref="ProcessHit"/>
+        /// on frame F. The actual <see cref="SetState"/> is deferred to the
+        /// start of the next sim frame by <see cref="ApplyPendingHitTransition"/>,
+        /// so frame F's remaining steps still see the pre-transition state and
+        /// the new state (e.g. Throw) first renders on F+1.
+        /// </summary>
+        public CharacterState? PendingHitState { get; private set; }
+        public Frame? PendingHitStateStart { get; private set; }
+        public Frame? PendingHitStateEnd { get; private set; }
+        public bool PendingHitStateForce { get; private set; }
 
         public bool HitLastRealFrame =>
             HitProps.HasValue
             && HitLocation.HasValue
-            && (State == CharacterState.Death || State == CharacterState.Knockdown || State == CharacterState.Hit);
+            && (
+                State == CharacterState.Death
+                || State == CharacterState.Knockdown
+                || State == CharacterState.Hit
+                || State == CharacterState.Grabbed
+            );
 
         public bool BlockedLastRealFrame =>
             HitProps.HasValue
@@ -73,34 +134,16 @@ namespace Game.Sim
         public bool DashedLastRealFrame =>
             StateChangedThisRealFrame && (State == CharacterState.BackDash || State == CharacterState.ForwardDash);
 
+        /// <summary>
+        /// Whether the fighter is actionable this frame. Mirrors
+        /// <see cref="CharacterStateExtensions.IsActionable"/> but additionally
+        /// returns false while <see cref="LockedHitstun"/> is set, so a fighter
+        /// whose hitstun rolled over into a mania stays locked down (no new
+        /// inputs, no combo reset, no blocking) until the mania ends.
+        /// </summary>
+        public bool Actionable => !LockedHitstun && State.IsActionable();
+
         public SVector2 StoredJumpVelocity;
-
-        public bool IsAerialAttack =>
-            State == CharacterState.LightAerial
-            || State == CharacterState.MediumAerial
-            || State == CharacterState.SuperAerial
-            || State == CharacterState.SpecialAerial;
-
-        public bool IsAerial =>
-            IsAerialAttack
-            || State == CharacterState.Jump
-            || State == CharacterState.PreJump
-            || State == CharacterState.Falling;
-
-        public bool IsDash =>
-            State == CharacterState.BackAirDash
-            || State == CharacterState.ForwardAirDash
-            || State == CharacterState.ForwardDash
-            || State == CharacterState.BackDash;
-
-        public bool Actionable => State == CharacterState.Jump || State == CharacterState.Falling || GroundedActionable;
-
-        public bool GroundedActionable =>
-            State == CharacterState.Idle
-            || State == CharacterState.ForwardWalk
-            || State == CharacterState.BackWalk
-            || State == CharacterState.Running
-            || State == CharacterState.Crouch;
 
         public SVector2 ForwardVector => FacingDir == FighterFacing.Left ? SVector2.left : SVector2.right;
         public SVector2 BackwardVector => FacingDir == FighterFacing.Left ? SVector2.right : SVector2.left;
@@ -109,10 +152,11 @@ namespace Game.Sim
 
         public static FighterState Create(
             int index,
-            GameOptions options,
+            sfloat health,
             SVector2 position,
             FighterFacing facingDirection,
-            int lives
+            int lives,
+            int stalingBufferSize
         )
         {
             FighterState state = new FighterState
@@ -125,17 +169,44 @@ namespace Game.Sim
                 StateEnd = Frame.Infinity,
                 ImmunityHash = 0,
                 ComboedCount = 0,
+                StalingBuffer = new CharacterState[stalingBufferSize],
+                StalingBufferIndex = 0,
                 InputH = new InputHistory(),
                 // TODO: character dependent?
-                Health = options.Players[index].Character.Health,
+                Health = health,
                 FacingDir = facingDirection,
                 Lives = lives,
                 Burst = 0,
+                Super = 0,
                 AirDashCount = 0,
                 Victories = new VictoryKind[lives],
                 NumVictories = 0,
+                LockedHitstun = false,
+                IsSuperAttack = false,
+                RhythmComboFinisherActive = false,
+                RhythmComboTier2 = false,
+                FreestyleActive = false,
+                NoOpBonus = sfloat.One,
+                NoOpBonusRemaining = (sfloat)0.25f,
             };
             return state;
+        }
+
+        public static FighterState CreateForDisplay(
+            CharacterState animState,
+            Frame stateStart,
+            SVector2 position,
+            FighterFacing facing
+        )
+        {
+            return new FighterState
+            {
+                Position = position,
+                FacingDir = facing,
+                State = animState,
+                StateStart = stateStart,
+                StateEnd = Frame.Infinity,
+            };
         }
 
         public void RoundReset(CharacterConfig config, SVector2 position, FighterFacing facingDirection)
@@ -147,33 +218,117 @@ namespace Game.Sim
             StateEnd = Frame.Infinity;
             ImmunityHash = 0;
             ComboedCount = 0;
+            Array.Clear(StalingBuffer, 0, StalingBuffer.Length);
+            StalingBufferIndex = 0;
+            LockedHitstun = false;
+            RhythmComboFinisherActive = false;
+            RhythmComboTier2 = false;
+            FreestyleActive = false;
+            NoOpBonus = sfloat.One;
+            NoOpBonusRemaining = (sfloat)0.25f;
+            PendingHitState = null;
+            PendingHitStateStart = null;
+            PendingHitStateEnd = null;
+            PendingHitStateForce = false;
             InputH.Clear(); // Clear, don't want to read input from a previous round.
             // TODO: character dependent?
+            IsSuperAttack = false;
             Burst = 0;
+            Super = 0;
             AirDashCount = 0;
             Health = config.Health;
             FacingDir = facingDirection;
         }
 
-        public void DoFrameStart(GameOptions options)
+        public void DoFrameStart(GameOptions options, bool maniaActive)
         {
-            if (Actionable)
+            // Latch the mania hitstun lock: if this fighter is currently in
+            // hitstun while a mania is running, they must remain treated as
+            // non-actionable for the rest of the mania even after
+            // TickStateMachine transitions them out of CharacterState.Hit.
+            // Must run before TickStateMachine — otherwise a fighter whose
+            // hitstun ends this frame would transition to Idle and be missed.
+            if (maniaActive && State == CharacterState.Hit)
             {
-                ComboedCount = 0;
-                if (options.Players[Index].HealOnActionable)
-                {
-                    Health = options.Players[Index].Character.Health;
-                }
+                LockedHitstun = true;
             }
-            if (Location == FighterLocation.Grounded)
+
+            if (OnGround(options))
             {
                 AirDashCount = 0;
             }
         }
 
+        /// <summary>
+        /// Applies the actionable-gated resets (combo count, heal-on-actionable,
+        /// super/burst max-on-actionable). Must run after <see cref="TickStateMachine"/>
+        /// so <see cref="Actionable"/> reflects the state the fighter will act
+        /// from this frame — otherwise a fighter whose stun ends this frame
+        /// would be seen as non-actionable and skip the resets even though
+        /// they're about to process input normally.
+        /// </summary>
+        public void ApplyActionableFrameResets(GameOptions options, GameMode gameMode)
+        {
+            if (!Actionable)
+            {
+                return;
+            }
+
+            ComboedCount = 0;
+            if (options.Players[Index].HealOnActionable)
+            {
+                Health = options.Players[Index].Character.Health;
+            }
+            if (options.Players[Index].SuperMaxOnActionable && gameMode == GameMode.Fighting && !FreestyleActive)
+            {
+                Super = options.Global.SuperMax;
+            }
+            if (options.Players[Index].BurstMaxOnActionable)
+            {
+                Burst = options.Players[Index].Character.BurstMax;
+            }
+        }
+
         public bool OnGround(GameOptions options) => Position.y > options.Global.GroundY ? false : true;
 
-        public FighterLocation Location => IsAerial ? FighterLocation.Airborne : FighterLocation.Grounded;
+        /// <summary>
+        /// Register a rhythm no-op press. Transfers half of the remaining
+        /// 0.25 budget into <see cref="NoOpBonus"/>, so the bonus
+        /// approaches but never reaches 1.25 no matter how many no-ops
+        /// accrue in a row.
+        /// </summary>
+        public void RegisterManiaNoOp()
+        {
+            sfloat share = NoOpBonusRemaining * (sfloat)0.5f;
+            NoOpBonus += share;
+            NoOpBonusRemaining -= share;
+        }
+
+        /// <summary>
+        /// Read the current no-op bonus and reset it. Called by the damage
+        /// pipeline so the bonus applies once, to the next attack after
+        /// one or more no-ops.
+        /// </summary>
+        public sfloat ConsumeNoOpBonus()
+        {
+            sfloat bonus = NoOpBonus;
+            NoOpBonus = sfloat.One;
+            NoOpBonusRemaining = (sfloat)0.25f;
+            return bonus;
+        }
+
+        /// <summary>
+        /// Reset no-op bonus to the default (1.0x, full 0.25 budget).
+        /// Used when a mania ends or fails to prevent a stale bonus from
+        /// carrying into a fresh combo.
+        /// </summary>
+        public void ResetNoOpBonus()
+        {
+            NoOpBonus = sfloat.One;
+            NoOpBonusRemaining = (sfloat)0.25f;
+        }
+
+        public FighterLocation Location => State.IsGrounded() ? FighterLocation.Grounded : FighterLocation.Airborne;
 
         public FighterAttackLocation AttackLocation
         {
@@ -184,6 +339,7 @@ namespace Game.Sim
                 {
                     return FighterAttackLocation.Aerial;
                 }
+
                 return InputH.IsHeld(InputFlags.Down)
                     ? FighterAttackLocation.Crouching
                     : FighterAttackLocation.Standing;
@@ -194,7 +350,49 @@ namespace Game.Sim
         {
             HitProps = null;
             HitLocation = null;
+            ClankLocation = null;
             StateChangedThisRealFrame = false;
+            SuperMaxedThisRealFrame = false;
+            PostActionState = null;
+            PostActionStateStart = null;
+        }
+
+        /// <summary>
+        /// Records a collision-driven state transition to apply at the start of
+        /// the next sim frame. Pass <paramref name="start"/> as the frame the
+        /// state should take effect on (typically the hit-frame + 1), so tick 0
+        /// lands on the first frame the new state is visible.
+        /// </summary>
+        public void EnqueueHitTransition(CharacterState state, Frame start, Frame end, bool force = false)
+        {
+            PendingHitState = state;
+            PendingHitStateStart = start;
+            PendingHitStateEnd = end;
+            PendingHitStateForce = force;
+        }
+
+        /// <summary>
+        /// Applies any transition queued by <see cref="EnqueueHitTransition"/>
+        /// during the previous sim frame's collision step. Call at the start of
+        /// a sim frame (after <c>SimFrame</c> increments, before
+        /// <see cref="DoFrameStart"/>) so the new state is visible to every
+        /// subsequent step of the frame.
+        /// </summary>
+        public void ApplyPendingHitTransition()
+        {
+            if (!PendingHitState.HasValue)
+                return;
+            SetState(PendingHitState.Value, PendingHitStateStart.Value, PendingHitStateEnd.Value, PendingHitStateForce);
+            PendingHitState = null;
+            PendingHitStateStart = null;
+            PendingHitStateEnd = null;
+            PendingHitStateForce = false;
+        }
+
+        public void CapturePostActionState()
+        {
+            PostActionState = State;
+            PostActionStateStart = StateStart;
         }
 
         public void SetState(CharacterState nextState, Frame start, Frame end, bool forceChange = false)
@@ -214,6 +412,7 @@ namespace Game.Sim
             {
                 return;
             }
+
             if (location.x < Position.x)
             {
                 FacingDir = FighterFacing.Left;
@@ -229,11 +428,18 @@ namespace Game.Sim
             // if animation ends, switch back to idle
             if (frame >= StateEnd)
             {
+                IsSuperAttack = false;
+
                 // TODO: is best place here?
-                if (IsDash)
+                if (State.IsDash())
                 {
                     Velocity.x = 0;
                 }
+                if (State == CharacterState.Hit)
+                {
+                    Velocity = SVector2.zero;
+                }
+
                 if (State == CharacterState.PreJump)
                 {
                     Velocity = StoredJumpVelocity;
@@ -241,6 +447,7 @@ namespace Game.Sim
                     SetState(CharacterState.Jump, frame, Frame.Infinity);
                     return;
                 }
+
                 if (OnGround(options))
                 {
                     SetState(CharacterState.Idle, frame, Frame.Infinity);
@@ -252,50 +459,46 @@ namespace Game.Sim
             }
         }
 
-        public void ApplyMovementState(Frame frame, GameOptions options)
+        public void ApplyMovementState(Frame frame, GameOptions options, bool isRhythmCancel)
         {
-            if (!Actionable)
+            CharacterConfig config = options.Players[Index].Character;
+            sfloat runMult = State == CharacterState.Running ? options.Global.RunningSpeedMultiplier : (sfloat)1f;
+
+            bool gatlingPreJumpAllowed =
+                (AttackLocation == FighterAttackLocation.Standing || AttackLocation == FighterAttackLocation.Crouching)
+                && InputH.IsHeld(InputFlags.Up)
+                && IsGatlingCancelAllowed(CharacterState.PreJump, frame, config);
+
+            if (gatlingPreJumpAllowed)
+            {
+                TriggerPreJump(frame, options, isRhythmCancel, runMult);
+                return;
+            }
+
+            if (!Actionable && !isRhythmCancel)
             {
                 return;
             }
-            sfloat runMult = State == CharacterState.Running ? options.Global.RunningSpeedMultiplier : (sfloat)1f;
-            CharacterConfig config = options.Players[Index].Character;
 
-            if (GroundedActionable)
+            bool DashInputs(InputFlags dirInput, ref FighterState self) =>
+                (
+                    self.InputH.IsHeld(dirInput)
+                    && self.InputH.PressedAndReleasedRecently(dirInput, options.Global.Input.DashWindow, 1)
+                )
+                || (
+                    self.InputH.IsHeld(dirInput)
+                    && self.InputH.PressedRecently(InputFlags.Dash, options.Global.Input.InputBufferWindow)
+                );
+
+            if (State.IsGroundedActionable() || (State.IsGrounded() && isRhythmCancel))
             {
                 if (InputH.IsHeld(InputFlags.Up))
                 {
-                    // Jump
-                    if (InputH.PressedAndReleasedRecently(InputFlags.Down, options.Global.Input.SuperJumpWindow))
-                    {
-                        StoredJumpVelocity.y = config.JumpVelocity * options.Global.SuperJumpMultiplier;
-                    }
-                    else
-                    {
-                        StoredJumpVelocity.y = config.JumpVelocity;
-                    }
-                    if (InputH.IsHeld(ForwardInput))
-                    {
-                        StoredJumpVelocity.x = ForwardVector.x * config.ForwardSpeed * runMult;
-                    }
-                    else if (InputH.IsHeld(BackwardInput))
-                    {
-                        StoredJumpVelocity.x = BackwardVector.x * config.BackSpeed;
-                    }
-                    else
-                    {
-                        StoredJumpVelocity.x = 0;
-                    }
-                    Velocity = SVector2.zero;
-                    SetState(
-                        CharacterState.PreJump,
-                        frame,
-                        frame + config.GetHitboxData(CharacterState.PreJump).TotalTicks
-                    );
+                    TriggerPreJump(frame, options, isRhythmCancel, runMult);
                     return;
                 }
 
-                if (InputH.IsHeld(InputFlags.Down))
+                if (InputH.IsHeld(InputFlags.Down) && !isRhythmCancel)
                 {
                     // Crouch
                     Velocity.x = 0;
@@ -303,7 +506,7 @@ namespace Game.Sim
                     return;
                 }
 
-                if (InputH.IsHeld(ForwardInput))
+                if (InputH.IsHeld(ForwardInput) && !isRhythmCancel)
                 {
                     Velocity.x = ForwardVector.x * config.ForwardSpeed * runMult;
 
@@ -311,74 +514,97 @@ namespace Game.Sim
                         State == CharacterState.Running ? CharacterState.Running : CharacterState.ForwardWalk;
                     SetState(nxtState, frame, Frame.Infinity);
                 }
-                else if (InputH.IsHeld(BackwardInput))
+                else if (InputH.IsHeld(BackwardInput) && !isRhythmCancel)
                 {
                     Velocity.x = BackwardVector.x * config.BackSpeed;
 
                     SetState(CharacterState.BackWalk, frame, Frame.Infinity);
                 }
-                else
+                else if (!isRhythmCancel)
                 {
                     Velocity.x = 0;
 
                     SetState(CharacterState.Idle, frame, Frame.Infinity);
                 }
 
-                if (
-                    InputH.IsHeld(ForwardInput)
-                    && InputH.PressedAndReleasedRecently(ForwardInput, options.Global.Input.DashWindow, 1)
-                )
+                if (DashInputs(ForwardInput, ref this))
                 {
-                    Velocity.x = ForwardVector.x * (config.ForwardDashDistance / options.Global.ForwardDashTicks);
-
                     SetState(CharacterState.ForwardDash, frame, frame + options.Global.ForwardDashTicks);
                     return;
                 }
-                if (
-                    InputH.IsHeld(BackwardInput)
-                    && InputH.PressedAndReleasedRecently(BackwardInput, options.Global.Input.DashWindow, 1)
-                )
-                {
-                    Velocity.x = BackwardVector.x * config.BackDashDistance / options.Global.BackDashTicks;
 
+                if (DashInputs(BackwardInput, ref this))
+                {
                     SetState(CharacterState.BackDash, frame, frame + options.Global.BackDashTicks);
                     return;
                 }
             }
-            else if (State == CharacterState.Jump || State == CharacterState.Falling)
+            else if (
+                State == CharacterState.Jump
+                || State == CharacterState.Falling
+                || (State.IsAerial() && isRhythmCancel)
+            )
             {
                 if (Velocity.y < 0)
                 {
                     SetState(CharacterState.Falling, frame, Frame.Infinity);
                 }
-                if (
-                    InputH.IsHeld(ForwardInput)
-                    && InputH.PressedAndReleasedRecently(ForwardInput, options.Global.Input.DashWindow, 1)
-                    && AirDashCount < config.NumAirDashes
-                )
+
+                if (DashInputs(ForwardInput, ref this) && AirDashCount < config.NumAirDashes)
                 {
                     AirDashCount += 1;
-                    Velocity.x = ForwardVector.x * (config.ForwardAirDashDistance / options.Global.ForwardAirDashTicks);
-                    Velocity.y = 0;
-
                     SetState(CharacterState.ForwardAirDash, frame, frame + options.Global.ForwardAirDashTicks);
                     return;
                 }
 
-                if (
-                    InputH.IsHeld(BackwardInput)
-                    && InputH.PressedAndReleasedRecently(BackwardInput, options.Global.Input.DashWindow, 1)
-                    && AirDashCount < config.NumAirDashes
-                )
+                if (DashInputs(BackwardInput, ref this) && AirDashCount < config.NumAirDashes)
                 {
                     AirDashCount += 1;
-                    Velocity.x = BackwardVector.x * (config.BackAirDashDistance / options.Global.BackAirDashTicks);
-                    Velocity.y = 0;
-
                     SetState(CharacterState.BackAirDash, frame, frame + options.Global.BackAirDashTicks);
                     return;
                 }
             }
+        }
+
+        private void TriggerPreJump(Frame frame, GameOptions options, bool isRhythmCancel, sfloat runMult)
+        {
+            CharacterConfig config = options.Players[Index].Character;
+
+            if (InputH.PressedAndReleasedRecently(InputFlags.Down, options.Global.Input.SuperJumpWindow))
+            {
+                StoredJumpVelocity.y = config.JumpVelocity * options.Global.SuperJumpMultiplier;
+            }
+            else
+            {
+                StoredJumpVelocity.y = config.JumpVelocity;
+            }
+
+            if (InputH.IsHeld(ForwardInput))
+            {
+                StoredJumpVelocity.x = ForwardVector.x * config.ForwardSpeed * runMult;
+            }
+            else if (InputH.IsHeld(BackwardInput))
+            {
+                StoredJumpVelocity.x = BackwardVector.x * config.BackSpeed;
+            }
+            else
+            {
+                StoredJumpVelocity.x = 0;
+            }
+
+            Velocity = SVector2.zero;
+            AttackConnected = false;
+
+            // Rhythm-cancel jumps skip PreJump wind-up and launch immediately.
+            if (isRhythmCancel)
+            {
+                Velocity = StoredJumpVelocity;
+                StoredJumpVelocity = SVector2.zero;
+                SetState(CharacterState.Jump, frame, Frame.Infinity);
+                return;
+            }
+
+            SetState(CharacterState.PreJump, frame, frame + config.GetHitboxData(CharacterState.PreJump).TotalTicks);
         }
 
         private static Dictionary<(FighterAttackLocation, InputFlags), CharacterState> _attackDictionary =
@@ -386,19 +612,27 @@ namespace Game.Sim
             {
                 { (FighterAttackLocation.Standing, InputFlags.LightAttack), CharacterState.LightAttack },
                 { (FighterAttackLocation.Standing, InputFlags.MediumAttack), CharacterState.MediumAttack },
-                { (FighterAttackLocation.Standing, InputFlags.HeavyAttack), CharacterState.SuperAttack },
+                { (FighterAttackLocation.Standing, InputFlags.HeavyAttack), CharacterState.HeavyAttack },
                 { (FighterAttackLocation.Standing, InputFlags.SpecialAttack), CharacterState.SpecialAttack },
                 { (FighterAttackLocation.Crouching, InputFlags.LightAttack), CharacterState.LightCrouching },
                 { (FighterAttackLocation.Crouching, InputFlags.MediumAttack), CharacterState.MediumCrouching },
-                { (FighterAttackLocation.Crouching, InputFlags.HeavyAttack), CharacterState.SuperCrouching },
+                { (FighterAttackLocation.Crouching, InputFlags.HeavyAttack), CharacterState.HeavyCrouching },
                 { (FighterAttackLocation.Crouching, InputFlags.SpecialAttack), CharacterState.SpecialCrouching },
                 { (FighterAttackLocation.Aerial, InputFlags.LightAttack), CharacterState.LightAerial },
                 { (FighterAttackLocation.Aerial, InputFlags.MediumAttack), CharacterState.MediumAerial },
-                { (FighterAttackLocation.Aerial, InputFlags.HeavyAttack), CharacterState.SuperAerial },
+                { (FighterAttackLocation.Aerial, InputFlags.HeavyAttack), CharacterState.HeavyAerial },
                 { (FighterAttackLocation.Aerial, InputFlags.SpecialAttack), CharacterState.SpecialAerial },
+                { (FighterAttackLocation.Standing, InputFlags.Grab), CharacterState.Grab },
+                { (FighterAttackLocation.Crouching, InputFlags.Grab), CharacterState.Grab },
             };
 
-        public void ApplyActiveState(Frame frame, Frame realFrame, GameOptions options, CharacterConfig config)
+        public void ApplyActiveState(
+            Frame simFrame,
+            GameOptions options,
+            CharacterConfig config,
+            bool isRhythmCancel,
+            GameMode gameMode
+        )
         {
             if (State == CharacterState.Hit)
             {
@@ -407,65 +641,165 @@ namespace Game.Sim
                     Burst = 0;
                     SetState(
                         CharacterState.Burst,
-                        frame,
-                        frame + config.GetHitboxData(CharacterState.Burst).TotalTicks
+                        simFrame,
+                        simFrame + config.GetHitboxData(CharacterState.Burst).TotalTicks
                     );
                     // TODO: apply knockback to other player (this should be a hitbox on a burst animation with large kb)
                 }
+
                 return;
             }
 
-            FrameData frameData = config.GetFrameData(State, frame - StateStart);
-            bool isOnBeat = options.Global.Audio.BeatWithinWindow(
-                realFrame,
-                AudioConfig.BeatSubdivision.QuarterNote,
-                windowFrames: options.Global.Input.BeatCancelWindow
-            );
-            bool beatCancelEligible = frameData.FrameType == FrameType.Recovery && isOnBeat;
-
-            bool dashCancelEligible =
-                (
-                    (frame + options.Global.ForwardDashCancelAfterTicks >= StateEnd)
-                    && State == CharacterState.ForwardDash
-                )
-                || ((frame + options.Global.BackDashCancelAfterTicks >= StateEnd) && State == CharacterState.BackDash);
-
-            if (!Actionable && !dashCancelEligible && !beatCancelEligible)
-            {
-                return;
-            }
-
-            Frame startFrame = frame;
             int bufferWindow = options.Global.Input.InputBufferWindow;
-            if (!Actionable && beatCancelEligible)
+
+            // Followup attacks:
+            HitboxData curData = config.GetHitboxData(State);
+            FrameData curFrameData = curData.GetFrame(simFrame - StateStart);
+            if (
+                curData.Followup != CharacterState.Idle
+                && curFrameData.FrameType == FrameType.Recovery
+                && InputH.IsHeld(curData.FollowupInput)
+            )
             {
-                int frameDiff =
-                    options.Global.Audio.ClosestBeat(frame, AudioConfig.BeatSubdivision.QuarterNote) - realFrame;
-                startFrame += frameDiff;
-                // beat cancel inputs must be on the beat
-                bufferWindow = 2;
+                // TODO: fixme copied code from previous
+                Frame startFrame = simFrame;
+                if (isRhythmCancel)
+                {
+                    // Beat-snap: back-date StateStart by the attack's startup
+                    // so the active frame lands on simFrame itself (= the
+                    // note's dispatch frame, since ManiaState withholds the
+                    // press to the last frame of the hit window).
+                    startFrame -= config.GetHitboxData(curData.Followup).StartupTicks;
+                }
+                AttackConnected = false;
+                SetState(
+                    curData.Followup,
+                    startFrame,
+                    startFrame + config.GetHitboxData(curData.Followup).TotalTicks,
+                    true
+                );
+                return;
             }
 
-            foreach (((var loc, var input), var state) in _attackDictionary)
+            // Hold-to-super: once the heavy attack has been active for
+            // SuperDelayWindow ticks, promote to a super if the heavy button
+            // is still held at that frame.
+            int superDelayWindow = options.Global.Input.SuperDelayWindow;
+            bool isHeavyAttackState =
+                State == CharacterState.HeavyAttack
+                || State == CharacterState.HeavyAerial
+                || State == CharacterState.HeavyCrouching;
+            if (
+                isHeavyAttackState
+                && !IsSuperAttack
+                && InputH.IsHeld(InputFlags.HeavyAttack)
+                && simFrame - StateStart == superDelayWindow
+                && gameMode == GameMode.Fighting
+            )
             {
-                if (InputH.PressedRecently(input, bufferWindow) && AttackLocation == loc)
+                sfloat superCost = options.Global.SuperCost;
+                if (Super >= superCost + superCost)
                 {
-                    if (
-                        AttackLocation == FighterAttackLocation.Standing
-                        || AttackLocation == FighterAttackLocation.Crouching
-                    )
-                    {
-                        Velocity = SVector2.zero;
-                    }
-                    SetState(state, startFrame, startFrame + config.GetHitboxData(state).TotalTicks, true);
-                    return;
+                    IsSuperAttack = true;
+                    SuperComboBeats = options.Global.SuperTier2Beats;
+                }
+                else if (Super >= superCost)
+                {
+                    IsSuperAttack = true;
+                    SuperComboBeats = options.Global.SuperTier1Beats;
+                }
+                // Pre-charge half of SuperCost on commit; refunded in
+                // GameState when the super lands. Whiffs keep the charge,
+                // so throwing out a super without connecting costs 50%.
+                if (IsSuperAttack)
+                {
+                    Super = Mathsf.Max(Super - superCost / (sfloat)2, (sfloat)0);
+                    StateEnd += options.Global.SuperRecoveryFrames;
                 }
             }
 
-            if (dashCancelEligible && InputH.IsHeld(ForwardInput) && State == CharacterState.ForwardDash)
+            bool dashCancelEligible =
+                (
+                    (simFrame + options.Global.ForwardDashCancelAfterTicks >= StateEnd)
+                    && State == CharacterState.ForwardDash
+                )
+                || (
+                    (simFrame + options.Global.BackDashCancelAfterTicks >= StateEnd) && State == CharacterState.BackDash
+                );
+
+            bool canActNormally = Actionable || dashCancelEligible || isRhythmCancel;
+
+            int[] frames = new int[HitboxData.ATTACK_FRAME_TYPE_ORDER.Length];
+            foreach (((var loc, var input), var state) in _attackDictionary)
             {
-                SetState(CharacterState.Running, frame, Frame.Infinity);
+                if (!(InputH.PressedRecently(input, bufferWindow) && AttackLocation == loc))
+                {
+                    continue;
+                }
+                if (!canActNormally && !IsGatlingCancelAllowed(state, simFrame, config))
+                {
+                    continue;
+                }
+
+                if (
+                    AttackLocation == FighterAttackLocation.Standing
+                    || AttackLocation == FighterAttackLocation.Crouching
+                )
+                {
+                    Velocity = SVector2.zero;
+                }
+
+                Frame startFrame = simFrame;
+                if (isRhythmCancel && config.GetHitboxData(state).IsValidAttack(frames))
+                {
+                    // Beat-snap: back-date StateStart by the attack's startup
+                    // so the active frame lands on simFrame itself (= the
+                    // note's dispatch frame, since ManiaState withholds the
+                    // press to the last frame of the hit window).
+                    startFrame -= frames[0];
+                }
+
+                AttackConnected = false;
+                SetState(state, startFrame, startFrame + config.GetHitboxData(state).TotalTicks, true);
+                return;
             }
+
+            if (simFrame + 1 >= StateEnd && InputH.IsHeld(ForwardInput) && State == CharacterState.ForwardDash)
+            {
+                SetState(CharacterState.Running, simFrame, Frame.Infinity);
+            }
+        }
+
+        private bool IsGatlingCancelAllowed(CharacterState to, Frame simFrame, CharacterConfig config)
+        {
+            if (!AttackConnected)
+                return false;
+            if (!config.HasGatling(State, to))
+                return false;
+
+            HitboxData fromData = config.GetHitboxData(State);
+            int total = fromData.StartupTicks + fromData.ActiveTicks + fromData.RecoveryTicks;
+            if (total == 0)
+                return false;
+
+            int ticksIntoState = simFrame - StateStart;
+            int recoveryStart = fromData.StartupTicks + fromData.ActiveTicks;
+            int recoveryEnd = total;
+            if (ticksIntoState < recoveryStart || ticksIntoState >= recoveryEnd)
+                return false;
+
+            HitboxData toData = config.GetHitboxData(to);
+
+            int cancelWindow;
+            if (toData.StartupTicks == 0)
+            {
+                cancelWindow = fromData.RecoveryTicks;
+            }
+            else
+            {
+                cancelWindow = Math.Max(0, toData.StartupTicks - fromData.OnHitAdvantage + 1);
+            }
+            return ticksIntoState >= recoveryEnd - cancelWindow;
         }
 
         public void UpdatePosition(Frame frame, GameOptions options, SVector2 otherFighterPos)
@@ -476,14 +810,57 @@ namespace Game.Sim
             {
                 Velocity /= options.Global.FloatingFactor;
             }
+
             if (curData.ShouldApplyVel)
             {
                 Velocity = curData.ApplyVelocity;
                 Velocity.x *= FacingDir == FighterFacing.Left ? -1 : 1;
             }
+
+            if (curData.ShouldTeleport)
+            {
+                SVector2 teleport = curData.TeleportLocation;
+                teleport.x *= FacingDir == FighterFacing.Left ? -1 : 1;
+                Position += teleport;
+            }
+
+            HitboxData moveData = options.Players[Index].Character.GetHitboxData(State);
+            if (moveData != null && moveData.ApplyRootMotion)
+            {
+                int rmTick = frame - StateStart;
+                SVector2 prevOffset =
+                    rmTick > 0
+                        ? options.Players[Index].Character.GetFrameData(State, rmTick - 1).RootMotionOffset
+                        : SVector2.zero;
+                SVector2 rmDelta = curData.RootMotionOffset - prevOffset;
+                rmDelta.x *= FacingDir == FighterFacing.Left ? -1 : 1;
+                Position += rmDelta;
+            }
+
             if (curData.GravityEnabled && Position.y > options.Global.GroundY)
             {
                 Velocity.y += options.Global.Gravity * 1 / GameManager.TPS;
+            }
+
+            CharacterConfig config = options.Players[Index].Character;
+            switch (State)
+            {
+                case CharacterState.BackAirDash:
+                    Velocity.x = BackwardVector.x * (config.BackAirDashDistance / options.Global.BackAirDashTicks);
+                    Velocity.y = 0;
+                    break;
+                case CharacterState.ForwardAirDash:
+                    Velocity.x = ForwardVector.x * (config.ForwardAirDashDistance / options.Global.ForwardAirDashTicks);
+                    Velocity.y = 0;
+                    break;
+                case CharacterState.BackDash:
+                    Velocity.x = BackwardVector.x * (config.BackDashDistance / options.Global.BackDashTicks);
+                    Velocity.y = 0;
+                    break;
+                case CharacterState.ForwardDash:
+                    Velocity.x = ForwardVector.x * (config.ForwardDashDistance / options.Global.ForwardDashTicks);
+                    Velocity.y = 0;
+                    break;
             }
 
             // Update Position
@@ -510,6 +887,7 @@ namespace Game.Sim
                 if (Velocity.x > 0)
                     Velocity.x = 0;
             }
+
             if (Position.x <= minBounds)
             {
                 Position.x = minBounds;
@@ -524,7 +902,8 @@ namespace Game.Sim
             {
                 return;
             }
-            if (IsAerialAttack)
+
+            if (State.IsAerialAttack())
             {
                 // TODO: apply some landing lag here
                 SetState(
@@ -534,12 +913,14 @@ namespace Game.Sim
                 );
                 return;
             }
+
             if (State == CharacterState.Knockdown)
             {
                 // TODO: getup options
                 SetState(CharacterState.Idle, frame, Frame.Infinity);
                 return;
             }
+
             if (State == CharacterState.Falling)
             {
                 SetState(
@@ -554,15 +935,21 @@ namespace Game.Sim
         public void AddBoxes(Frame frame, CharacterConfig config, Physics<BoxProps> physics, int handle)
         {
             int tick = frame - StateStart;
+            HitboxData hitboxData = config.GetHitboxData(State);
             FrameData frameData = config.GetFrameData(State, tick);
 
             foreach (var box in frameData.Boxes)
             {
                 SVector2 centerLocal = box.CenterLocal;
+                if (hitboxData != null && hitboxData.ApplyRootMotion)
+                {
+                    centerLocal -= frameData.RootMotionOffset;
+                }
                 if (FacingDir == FighterFacing.Left)
                 {
                     centerLocal.x *= -1;
                 }
+
                 SVector2 sizeLocal = box.SizeLocal;
                 SVector2 centerWorld = Position + centerLocal;
                 BoxProps newProps = box.Props;
@@ -570,7 +957,43 @@ namespace Game.Sim
                 {
                     newProps.Knockback.x *= -1;
                 }
-                physics.AddBox(handle, centerWorld, sizeLocal, newProps);
+
+                bool ignoreOwner = hitboxData != null && hitboxData.IgnoreOwner;
+                physics.AddBox(handle, centerWorld, sizeLocal, newProps, -1, ignoreOwner);
+            }
+        }
+
+        public void ProcessHit(Frame frame, BoxProps props, CharacterConfig config)
+        {
+            if (props.HasTransition)
+            {
+                // The transition is deferred to the start of the next sim
+                // frame by ApplyPendingHitTransition, so StateStart = frame+1
+                // lines up tick 0 with the first frame the new state is
+                // visible.
+                Frame nextStart = frame + 1;
+                if (props.OnHitTransition == CharacterState.Throw)
+                {
+                    bool backThrow = InputH.IsHeld(BackwardInput);
+                    if (backThrow)
+                    {
+                        FacingDir = FacingDir == FighterFacing.Right ? FighterFacing.Left : FighterFacing.Right;
+                    }
+
+                    EnqueueHitTransition(
+                        CharacterState.Throw,
+                        nextStart,
+                        nextStart + config.GetHitboxData(CharacterState.Throw).TotalTicks,
+                        true
+                    );
+                    return;
+                }
+                EnqueueHitTransition(
+                    props.OnHitTransition,
+                    nextStart,
+                    nextStart + config.GetHitboxData(props.OnHitTransition).TotalTicks,
+                    true
+                );
             }
         }
 
@@ -609,20 +1032,23 @@ namespace Game.Sim
                 SetState(
                     holdingDown ? CharacterState.BlockCrouch : CharacterState.BlockStand,
                     frame,
-                    frame + props.BlockstunTicks
+                    frame + props.BlockstunTicks,
+                    true
                 );
 
+                Velocity = new SVector2(props.Knockback.x * (sfloat)0.5f, sfloat.Zero);
+
                 // TODO: check if other move is special, if so apply chip
-                return new HitOutcome { Kind = HitKind.Blocked };
+                return new HitOutcome { Kind = HitKind.Blocked, Props = props };
             }
 
             switch (props.KnockdownKind)
             {
                 case KnockdownKind.None:
-                    SetState(CharacterState.Hit, frame, frame + props.HitstunTicks);
+                    SetState(CharacterState.Hit, frame, frame + props.HitstunTicks, true);
                     break;
                 case KnockdownKind.Light:
-                    SetState(CharacterState.Knockdown, frame, Frame.Infinity);
+                    SetState(CharacterState.Knockdown, frame, Frame.Infinity, true);
                     break;
             }
 
@@ -639,11 +1065,46 @@ namespace Game.Sim
             return new HitOutcome { Kind = HitKind.Hit, Props = props };
         }
 
-        public void ApplyClank(Frame frame, GameOptions options)
+        public void ApplyGrab(Frame frame, BoxProps props, SVector2 hitboxCenter, FighterFacing grabberFacingDir)
+        {
+            if (State != CharacterState.Grabbed)
+            {
+                ComboedCount++;
+            }
+            SetState(CharacterState.Grabbed, frame, Frame.Infinity);
+            Velocity = SVector2.zero;
+
+            SVector2 grabPos = props.GrabPosition;
+            if (grabberFacingDir == FighterFacing.Left)
+            {
+                grabPos.x *= -1;
+            }
+
+            Position = hitboxCenter + grabPos;
+        }
+
+        public void ApplyClank(Frame frame, GameOptions options, SVector2 location)
         {
             SetState(CharacterState.Hit, frame, frame + options.Global.ClankTicks);
+            ClankLocation = location;
 
             Velocity = SVector2.zero;
+        }
+
+        public void AddSuper(sfloat amount, GameOptions options)
+        {
+            sfloat max = options.Global.SuperMax;
+            sfloat cost = options.Global.SuperCost;
+            sfloat doubleCost = cost + cost;
+            sfloat prevSuper = Super;
+            Super += amount;
+            Super = Mathsf.Min(Super, max);
+            bool crossedTier1 = prevSuper < cost && Super >= cost;
+            bool crossedTier2 = prevSuper < doubleCost && Super >= doubleCost;
+            if (crossedTier1 || crossedTier2)
+            {
+                SuperMaxedThisRealFrame = true;
+            }
         }
     }
 }

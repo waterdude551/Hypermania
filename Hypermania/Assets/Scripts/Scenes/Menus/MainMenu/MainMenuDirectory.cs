@@ -10,6 +10,7 @@ namespace Scenes.Menus.MainMenu
     {
         Local,
         Training,
+        Manual,
         Online,
     }
 
@@ -57,6 +58,13 @@ namespace Scenes.Menus.MainMenu
             _onlineButton.interactable = SteamManager.Initialized;
         }
 
-        public void Quit() { }
+        public void Quit()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using Utils;
 
 namespace Game.View.Events.Vfx
 {
@@ -16,8 +17,6 @@ namespace Game.View.Events.Vfx
         }
     }
 
-    // TODO: should create vfxeffect base component that determines how to start/stop/play each effect, and then call
-    // that here
     public class VfxManager : ViewEventManager<VfxEvent, VfxEffect>
     {
         [SerializeField]
@@ -25,7 +24,12 @@ namespace Game.View.Events.Vfx
 
         public override VfxEffect OnStartEffect(ViewEvent<VfxEvent> ev)
         {
-            GameObject vfx = Instantiate(_vfxLibrary.Library[ev.Event.Kind].Effect, transform, true);
+            // worldPositionStays: false so the spawned VFX starts at local
+            // (0,0,0) under the VfxManager. StartEffect then only overwrites
+            // world x/y, leaving local z = 0 so the effect sits on the
+            // VfxManager parent's z plane (in front of the player) rather
+            // than wherever the prefab was saved in world space.
+            GameObject vfx = Instantiate(_vfxLibrary.Library[ev.Event.Kind].Effect, transform, false);
             VfxEffect effect = vfx.GetComponent<VfxEffect>();
             if (effect == null)
             {
@@ -41,6 +45,29 @@ namespace Game.View.Events.Vfx
         {
             effect.EndEffect();
             Destroy(effect.gameObject);
+        }
+
+        public void AddDesired(
+            VfxKind kind,
+            Frame frame,
+            int hash = 0,
+            Vector2 position = default,
+            Vector2 direction = default
+        )
+        {
+            AddDesired(
+                new ViewEvent<VfxEvent>
+                {
+                    Event = new VfxEvent
+                    {
+                        Kind = kind,
+                        Position = position,
+                        Direction = direction,
+                    },
+                    StartFrame = frame,
+                    Hash = hash,
+                }
+            );
         }
 
         public override bool EffectIsFinished(VfxEffect effect)
