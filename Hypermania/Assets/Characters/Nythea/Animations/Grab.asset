@@ -50,6 +50,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 1
     Floating: 0
@@ -102,6 +103,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 1
     Floating: 0
@@ -154,6 +156,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 1
     Floating: 0
@@ -206,6 +209,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 1
     Floating: 0
@@ -258,6 +262,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 1
     Floating: 0
@@ -310,6 +315,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 1
     Floating: 0
@@ -362,17 +368,18 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     - CenterLocal:
         x:
           rawValue: 1058198461
         y:
-          rawValue: 1064588768
+          rawValue: 1057730588
       SizeLocal:
         x:
-          rawValue: 1049330499
+          rawValue: 1049330500
         y:
-          rawValue: 1049278480
+          rawValue: 1066095560
       Props:
         Kind: 2
         AttackKind: 0
@@ -389,10 +396,11 @@ MonoBehaviour:
             rawValue: 0
         GrabPosition:
           x:
-            rawValue: 3141943040
+            rawValue: 3117670400
           y:
-            rawValue: 3211955960
+            rawValue: 3205228480
         HasTransition: 1
+        Unblockable: 0
         OnHitTransition: 34
     - CenterLocal:
         x:
@@ -424,6 +432,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 2
     Floating: 0
@@ -476,17 +485,18 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     - CenterLocal:
         x:
           rawValue: 1058198461
         y:
-          rawValue: 1064588768
+          rawValue: 1057730588
       SizeLocal:
         x:
-          rawValue: 1049330499
+          rawValue: 1049330500
         y:
-          rawValue: 1049278480
+          rawValue: 1066095560
       Props:
         Kind: 2
         AttackKind: 0
@@ -503,10 +513,11 @@ MonoBehaviour:
             rawValue: 0
         GrabPosition:
           x:
-            rawValue: 3141943040
+            rawValue: 3117670400
           y:
-            rawValue: 3211955960
+            rawValue: 3205228480
         HasTransition: 1
+        Unblockable: 0
         OnHitTransition: 34
     - CenterLocal:
         x:
@@ -538,6 +549,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 2
     Floating: 0
@@ -590,17 +602,18 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     - CenterLocal:
         x:
           rawValue: 1058198461
         y:
-          rawValue: 1064588768
+          rawValue: 1057730588
       SizeLocal:
         x:
-          rawValue: 1049330499
+          rawValue: 1049330500
         y:
-          rawValue: 1049278480
+          rawValue: 1066095560
       Props:
         Kind: 2
         AttackKind: 0
@@ -617,10 +630,11 @@ MonoBehaviour:
             rawValue: 0
         GrabPosition:
           x:
-            rawValue: 3141943040
+            rawValue: 3117670400
           y:
-            rawValue: 3211955960
+            rawValue: 3205228480
         HasTransition: 1
+        Unblockable: 0
         OnHitTransition: 34
     - CenterLocal:
         x:
@@ -652,6 +666,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 2
     Floating: 0
@@ -704,6 +719,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -756,6 +772,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -808,6 +825,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -860,6 +878,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -912,6 +931,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -964,6 +984,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1016,6 +1037,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1068,6 +1090,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1120,6 +1143,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1172,6 +1196,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1224,6 +1249,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1276,6 +1302,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1328,6 +1355,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1380,6 +1408,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1432,6 +1461,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
@@ -1484,6 +1514,7 @@ MonoBehaviour:
           y:
             rawValue: 0
         HasTransition: 0
+        Unblockable: 0
         OnHitTransition: 0
     FrameType: 3
     Floating: 0
